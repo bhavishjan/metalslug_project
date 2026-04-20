@@ -1,0 +1,8 @@
+﻿  main.cpp
+E:\Semester 2\OOP\Final Project\main.cpp(68,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(69,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(72,20): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(125,24): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(165,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(165,31): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Final Project.vcxproj -> E:\Semester 2\OOP\Final Project\x64\Debug\Final Project.exe
