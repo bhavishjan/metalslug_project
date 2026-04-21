@@ -13,7 +13,7 @@ int screen_y = 900;
 
 // prototypes
 void draw_player(RenderWindow& window, Sprite& playerSprite, float player_x, float player_y);
-void display_level(RenderWindow& window, const int height, const int width, char** lvl, Sprite& wallSprite1, const int cell_size);
+void display_level(RenderWindow& window, const int height, const int width, char** lvl, Sprite& wallSprite1, Sprite& wallSprite2, const int cell_size);
 
 int main()
 {
@@ -39,14 +39,21 @@ int main()
 
 	for (int i = 0; i < 25; i++)
 	{
-		lvl[13][i] = 'g';
+		lvl[13][i] = 's';
 	}
+
+
+
 	
 	Texture wallTex1;
 	Sprite wallSprite1;
+	Texture wallTex2;
+	Sprite wallSprite2;
 
 	wallTex1.loadFromFile("Sprites/blocks/stone.png");
 	wallSprite1.setTexture(wallTex1);
+	wallTex2.loadFromFile("Sprites/blocks/dirt.png");
+	wallSprite2.setTexture(wallTex2);
 
 	////////////////////////////////////////////////////////
 	float player_x = 380;
@@ -69,13 +76,16 @@ int main()
 	int Pwidth  = raw_img_x * scale_x;
 
 	bool onGround = true;
+	bool isfacingright = true;
 	float groundLevel = 13 * cell_size - Pheight;
 
-	Texture playerTex;
+	Texture playerTex1;
+	Texture playerTex2;
 	Sprite playerSprite;
 
-	playerTex.loadFromFile("Sprites/Character.png");
-	playerSprite.setTexture(playerTex);
+	playerTex1.loadFromFile("Sprites/character_facing_right.png");
+	playerTex2.loadFromFile("Sprites/character_facing_left.png");
+	playerSprite.setTexture(playerTex1);
 	playerSprite.setScale(scale_x, scale_y);
 
 	////////////////////////////////////////////////////////
@@ -96,29 +106,44 @@ int main()
 			window.close();
 		} 
 
-		
-
-		// Smooth movement and jump
-		if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::Left)) // move left
+		// jump movements
+		if (Keyboard::isKeyPressed(Keyboard::Left)) 
 		{
-			player_x -= velocityX;
-
+			player_x -= 10;
+			if(isfacingright)
+			{
+				playerSprite.setTexture(playerTex2);
+				isfacingright = false;
+			}
 		}
 
-		if (Keyboard::isKeyPressed(Keyboard::D) || Keyboard::isKeyPressed(Keyboard::Right)) // move right
+		if (Keyboard::isKeyPressed(Keyboard::Right)) 
 		{
-			player_x += velocityX;
-			
+			player_x += 10;
+			if(!isfacingright)
+			{
+				playerSprite.setTexture(playerTex1);
+				isfacingright = true;
+			}
 		}
 
-		if ((Keyboard::isKeyPressed(Keyboard::W) || Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::Space)) && onGround) // jump
+		if ((Keyboard::isKeyPressed(Keyboard::Up) || Keyboard::isKeyPressed(Keyboard::Space)) && onGround)
 		{
-			velocityY = -20;
+			velocityY = -15;
 			onGround = false;
 		}
+		if (Keyboard::isKeyPressed(Keyboard::Down) && !onGround)
+		{
+			velocityY = 15;
+			onGround = true;
+		}
 		
+		velocityY += gravity;
+		player_y += velocityY;
+
+
 		// X Bounds
-		if(player_x < 0)
+		if (player_x < 0)
 			player_x = 0;
 
 		else if (player_x + Pwidth > screen_x)
@@ -131,13 +156,13 @@ int main()
 			velocityY = 0;
 			onGround = true;
 		}
-
-		velocityY += gravity;
-		player_y += velocityY;
+		else {
+			onGround = false;
+		}
 
 		window.clear();
 
-		display_level(window, height, width, lvl, wallSprite1, cell_size);
+		display_level(window, height, width, lvl, wallSprite1, wallSprite2, cell_size);
 		draw_player(window, playerSprite, player_x, player_y);
 
 		window.display();
@@ -154,16 +179,21 @@ void draw_player(RenderWindow& window, Sprite& playerSprite, float player_x, flo
 	window.draw(playerSprite);
 }
 
-void display_level(RenderWindow& window, const int height, const int width, char** lvl, Sprite& wallSprite1, const int cell_size)
+void display_level(RenderWindow& window, const int height, const int width, char** lvl, Sprite& wallSprite1, Sprite& wallSprite2, const int cell_size)
 {
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
 		{
-			if (lvl[i][j] == 'g')
+			if (lvl[i][j] == 's')
 			{
 				wallSprite1.setPosition(j * cell_size, i * cell_size);
 				window.draw(wallSprite1);
+			}
+			if (lvl[i][j] == 'g')
+			{
+				wallSprite2.setPosition(j * cell_size, i * cell_size);
+				window.draw(wallSprite2);
 			}
 		}
 	}
