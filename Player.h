@@ -1,5 +1,10 @@
 #pragma once
 
+class Vehicle;
+class Weapon;
+class Pistol;
+class Knife;
+
 class Player {
 protected:
     char name[50];
@@ -23,7 +28,6 @@ protected:
     Knife* knife;
     bool facingRight;
     float aimAngle;
-    int state;
     int state;
     int damageState;
     float damageTimer;

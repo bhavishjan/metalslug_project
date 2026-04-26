@@ -1,5 +1,6 @@
 #pragma once
-#include "Player.h"
+
+class Player;
 
 //Weapon types
 const int WT_NONE = 0;
@@ -214,8 +215,10 @@ public:
 
 class Grenade : public Weapon {
 protected:
-    float   width, height;
-    float   velocityX, velocityY;
+    float   width;
+    float   height;
+    float   velocityX;
+    float   velocityY;
     float   blastRadius;
     bool    isExploded;
     Player* thrownByPlayer;

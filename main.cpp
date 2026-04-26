@@ -6,6 +6,7 @@
 #include <SFML/Window.hpp>
 #include "Vehicle.h"
 #include "Weapon.h"
+#include "Player.h"
 
 using namespace sf;
 using namespace std;
