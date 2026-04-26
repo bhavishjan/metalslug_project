@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/Window.hpp>
+#include "Vehicle.h"
+#include "Weapon.h"
 
 using namespace sf;
 using namespace std;
@@ -13,7 +15,7 @@ int screen_y = 900;
 
 // prototypes
 void draw_player(RenderWindow& window, Sprite& playerSprite, float player_x, float player_y);
-void display_level(RenderWindow& window, const int height, const int width, char** lvl, Sprite& wallSprite1, Sprite& wallSprite2, const int cell_size);
+void display_level(RenderWindow& window, const int height, const int width, char** lvl, Sprite& wallSprite1, Sprite& bgSprite, const int cell_size);
 
 int main()
 {
@@ -35,25 +37,88 @@ int main()
 	for (int i = 0; i < height; i += 1)
 	{
 		lvl[i] = new char[width] {'\0'};
+		for (int j = 0; j < width; ++j)
+			lvl[i][j] = '.';   // empty cell
 	}
 
-	for (int i = 0; i < 25; i++)
+	// Ground
+	for (int j = 0; j < width; j++)
+		lvl[13][j] = '#';
+
+
+	// Mid Top & Mid Bottom Platforms
+	for (int i = 2; i < 16; i++)
 	{
-		lvl[13][i] = 's';
+		lvl[3][i] = '#';
+		lvl[11][i] = '#';
 	}
 
 
+	//Mid Pattern
+	lvl[4][8] = '#';
+	lvl[4][9] = '#';
 
-	
+	lvl[5][1] = '#';
+	lvl[5][2] = '#';
+	lvl[5][3] = '#';
+	lvl[5][4] = '#';
+	lvl[5][7] = '#';
+	lvl[5][8] = '#';
+	lvl[5][9] = '#';
+	lvl[5][10] = '#';
+	lvl[5][13] = '#';
+	lvl[5][14] = '#';
+	lvl[5][15] = '#';
+	lvl[5][16] = '#';
+
+	lvl[6][7] = '#';
+	lvl[6][10] = '#';
+
+	lvl[7][3] = '#';
+	lvl[7][4] = '#';
+	lvl[7][5] = '#';
+	lvl[7][6] = '#';
+	lvl[7][7] = '#';
+	lvl[7][10] = '#';
+	lvl[7][11] = '#';
+	lvl[7][12] = '#';
+	lvl[7][13] = '#';
+	lvl[7][14] = '#';
+	lvl[7][15] = '#';
+
+	lvl[8][7] = '#';
+	lvl[8][10] = '#';
+
+	lvl[9][1] = '#';
+	lvl[9][2] = '#';
+	lvl[9][3] = '#';
+	lvl[9][4] = '#';
+	lvl[9][7] = '#';
+	lvl[9][8] = '#';
+	lvl[9][9] = '#';
+	lvl[9][10] = '#';
+	lvl[9][13] = '#';
+	lvl[9][14] = '#';
+	lvl[9][15] = '#';
+	lvl[9][16] = '#';
+
+	lvl[10][8] = '#';
+	lvl[10][9] = '#';
+
+
 	Texture wallTex1;
 	Sprite wallSprite1;
 	Texture wallTex2;
 	Sprite wallSprite2;
+	Texture bgTexture;
+	Sprite bgSprite;
 
-	wallTex1.loadFromFile("Sprites/blocks/stone.png");
+	wallTex1.loadFromFile("Sprites/blocks/block.png");
 	wallSprite1.setTexture(wallTex1);
 	wallTex2.loadFromFile("Sprites/blocks/dirt.png");
 	wallSprite2.setTexture(wallTex2);
+	bgTexture.loadFromFile("Sprites/bg.jpg");
+	bgSprite.setTexture(bgTexture);
 
 	////////////////////////////////////////////////////////
 	float player_x = 380;
@@ -161,8 +226,8 @@ int main()
 		}
 
 		window.clear();
-
-		display_level(window, height, width, lvl, wallSprite1, wallSprite2, cell_size);
+		
+		display_level(window, height, width, lvl, wallSprite1, bgSprite, cell_size);
 		draw_player(window, playerSprite, player_x, player_y);
 
 		window.display();
@@ -179,22 +244,20 @@ void draw_player(RenderWindow& window, Sprite& playerSprite, float player_x, flo
 	window.draw(playerSprite);
 }
 
-void display_level(RenderWindow& window, const int height, const int width, char** lvl, Sprite& wallSprite1, Sprite& wallSprite2, const int cell_size)
+void display_level(RenderWindow& window, const int height, const int width, char** lvl, Sprite& wallSprite1, Sprite& bgSprite, const int cell_size)
 {
+	bgSprite.setPosition(0, 0);
+	window.draw(bgSprite);
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
 		{
-			if (lvl[i][j] == 's')
+			if (lvl[i][j] == '#')
 			{
 				wallSprite1.setPosition(j * cell_size, i * cell_size);
 				window.draw(wallSprite1);
 			}
-			if (lvl[i][j] == 'g')
-			{
-				wallSprite2.setPosition(j * cell_size, i * cell_size);
-				window.draw(wallSprite2);
-			}
 		}
 	}
+	
 }

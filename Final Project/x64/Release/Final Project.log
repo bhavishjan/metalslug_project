@@ -1,13 +1,15 @@
 ﻿  main.cpp
-E:\Semester 2\OOP\Final Project\main.cpp(68,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(69,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(72,20): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(125,24): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(165,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(165,31): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(75,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(76,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(80,20): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(150,24): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(190,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(190,31): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(195,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(195,31): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Generating code
-  1 of 74 functions ( 1.4%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
+  2 of 74 functions ( 2.7%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Final Project.vcxproj -> E:\Semester 2\OOP\Final Project\x64\Release\Final Project.exe
