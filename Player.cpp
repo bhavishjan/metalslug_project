@@ -1,10 +1,14 @@
-#include "Player.h"
+    #include "Player.h"
 #include "Weapon.h"
 #include "Vehicle.h"
 #include <iostream>
 #include <cmath>
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include <SFML/Window.hpp>
 
 using namespace std;
+using namespace sf;
 
 Player::Player() {
     x = 100.0f;
@@ -270,7 +274,7 @@ void Player::update() {
 }
 
 void Player::render() {
-    cout << "Rendering player at (" << x << ", " << y << ")" << endl;
+	cout << "Render player at (" << x << ", " << y << ")" << endl;
 }
 
 float Player::getFireRate() {

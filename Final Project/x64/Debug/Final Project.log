@@ -1,13 +1,6 @@
 ﻿  main.cpp
-E:\Semester 2\OOP\Final Project\main.cpp(141,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(142,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(146,20): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(216,24): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(258,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(258,31): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Player.cpp
-  Vehicle.cpp
-  Weapon.cpp
-E:\Semester 2\OOP\Final Project\Weapon.cpp(371,20): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
-  Generating Code...
+E:\Semester 2\OOP\Final Project\main.cpp(101,21): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(101,13): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(110,21): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(110,13): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Final Project.vcxproj -> E:\Semester 2\OOP\Final Project\x64\Debug\Final Project.exe
