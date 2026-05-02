@@ -113,11 +113,11 @@ int main() {
     tarmaRovingBtn.setOutlineThickness(3);
     tarmaRovingBtn.setOutlineColor(Color::White);
 
-    RectangleShape eriKasamatoBtn(Vector2f(500, 70));
-    eriKasamatoBtn.setFillColor(Color::Green);
-    eriKasamatoBtn.setPosition(550, 570);
-    eriKasamatoBtn.setOutlineThickness(3);
-    eriKasamatoBtn.setOutlineColor(Color::White);
+    RectangleShape eriKasamotoBtn(Vector2f(500, 70));
+    eriKasamotoBtn.setFillColor(Color::Green);
+    eriKasamotoBtn.setPosition(550, 570);
+    eriKasamotoBtn.setOutlineThickness(3);
+    eriKasamotoBtn.setOutlineColor(Color::White);
 
     RectangleShape fiolinaGermiBtn(Vector2f(500, 70));
     fiolinaGermiBtn.setFillColor(Color::Green);
@@ -167,13 +167,13 @@ int main() {
     tarmaRovingText.setFillColor(Color::White);
     tarmaRovingText.setPosition(630, 480);
 
-    // Eri Kasamato text
-    Text eriKasamatoText;
-    eriKasamatoText.setFont(menuFont);
-    eriKasamatoText.setString("3 - Eri Kasamato");
-    eriKasamatoText.setCharacterSize(30);
-    eriKasamatoText.setFillColor(Color::White);
-    eriKasamatoText.setPosition(630, 590);
+    // Eri Kasamoto text
+    Text eriKasamotoText;
+    eriKasamotoText.setFont(menuFont);
+    eriKasamotoText.setString("3 - Eri Kasamoto");
+    eriKasamotoText.setCharacterSize(30);
+    eriKasamotoText.setFillColor(Color::White);
+    eriKasamotoText.setPosition(630, 590);
 
     // Fiolina Germi text
     Text fiolinaGermiText;
@@ -277,7 +277,7 @@ int main() {
 				else if (ev.key.code == Keyboard::Num3) {
 					characters.switchCharacterToIndex(2);
                     playerSelection = true;
-					cout << "Selected Eri Kasamato" << endl;
+					cout << "Selected Eri Kasamoto" << endl;
 				}
 				else if (ev.key.code == Keyboard::Num4) {
 					characters.switchCharacterToIndex(3);
@@ -332,7 +332,7 @@ int main() {
             window.draw(playerSelectTitleBar);
             window.draw(macroRossiBtn);
 			window.draw(tarmaRovingBtn);
-			window.draw(eriKasamatoBtn);
+			window.draw(eriKasamotoBtn);
 			window.draw(fiolinaGermiBtn);
             window.draw(playerSelectKey1);
 			window.draw(playerSelectKey2);
@@ -343,7 +343,7 @@ int main() {
             window.draw(playerSelectTitleText);
             window.draw(macroRossiText);
             window.draw(tarmaRovingText);
-            window.draw(eriKasamatoText);
+            window.draw(eriKasamotoText);
             window.draw(fiolinaGermiText);
 
             window.display();

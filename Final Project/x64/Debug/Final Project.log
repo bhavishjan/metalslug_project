@@ -11,17 +11,7 @@ E:\Semester 2\OOP\OOP Final Project\Player.h(419,16): warning C4244: 'return': c
 E:\Semester 2\OOP\OOP Final Project\Player.h(422,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Weapon.h(17,11): error C2374: 'NONE': redefinition; multiple initialization
-  (compiling source file 'main.cpp')
-      E:\Semester 2\OOP\OOP Final Project\Weapon.h(6,11):
-      see declaration of 'NONE'
-  
-E:\Semester 2\OOP\OOP Final Project\Weapon.h(17,11): error C2086: 'const int NONE': redefinition
-  (compiling source file 'main.cpp')
-      E:\Semester 2\OOP\OOP Final Project\Weapon.h(6,11):
-      see declaration of 'NONE'
-  
-E:\Semester 2\OOP\OOP Final Project\Weapon.h(455,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Weapon.h(454,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\main.cpp(38,46): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
@@ -55,3 +45,4 @@ E:\Semester 2\OOP\OOP Final Project\main.cpp(433,103): warning C4244: 'argument'
 E:\Semester 2\OOP\OOP Final Project\main.cpp(439,146): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(439,103): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(531,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Final Project.vcxproj -> E:\Semester 2\OOP\OOP Final Project\x64\Debug\Final Project.exe

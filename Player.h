@@ -438,15 +438,14 @@ public:
         dualFireTimer = 0;
         dualFireDuration = 10.0f;
 
-        marcoTex1.loadFromFile("Sprites/blocks/dirt.png");
-        marcoTex2.loadFromFile("Sprites/blocks/dirt.png");
+        marcoTex1.loadFromFile("Sprites/Marco Rossi 1.png");
+        marcoTex2.loadFromFile("Sprites/Marco Rossi 2.png");
 
         marcoSprite1.setTexture(marcoTex1);
         marcoSprite2.setTexture(marcoTex2);
 
         marcoSprite1.setPosition(100.0f, 100.0f);
         marcoSprite2.setPosition(100.0f, 100.0f + marcoTex1.getSize().y);
-        cout << "FINISHED MARCO CONSTRUCTOR" << endl;
     }
 
     void flipToLeft() override {
@@ -522,7 +521,7 @@ private:
     float vehicleFireRateBonus;
     float vehicleDurabilityBonus;
 
-    Texture TarmaTexLeft, TarmaTexRight;
+    Texture TarmaTex;
     Sprite  TarmaSprite;
 
 
@@ -534,18 +533,18 @@ public:
         immunityDuration = 5.0f;
         vehicleFireRateBonus = 1.5f;
         vehicleDurabilityBonus = 1.3f;
-        TarmaTexLeft.loadFromFile("Sprites/character_facing_left.png");
-        TarmaTexRight.loadFromFile("Sprites/character_facing_right.png");
-        TarmaSprite.setTexture(TarmaTexRight);
+        TarmaTex.loadFromFile("Sprites/Tarma Roving.png");
+     
+        TarmaSprite.setTexture(TarmaTex);
     }
 
     void flipToLeft() override {
-        TarmaSprite.setTexture(TarmaTexLeft);
+        TarmaSprite.setTexture(TarmaTex);
         facingRight = false;
     }
 
     void flipToRight() override {
-        TarmaSprite.setTexture(TarmaTexRight);
+        TarmaSprite.setTexture(TarmaTex);
         facingRight = true;
     }
 
@@ -618,7 +617,7 @@ private:
     bool doubleGrenadeActive;
     float doubleGrenadeTimer;
     float doubleGrenadeDuration;
-    Texture EriTexLeft, EriTexRight;
+    Texture EriTex;
     Sprite  EriSprite;
 
 
@@ -628,18 +627,17 @@ public:
         doubleGrenadeActive = false;
         doubleGrenadeTimer = 0;
         doubleGrenadeDuration = 10.0f;
-        EriTexLeft.loadFromFile("Sprites/blocks/stone.png");
-        EriTexRight.loadFromFile("Sprites/blocks/stone.png");
-        EriSprite.setTexture(EriTexRight);
+        EriTex.loadFromFile("Sprites/Eri Kasamoto.png");
+        EriSprite.setTexture(EriTex);
     }
 
     void flipToLeft() override {
-        EriSprite.setTexture(EriTexLeft);
+        EriSprite.setTexture(EriTex);
         facingRight = false;
     }
 
     void flipToRight() override {
-        EriSprite.setTexture(EriTexRight);
+        EriSprite.setTexture(EriTex);
         facingRight = true;
     }
 
@@ -709,7 +707,7 @@ private:
     bool superchargedActive;
     float superchargedTimer;
     float superchargedDuration;
-    Texture FiolinaTexLeft, FiolinaTexRight;
+	Texture FiolinaTex1, FiolinaTex2;
     Sprite  FiolinaSprite;
 public:
     Fiolina() : Player() {
@@ -717,18 +715,18 @@ public:
         superchargedActive = false;
         superchargedTimer = 0;
         superchargedDuration = 12.0f;
-        FiolinaTexLeft.loadFromFile("Sprites/blocks/water.png");
-        FiolinaTexRight.loadFromFile("Sprites/blocks/water.png");
-        FiolinaSprite.setTexture(FiolinaTexRight);
+        FiolinaTex1.loadFromFile("Sprites/Fiolina Germi 1.png");
+        FiolinaTex2.loadFromFile("Sprites/Fiolina Germi 2.png");
+        FiolinaSprite.setTexture(FiolinaTex1);
     }
 
     void flipToLeft() override {
-        FiolinaSprite.setTexture(FiolinaTexLeft);
+        FiolinaSprite.setTexture(FiolinaTex1);
         facingRight = false;
     }
 
     void flipToRight() override {
-        FiolinaSprite.setTexture(FiolinaTexRight);
+        FiolinaSprite.setTexture(FiolinaTex2);
         facingRight = true;
     }
 
