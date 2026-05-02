@@ -18,13 +18,22 @@ private:
     int currentFrame;
     float timer;
     float frameTime;
+    
+    // Secondary layer for legs (optional)
+    Texture legsTexture;
+    IntRect legsFrames[MAX_FRAMES];
+    int legsFrameCount;
+    int legsCurrentFrame;
+    float legsTimer;
+    float legsFrameTime;
+    int legsOffsetY;  // Vertical offset from torso to draw legs
 
 public:
-    Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f) {}
+    Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f),
+                   legsFrameCount(0), legsCurrentFrame(0), legsTimer(0.0f), legsFrameTime(0.08f), legsOffsetY(0) {}
 
     // Build frames in a loop along a horizontal strip on the sheet
-    void load(const char* path, int x, int y, int frameW, int frameH,
-              int count, int stride, float seconds) {
+    void load(const char* path, int x, int y, int frameW, int frameH, int count, int stride, float seconds) {
         texture.loadFromFile(path);
         frameTime = seconds;
         frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
@@ -32,22 +41,65 @@ public:
             frames[i] = IntRect(x + i * stride, y, frameW, frameH);
         }
     }
+    
+    // Load secondary legs layer
+    void loadLegs(const char* path, int x, int y, int frameW, int frameH, int count, int stride, float seconds, int offsetY) {
+        legsTexture.loadFromFile(path);
+        legsFrameTime = seconds;
+        legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        legsOffsetY = offsetY;
+        for (int i = 0; i < legsFrameCount; i++) {
+            legsFrames[i] = IntRect(x + i * stride, y, frameW, frameH);
+        }
+    }
 
     void update(float dt) {
-        if (frameCount <= 0) return;
+        if (frameCount <= 0) 
+            return;
         timer += dt;
         while (timer >= frameTime) {
             timer -= frameTime;
             currentFrame = (currentFrame + 1) % frameCount;
         }
+        
+        // Update legs layer if present
+        if (legsFrameCount > 0) {
+            legsTimer += dt;
+            while (legsTimer >= legsFrameTime) {
+                legsTimer -= legsFrameTime;
+                legsCurrentFrame = (legsCurrentFrame + 1) % legsFrameCount;
+            }
+        }
     }
 
-    void reset() { currentFrame = 0; timer = 0.0f; }
+    void reset() { currentFrame = 0; timer = 0.0f; legsCurrentFrame = 0; legsTimer = 0.0f; }
 
-    bool hasFrames() const { return frameCount > 0; }
-    const Texture& getTexture() const { return texture; }
+    bool hasFrames() const { 
+        return frameCount > 0; 
+    }
+    
+    bool hasLegs() const {
+        return legsFrameCount > 0;
+    }
+
+    const Texture& getTexture() const { 
+        return texture; 
+    }
+    
+    const Texture& getLegsTexture() const {
+        return legsTexture;
+    }
+
     IntRect currentRect() const {
         return frameCount > 0 ? frames[currentFrame] : IntRect();
+    }
+    
+    IntRect currentLegsRect() const {
+        return legsFrameCount > 0 ? legsFrames[legsCurrentFrame] : IntRect();
+    }
+    
+    int getLegsOffsetY() const {
+        return legsOffsetY;
     }
 };
 
@@ -116,6 +168,20 @@ protected:
     void renderCurrent(RenderWindow& window, float camX, float camY) {
         Animation& a = anims[currentAnim];
         if (!a.hasFrames()) return;
+        
+        // Draw legs first if they exist
+        if (a.hasLegs()) {
+            IntRect legsR = a.currentLegsRect();
+            sprite.setTexture(a.getLegsTexture());
+            sprite.setTextureRect(legsR);
+            sprite.setOrigin(legsR.width / 2.0f, (float)legsR.height);
+            sprite.setPosition(player_x + width / 2.0f - camX,
+                               player_y + height - camY + a.getLegsOffsetY());
+            sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+            window.draw(sprite);
+        }
+        
+        // Draw torso on top
         IntRect r = a.currentRect();
         sprite.setTexture(a.getTexture());
         sprite.setTextureRect(r);
@@ -518,8 +584,10 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // Top-left PISTOL run cycle: 8 frames, ~35x30 each, stride 35
-        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 418, 35, 40, 8, 35, 0.08f);
+        // Torso: y=418, 34px tall, 15 frames at x=10, stride 35, width 30
+        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 418, 30, 34, 15, 35, 0.08f);
+        // Legs: y=456, 16px tall, 4 frames at x=10, stride 26, width 21, offset 28
+        anims[ANIM_WALK].loadLegs("Sprites/Marco Rossi 1.png", 10, 456, 21, 16, 4, 26, 0.08f, 28);
     }
 
     void flipToLeft() override {
@@ -597,8 +665,10 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // Top-left PISTOL run cycle: 8 frames, ~30x47 each, stride 37
-        anims[ANIM_WALK].load("Sprites/Tarma Roving.png", 7, 423, 32, 47, 8, 37, 0.08f);
+        // Torso: y=385, 36px tall, 8 frames at x=7, stride 34, width 29
+        anims[ANIM_WALK].load("Sprites/Tarma Roving.png", 7, 385, 29, 36, 8, 34, 0.08f);
+        // Legs: y=481, 29px tall, 15 frames at x=8, stride 38, width 30, offset 32
+        anims[ANIM_WALK].loadLegs("Sprites/Tarma Roving.png", 8, 481, 30, 29, 15, 38, 0.08f, 32);
     }
 
     void flipToLeft() override {
@@ -681,8 +751,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // Top-left PISTOL run cycle: 8 frames, ~30x40 each, stride 34
-        anims[ANIM_WALK].load("Sprites/Eri Kasamoto.png", 8, 435, 30, 40, 8, 34, 0.08f);
+        // Full-body walking: y=387, 40px tall, 16 frames at x=5, stride 34, width 30
+        anims[ANIM_WALK].load("Sprites/Eri Kasamoto.png", 5, 387, 30, 40, 16, 34, 0.08f);
     }
 
     void flipToLeft() override {
@@ -761,8 +831,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // Top-left PISTOL run cycle: 8 frames, ~28x38 each, stride 31
-        anims[ANIM_WALK].load("Sprites/Fiolina Germi 1.png", 10, 420, 30, 38, 8, 31, 0.08f);
+        // Full-body walking: y=420, 38px tall, 16 frames at x=10, stride 31, width 26
+        anims[ANIM_WALK].load("Sprites/Fiolina Germi 1.png", 10, 420, 26, 38, 16, 31, 0.08f);
     }
 
     void flipToLeft() override {
