@@ -25,6 +25,7 @@
     <ClInclude Include="Block.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

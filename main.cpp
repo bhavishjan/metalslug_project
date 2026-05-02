@@ -3,6 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "Header.h"
+#include "Player.h"
+#include "Weapon.h"
 
 using namespace sf;
 using namespace std;
