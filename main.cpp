@@ -409,17 +409,20 @@ int main() {
             // Apply horizontal movement
             pX += pVelocityX;
 
-            // Step-up mechanism
+            // Step-up mechanism: only when moving horizontally AND blocked at current height
             float stepHeight = 20.0f;
-            float tempY = pY - stepHeight;
-            if (currentLevel->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                if (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+            if (pVelocityX != 0 &&
+                currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                float tempY = pY - stepHeight;
+                if (!currentLevel->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    // Small obstacle — step up over it
+                    pY = tempY;
+                }
+                else {
+                    // Wall — revert horizontal movement
                     pX = characters.getActivePlayer()->getPlayerX();
                     pVelocityX = 0;
                 }
-            }
-            else {
-                pY = tempY;
             }
 
             // Apply vertical movement
