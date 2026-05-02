@@ -52,6 +52,70 @@ protected:
     float scale_x;
     float scale_y;
     float moveAcceleration;
+    static const int MAX_WALK_FRAMES = 32;
+    Texture walkTexture;
+    Sprite walkSprite;
+    IntRect walkFrames[MAX_WALK_FRAMES];
+    int walkFrameCount;
+    int currentWalkFrame;
+    float walkAnimationTimer;
+    float walkFrameTime;
+
+    void setWalkFrame() {
+        if (walkFrameCount <= 0) return;
+
+        IntRect frame = walkFrames[currentWalkFrame];
+        walkSprite.setTextureRect(frame);
+        walkSprite.setOrigin(frame.width / 2.0f, (float)frame.height);
+    }
+
+    void setupWalkAnimation(const char* sheetPath, Color backgroundColor, const IntRect* frames, int frameCount, float frameSeconds) {
+        Image image;
+        if (image.loadFromFile(sheetPath)) {
+            if (backgroundColor.a != 0) {
+                image.createMaskFromColor(backgroundColor);
+            }
+
+            walkTexture.loadFromImage(image);
+            walkSprite.setTexture(walkTexture);
+        }
+
+        walkFrameCount = frameCount < MAX_WALK_FRAMES ? frameCount : MAX_WALK_FRAMES;
+        for (int i = 0; i < walkFrameCount; i++) {
+            walkFrames[i] = frames[i];
+        }
+
+        currentWalkFrame = 0;
+        walkAnimationTimer = 0.0f;
+        walkFrameTime = frameSeconds;
+        setWalkFrame();
+    }
+
+    void updateWalkAnimation(float dt) {
+        if (walkFrameCount <= 0) return;
+
+        bool isWalking = velocityX > 0.1f || velocityX < -0.1f;
+        if (!isWalking) {
+            currentWalkFrame = 0;
+            walkAnimationTimer = 0.0f;
+            setWalkFrame();
+            return;
+        }
+
+        walkAnimationTimer += dt;
+        while (walkAnimationTimer >= walkFrameTime) {
+            walkAnimationTimer -= walkFrameTime;
+            currentWalkFrame = (currentWalkFrame + 1) % walkFrameCount;
+        }
+
+        setWalkFrame();
+    }
+
+    void renderWalkAnimation(RenderWindow& window) {
+        walkSprite.setPosition(player_x + width / 2.0f, player_y + height);
+        walkSprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+        window.draw(walkSprite);
+    }
 public:
 
     Player() {
@@ -97,6 +161,10 @@ public:
         weaponSlots[1] = nullptr;
         activeWeaponIndex = 0;
         moveAcceleration = 0.6f;
+        walkFrameCount = 0;
+        currentWalkFrame = 0;
+        walkAnimationTimer = 0.0f;
+        walkFrameTime = 0.08f;
     }
 
     ~Player() {
@@ -311,6 +379,10 @@ public:
     void updateInputHistory() {
     }
 
+    virtual void updateAnimation(float dt) {
+        updateWalkAnimation(dt);
+    }
+
     void update() {
         applyGravity();
         checkGrounded();
@@ -428,8 +500,6 @@ private:
     bool dualFireActive;
     float dualFireTimer;
     float dualFireDuration;
-    Texture marcoTex1, marcoTex2;
-    Sprite  marcoSprite1, marcoSprite2;
 
 public:
     Marco() : Player() {
@@ -437,38 +507,44 @@ public:
         dualFireActive = false;
         dualFireTimer = 0;
         dualFireDuration = 10.0f;
+        scale_x = 2.0f;
+        scale_y = 2.0f;
+        width = 60.0f;
+        height = 82.0f;
 
-        marcoTex1.loadFromFile("Sprites/Marco Rossi 1.png");
-        marcoTex2.loadFromFile("Sprites/Marco Rossi 2.png");
-
-        marcoSprite1.setTexture(marcoTex1);
-        marcoSprite2.setTexture(marcoTex2);
-
-        marcoSprite1.setPosition(100.0f, 100.0f);
-        marcoSprite2.setPosition(100.0f, 100.0f + marcoTex1.getSize().y);
+        IntRect frames[] = {
+            IntRect(919, 7192, 29, 37),
+            IntRect(953, 7193, 29, 36),
+            IntRect(987, 7192, 30, 37),
+            IntRect(1022, 7192, 32, 37),
+            IntRect(1059, 7192, 30, 37),
+            IntRect(1094, 7193, 29, 36),
+            IntRect(1128, 7192, 29, 37),
+            IntRect(1162, 7193, 29, 36),
+            IntRect(1196, 7193, 30, 36),
+            IntRect(1231, 7192, 32, 37),
+            IntRect(1268, 7192, 30, 37),
+            IntRect(1303, 7193, 29, 36),
+            IntRect(1337, 7192, 29, 37),
+            IntRect(1371, 7193, 29, 36),
+            IntRect(1405, 7192, 34, 37),
+            IntRect(1444, 7190, 40, 39),
+            IntRect(1489, 7189, 43, 40),
+            IntRect(1537, 7188, 44, 41)
+        };
+        setupWalkAnimation("Sprites/Marco Rossi 1.png", Color(153, 217, 234), frames, 18, 0.08f);
     }
 
     void flipToLeft() override {
-        marcoSprite1.setTexture(marcoTex1);
         facingRight = false;
     }
 
     void flipToRight() override {
-        marcoSprite1.setTexture(marcoTex2);
         facingRight = true;
     }
 
     void render(RenderWindow& window) override {
-        if (facingRight) {
-            marcoSprite1.setPosition(player_x, player_y);
-            marcoSprite1.setScale(scale_x, scale_y);
-            window.draw(marcoSprite1);
-        }
-        else {
-            marcoSprite2.setPosition(player_x, player_y);
-            marcoSprite2.setScale(scale_x, scale_y);
-            window.draw(marcoSprite2);
-        }
+        renderWalkAnimation(window);
     }
     void shoot() {
         if (dualFireActive) {
@@ -521,10 +597,6 @@ private:
     float vehicleFireRateBonus;
     float vehicleDurabilityBonus;
 
-    Texture TarmaTex;
-    Sprite  TarmaSprite;
-
-
 public:
     Tarma() : Player() {
         name = "Tarma";
@@ -533,32 +605,44 @@ public:
         immunityDuration = 5.0f;
         vehicleFireRateBonus = 1.5f;
         vehicleDurabilityBonus = 1.3f;
-        TarmaTex.loadFromFile("Sprites/Tarma Roving.png");
-     
-        TarmaSprite.setTexture(TarmaTex);
+        scale_x = 2.0f;
+        scale_y = 2.0f;
+        width = 60.0f;
+        height = 82.0f;
+
+        IntRect frames[] = {
+            IntRect(7, 1608, 31, 36),
+            IntRect(43, 1610, 34, 34),
+            IntRect(82, 1612, 35, 32),
+            IntRect(121, 1612, 37, 32),
+            IntRect(163, 1611, 42, 33),
+            IntRect(208, 1605, 46, 39),
+            IntRect(257, 1605, 57, 39),
+            IntRect(317, 1608, 60, 36),
+            IntRect(381, 1609, 61, 35),
+            IntRect(446, 1609, 61, 35),
+            IntRect(510, 1613, 58, 31),
+            IntRect(572, 1614, 48, 30),
+            IntRect(627, 1615, 44, 29),
+            IntRect(677, 1615, 45, 29),
+            IntRect(726, 1614, 45, 30),
+            IntRect(775, 1608, 45, 36),
+            IntRect(824, 1609, 44, 35),
+            IntRect(872, 1613, 43, 31)
+        };
+        setupWalkAnimation("Sprites/Tarma Roving.png", Color(86, 177, 222), frames, 18, 0.08f);
     }
 
     void flipToLeft() override {
-        TarmaSprite.setTexture(TarmaTex);
         facingRight = false;
     }
 
     void flipToRight() override {
-        TarmaSprite.setTexture(TarmaTex);
         facingRight = true;
     }
 
     void render(RenderWindow& window) override {
-        if (facingRight) {
-            TarmaSprite.setPosition(player_x, player_y);
-            TarmaSprite.setScale(scale_x, scale_y);
-            window.draw(TarmaSprite);
-        }
-        else {
-            TarmaSprite.setPosition(player_x, player_y);
-            TarmaSprite.setScale(scale_x, scale_y);
-            window.draw(TarmaSprite);
-        }
+        renderWalkAnimation(window);
     }
 
     void takeDamage(int damage) {
@@ -617,9 +701,6 @@ private:
     bool doubleGrenadeActive;
     float doubleGrenadeTimer;
     float doubleGrenadeDuration;
-    Texture EriTex;
-    Sprite  EriSprite;
-
 
 public:
     Eri() : Player() {
@@ -627,31 +708,39 @@ public:
         doubleGrenadeActive = false;
         doubleGrenadeTimer = 0;
         doubleGrenadeDuration = 10.0f;
-        EriTex.loadFromFile("Sprites/Eri Kasamoto.png");
-        EriSprite.setTexture(EriTex);
+        scale_x = 2.0f;
+        scale_y = 2.0f;
+        width = 60.0f;
+        height = 82.0f;
+
+        IntRect frames[] = {
+            IntRect(5, 337, 30, 40),
+            IntRect(39, 337, 30, 40),
+            IntRect(73, 337, 30, 40),
+            IntRect(107, 337, 27, 40),
+            IntRect(139, 338, 27, 39),
+            IntRect(170, 338, 33, 39),
+            IntRect(207, 338, 35, 39),
+            IntRect(248, 338, 30, 39),
+            IntRect(282, 338, 27, 39),
+            IntRect(315, 337, 25, 40),
+            IntRect(345, 337, 24, 40),
+            IntRect(373, 337, 26, 40),
+            IntRect(404, 337, 28, 40)
+        };
+        setupWalkAnimation("Sprites/Eri Kasamoto.png", Color(0, 0, 0, 0), frames, 13, 0.08f);
     }
 
     void flipToLeft() override {
-        EriSprite.setTexture(EriTex);
         facingRight = false;
     }
 
     void flipToRight() override {
-        EriSprite.setTexture(EriTex);
         facingRight = true;
     }
 
     void render(RenderWindow& window) override {
-        if (facingRight) {
-            EriSprite.setPosition(player_x, player_y);
-            EriSprite.setScale(scale_x, scale_y);
-            window.draw(EriSprite);
-        }
-        else {
-            EriSprite.setPosition(player_x, player_y);
-            EriSprite.setScale(scale_x, scale_y);
-            window.draw(EriSprite);
-        }
+        renderWalkAnimation(window);
     }
     void throwGrenade() {
         if (doubleGrenadeActive && grenadeCount >= 2) {
@@ -707,40 +796,50 @@ private:
     bool superchargedActive;
     float superchargedTimer;
     float superchargedDuration;
-	Texture FiolinaTex1, FiolinaTex2;
-    Sprite  FiolinaSprite;
 public:
     Fiolina() : Player() {
         name = "Fiolina";
         superchargedActive = false;
         superchargedTimer = 0;
         superchargedDuration = 12.0f;
-        FiolinaTex1.loadFromFile("Sprites/Fiolina Germi 1.png");
-        FiolinaTex2.loadFromFile("Sprites/Fiolina Germi 2.png");
-        FiolinaSprite.setTexture(FiolinaTex1);
+        scale_x = 2.0f;
+        scale_y = 2.0f;
+        width = 60.0f;
+        height = 82.0f;
+
+        IntRect frames[] = {
+            IntRect(10, 9250, 35, 36),
+            IntRect(50, 9250, 36, 37),
+            IntRect(91, 9250, 36, 38),
+            IntRect(132, 9250, 35, 39),
+            IntRect(172, 9250, 35, 39),
+            IntRect(212, 9250, 36, 39),
+            IntRect(253, 9250, 33, 39),
+            IntRect(291, 9250, 33, 38),
+            IntRect(329, 9250, 33, 37),
+            IntRect(367, 9250, 34, 37),
+            IntRect(410, 9250, 33, 37),
+            IntRect(454, 9250, 33, 37),
+            IntRect(499, 9250, 33, 37),
+            IntRect(545, 9250, 33, 37),
+            IntRect(591, 9250, 32, 37),
+            IntRect(638, 9250, 32, 37),
+            IntRect(675, 9250, 32, 37),
+            IntRect(712, 9250, 32, 37)
+        };
+        setupWalkAnimation("Sprites/Fiolina Germi 1.png", Color(153, 217, 234), frames, 18, 0.08f);
     }
 
     void flipToLeft() override {
-        FiolinaSprite.setTexture(FiolinaTex1);
         facingRight = false;
     }
 
     void flipToRight() override {
-        FiolinaSprite.setTexture(FiolinaTex2);
         facingRight = true;
     }
 
     void render(RenderWindow& window) override {
-        if (facingRight) {
-            FiolinaSprite.setPosition(player_x, player_y);
-            FiolinaSprite.setScale(scale_x, scale_y);
-            window.draw(FiolinaSprite);
-        }
-        else {
-            FiolinaSprite.setPosition(player_x, player_y);
-            FiolinaSprite.setScale(scale_x, scale_y);
-            window.draw(FiolinaSprite);
-        }
+        renderWalkAnimation(window);
     }
 
     void pickupWeapon(Weapon* weapon) {
@@ -1002,6 +1101,28 @@ private:
     float fusionCooldownTimer;
     int activeCharacterCount;
 
+    void switchToIndexKeepingPosition(int index) {
+        if (!isCharacterAvailable(index) || index == activeIndex)
+            return;
+
+        Player* oldPlayer = characters[activeIndex];
+        Player* newPlayer = characters[index];
+
+        if (oldPlayer && newPlayer) {
+            newPlayer->setPlayerPosition(oldPlayer->getPlayerX(), oldPlayer->getPlayerY());
+            newPlayer->setVelocity(oldPlayer->getVelocityX(), oldPlayer->getVelocityY());
+
+            if (oldPlayer->isFacingRight()) {
+                newPlayer->flipToRight();
+            }
+            else {
+                newPlayer->flipToLeft();
+            }
+        }
+
+        activeIndex = index;
+    }
+
 public:
     CharacterManager() {
         characters[0] = new Marco();
@@ -1017,13 +1138,13 @@ public:
     void switchCharacter() {
         int nextIndex = getNextAvailableIndex();
         if (nextIndex != -1) {
-            activeIndex = nextIndex;
+            switchToIndexKeepingPosition(nextIndex);
         }
     }
 
     void switchCharacterToIndex(int index) {
         if (isCharacterAvailable(index)) {
-            activeIndex = index;
+            switchToIndexKeepingPosition(index);
         }
     }
 

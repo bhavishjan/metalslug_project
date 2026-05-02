@@ -507,6 +507,7 @@ int main() {
 
             // Update
             currentLevel->update(dt);
+            characters.getActivePlayer()->updateAnimation(dt);
 
             // Render
             window.clear(Color(135, 206, 235));
@@ -539,6 +540,7 @@ int main() {
 
             // Campaign update - naye chunks auto generate honge
             campaignLevel->update(characters.getActivePlayer()->getPlayerX());
+            characters.getActivePlayer()->updateAnimation(dt);
 
             // Camera
             float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
