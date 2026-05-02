@@ -1,17 +1,17 @@
 ﻿  main.cpp
-E:\Semester 2\OOP\Final Project\Header.h(712,22): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\Player.h(62,22): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\Final Project\Header.h(713,23): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\Player.h(63,23): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\Final Project\Header.h(1069,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
+E:\Semester 2\OOP\Final Project\Player.h(419,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\Final Project\Header.h(1072,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
+E:\Semester 2\OOP\Final Project\Player.h(422,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\Final Project\Header.h(3165,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
+E:\Semester 2\OOP\Final Project\Header.h(2067,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\Final Project\main.cpp(36,46): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
@@ -44,5 +44,5 @@ E:\Semester 2\OOP\Final Project\main.cpp(431,146): warning C4244: 'argument': co
 E:\Semester 2\OOP\Final Project\main.cpp(431,103): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\Final Project\main.cpp(437,146): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\Final Project\main.cpp(437,103): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\Final Project\main.cpp(522,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\Final Project\main.cpp(529,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Final Project.vcxproj -> E:\Semester 2\OOP\Final Project\x64\Debug\Final Project.exe

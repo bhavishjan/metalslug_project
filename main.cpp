@@ -213,7 +213,7 @@ int main() {
     CharacterManager characters;
 
     Clock clock;
-    Clock selectionClock;
+    Clock Delay;
     Event ev;
 
     // -------------------------
@@ -240,7 +240,7 @@ int main() {
 					characters.getActivePlayer()->setVelocity(0, 0);
                     onGround = false;
                     cameraX = cameraY = 0;
-                    selectionClock.restart();
+                    Delay.restart();
 					cout << "Entered Survival Mode" << endl;
                 }
 				else if (ev.key.code == Keyboard::Num2) {
@@ -252,7 +252,7 @@ int main() {
 					characters.getActivePlayer()->setVelocity(0, 0);
 					onGround = false;
 					cameraX = cameraY = 0;
-					selectionClock.restart();
+					Delay.restart();
 					cout << "Entered Campaign Mode" << endl;
 				}
 			}
@@ -260,7 +260,7 @@ int main() {
 			// -------------------------
 			// PLAYER SELECTION MENU INPUT
 			// -------------------------
-			if (playerSelection == false && gameMode != 0 && ev.type == Event::KeyPressed && selectionClock.getElapsedTime().asSeconds() > 0.2f) {
+			if (playerSelection == false && gameMode != 0 && ev.type == Event::KeyPressed && Delay.getElapsedTime().asSeconds() > 0.2f) {
 
 				if (ev.key.code == Keyboard::Num1) {
 					characters.switchCharacterToIndex(0);
@@ -488,13 +488,20 @@ int main() {
 
             // Camera
             if (currentLevel) {
-                float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
+                float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 0.25f;
                 cameraX += (targetCamX - cameraX) * 0.25f;
-                if (cameraX < 0) cameraX = 0;
+                if (cameraX < 0)
+                    cameraX = 0;
                 if (cameraX > currentLevel->getLevelEnd() - screen_x)
                     cameraX = currentLevel->getLevelEnd() - screen_x;
             }
             cameraY = 0;
+
+            if (Keyboard::isKeyPressed(Keyboard::Space) && Delay.getElapsedTime().asSeconds() > 0.2f)
+            {
+                characters.switchCharacter();
+                Delay.restart();
+            }
 
             // Update
             currentLevel->update(dt);
@@ -525,7 +532,8 @@ int main() {
             }
 
             // Left bound
-            if (characters.getActivePlayer()->getPlayerX() < 0) characters.getActivePlayer()->setPlayerX(0);
+            if (characters.getActivePlayer()->getPlayerX() < 0) 
+                characters.getActivePlayer()->setPlayerX(0);
 
             // Campaign update - naye chunks auto generate honge
             campaignLevel->update(characters.getActivePlayer()->getPlayerX());
@@ -535,6 +543,12 @@ int main() {
             cameraX += (targetCamX - cameraX) * 0.12f;
             if (cameraX < 0) cameraX = 0;
             cameraY = 0;
+
+            if (Keyboard::isKeyPressed(Keyboard::Space) && Delay.getElapsedTime().asSeconds() > 0.2f)
+            {
+                characters.switchCharacter();
+				Delay.restart();
+            }
 
             // Render
             window.clear(Color(135, 206, 235));
