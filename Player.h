@@ -9,7 +9,8 @@ class Pistol;
 class Knife;
 
 // One sprite-sheet animation: texture + a uniform horizontal strip of frames
-struct Animation {
+class Animation {
+private:
     static const int MAX_FRAMES = 32;
     Texture texture;
     IntRect frames[MAX_FRAMES];
@@ -18,9 +19,10 @@ struct Animation {
     float timer;
     float frameTime;
 
+public:
     Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f) {}
 
-    // Build frames in a loop along a horizontal strip
+    // Build frames in a loop along a horizontal strip on the sheet
     void load(const char* path, int x, int y, int frameW, int frameH,
               int count, int stride, float seconds) {
         texture.loadFromFile(path);
@@ -41,6 +43,12 @@ struct Animation {
     }
 
     void reset() { currentFrame = 0; timer = 0.0f; }
+
+    bool hasFrames() const { return frameCount > 0; }
+    const Texture& getTexture() const { return texture; }
+    IntRect currentRect() const {
+        return frameCount > 0 ? frames[currentFrame] : IntRect();
+    }
 };
 
 class Player {
@@ -104,15 +112,16 @@ protected:
         anims[currentAnim].update(dt);
     }
 
-    // Draw the current animation frame at the player's bottom-center
-    void renderCurrent(RenderWindow& window) {
+    // Draw the current animation at player's bottom-center, offset by camera
+    void renderCurrent(RenderWindow& window, float camX, float camY) {
         Animation& a = anims[currentAnim];
-        if (a.frameCount <= 0) return;
-        IntRect r = a.frames[a.currentFrame];
-        sprite.setTexture(a.texture);
+        if (!a.hasFrames()) return;
+        IntRect r = a.currentRect();
+        sprite.setTexture(a.getTexture());
         sprite.setTextureRect(r);
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
-        sprite.setPosition(player_x + width / 2.0f, player_y + height);
+        sprite.setPosition(player_x + width / 2.0f - camX,
+                           player_y + height - camY);
         sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
         window.draw(sprite);
     }
@@ -397,7 +406,7 @@ public:
         }
     }
 
-    virtual void render(RenderWindow& window) = 0;
+    virtual void render(RenderWindow& window, float camX = 0, float camY = 0) = 0;
 
     void applyVehicleBonus() {
     }
@@ -509,8 +518,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // walk strip: (startX, startY, frameW, frameH, count, stride, frameTime)
-        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 919, 7192, 32, 38, 14, 34, 0.08f);
+        // Top-left PISTOL run cycle: 8 frames, ~35x30 each, stride 35
+        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 418, 35, 40, 8, 35, 0.08f);
     }
 
     void flipToLeft() override {
@@ -521,8 +530,8 @@ public:
         facingRight = true;
     }
 
-    void render(RenderWindow& window) override {
-        renderCurrent(window);
+    void render(RenderWindow& window, float camX = 0, float camY = 0) override {
+        renderCurrent(window, camX, camY);
     }
     void shoot() {
         if (dualFireActive) {
@@ -588,8 +597,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // walk strip: tune (startX, startY) until Tarma's walk row aligns
-        anims[ANIM_WALK].load("Sprites/Tarma Roving.png", 7, 1608, 34, 38, 12, 36, 0.08f);
+        // Top-left PISTOL run cycle: 8 frames, ~30x47 each, stride 37
+        anims[ANIM_WALK].load("Sprites/Tarma Roving.png", 7, 423, 32, 47, 8, 37, 0.08f);
     }
 
     void flipToLeft() override {
@@ -600,8 +609,8 @@ public:
         facingRight = true;
     }
 
-    void render(RenderWindow& window) override {
-        renderCurrent(window);
+    void render(RenderWindow& window, float camX = 0, float camY = 0) override {
+        renderCurrent(window, camX, camY);
     }
 
     void takeDamage(int damage) {
@@ -672,8 +681,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // walk strip: (startX, startY, frameW, frameH, count, stride, frameTime)
-        anims[ANIM_WALK].load("Sprites/Eri Kasamoto.png", 5, 337, 30, 40, 13, 34, 0.08f);
+        // Top-left PISTOL run cycle: 8 frames, ~30x40 each, stride 34
+        anims[ANIM_WALK].load("Sprites/Eri Kasamoto.png", 8, 435, 30, 40, 8, 34, 0.08f);
     }
 
     void flipToLeft() override {
@@ -684,8 +693,8 @@ public:
         facingRight = true;
     }
 
-    void render(RenderWindow& window) override {
-        renderCurrent(window);
+    void render(RenderWindow& window, float camX = 0, float camY = 0) override {
+        renderCurrent(window, camX, camY);
     }
     void throwGrenade() {
         if (doubleGrenadeActive && grenadeCount >= 2) {
@@ -752,8 +761,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // walk strip: tune (startX, startY) until Fiolina's walk row aligns
-        anims[ANIM_WALK].load("Sprites/Fiolina Germi 1.png", 10, 9250, 36, 39, 12, 41, 0.08f);
+        // Top-left PISTOL run cycle: 8 frames, ~28x38 each, stride 31
+        anims[ANIM_WALK].load("Sprites/Fiolina Germi 1.png", 10, 420, 30, 38, 8, 31, 0.08f);
     }
 
     void flipToLeft() override {
@@ -764,8 +773,8 @@ public:
         facingRight = true;
     }
 
-    void render(RenderWindow& window) override {
-        renderCurrent(window);
+    void render(RenderWindow& window, float camX = 0, float camY = 0) override {
+        renderCurrent(window, camX, camY);
     }
 
     void pickupWeapon(Weapon* weapon) {
@@ -1136,9 +1145,9 @@ public:
         }
     }
 
-    void render(RenderWindow& window) {
+    void render(RenderWindow& window, float camX = 0, float camY = 0) {
         if (characters[activeIndex]) {
-            characters[activeIndex]->render(window);
+            characters[activeIndex]->render(window, camX, camY);
         }
 
         if (fusionCompanion) {

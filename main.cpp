@@ -494,7 +494,7 @@ int main() {
             // Camera follows player smoothly, centered horizontally
             if (currentLevel) {
                 float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
-                cameraX += (targetCamX - cameraX) * 0.12f;
+                cameraX += (targetCamX - cameraX) * 0.2f;
                 if (cameraX < 0)
                     cameraX = 0;
                 if (cameraX > currentLevel->getLevelEnd() - screen_x)
@@ -516,7 +516,7 @@ int main() {
             // Render
             window.clear(Color(135, 206, 235));
             currentLevel->render(window, cameraX, cameraY);
-            characters.getActivePlayer()->render(window);
+            characters.getActivePlayer()->render(window, cameraX, cameraY);
             window.display();
         }
 
@@ -548,7 +548,7 @@ int main() {
 
             // Camera
             float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
-            cameraX += (targetCamX - cameraX) * 0.12f;
+            cameraX += (targetCamX - cameraX) * 0.2f;
             if (cameraX < 0) cameraX = 0;
             cameraY = 0;
 
@@ -562,7 +562,7 @@ int main() {
             // Render
             window.clear(Color(135, 206, 235));
             campaignLevel->render(window, cameraX, cameraY);
-            characters.getActivePlayer()->render(window);
+            characters.getActivePlayer()->render(window, cameraX, cameraY);
             window.display();
         }
     }

@@ -5,10 +5,10 @@ E:\Semester 2\OOP\OOP Final Project\Player.h(126,22): warning C4244: '=': conver
 E:\Semester 2\OOP\OOP Final Project\Player.h(127,23): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Player.h(491,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Player.h(488,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Player.h(494,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Player.h(491,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Weapon.h(454,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
@@ -44,5 +44,5 @@ E:\Semester 2\OOP\OOP Final Project\main.cpp(436,146): warning C4244: 'argument'
 E:\Semester 2\OOP\OOP Final Project\main.cpp(436,103): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(442,146): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(442,103): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(535,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(536,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Final Project.vcxproj -> E:\Semester 2\OOP\OOP Final Project\x64\Debug\Final Project.exe
