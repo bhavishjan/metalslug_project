@@ -491,10 +491,10 @@ int main() {
                 }
             }
 
-            // Camera
+            // Camera follows player smoothly, centered horizontally
             if (currentLevel) {
-                float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 0.25f;
-                cameraX += (targetCamX - cameraX) * 0.25f;
+                float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
+                cameraX += (targetCamX - cameraX) * 0.12f;
                 if (cameraX < 0)
                     cameraX = 0;
                 if (cameraX > currentLevel->getLevelEnd() - screen_x)
@@ -502,7 +502,8 @@ int main() {
             }
             cameraY = 0;
 
-            if (Keyboard::isKeyPressed(Keyboard::Space) && Delay.getElapsedTime().asSeconds() > 0.2f)
+            // Z swaps character
+            if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f)
             {
                 characters.switchCharacter();
                 Delay.restart();
@@ -551,10 +552,11 @@ int main() {
             if (cameraX < 0) cameraX = 0;
             cameraY = 0;
 
-            if (Keyboard::isKeyPressed(Keyboard::Space) && Delay.getElapsedTime().asSeconds() > 0.2f)
+            // Z swaps character
+            if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f)
             {
                 characters.switchCharacter();
-				Delay.restart();
+                Delay.restart();
             }
 
             // Render

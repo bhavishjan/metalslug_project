@@ -8,8 +8,45 @@ class Vehicle;
 class Pistol;
 class Knife;
 
+// One sprite-sheet animation: texture + a uniform horizontal strip of frames
+struct Animation {
+    static const int MAX_FRAMES = 32;
+    Texture texture;
+    IntRect frames[MAX_FRAMES];
+    int frameCount;
+    int currentFrame;
+    float timer;
+    float frameTime;
+
+    Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f) {}
+
+    // Build frames in a loop along a horizontal strip
+    void load(const char* path, int x, int y, int frameW, int frameH,
+              int count, int stride, float seconds) {
+        texture.loadFromFile(path);
+        frameTime = seconds;
+        frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        for (int i = 0; i < frameCount; i++) {
+            frames[i] = IntRect(x + i * stride, y, frameW, frameH);
+        }
+    }
+
+    void update(float dt) {
+        if (frameCount <= 0) return;
+        timer += dt;
+        while (timer >= frameTime) {
+            timer -= frameTime;
+            currentFrame = (currentFrame + 1) % frameCount;
+        }
+    }
+
+    void reset() { currentFrame = 0; timer = 0.0f; }
+};
+
 class Player {
 protected:
+    // Animation slots (add more later: idle, jump, shoot, ...)
+    enum { ANIM_WALK = 0, ANIM_IDLE = 1, ANIM_JUMP = 2, ANIM_COUNT = 8 };
     const char* name;
     float player_x;
     float player_y;
@@ -52,69 +89,32 @@ protected:
     float scale_x;
     float scale_y;
     float moveAcceleration;
-    static const int MAX_WALK_FRAMES = 32;
-    Texture walkTexture;
-    Sprite walkSprite;
-    IntRect walkFrames[MAX_WALK_FRAMES];
-    int walkFrameCount;
-    int currentWalkFrame;
-    float walkAnimationTimer;
-    float walkFrameTime;
+    Animation anims[ANIM_COUNT];
+    Sprite sprite;
+    int currentAnim;
 
-    void setWalkFrame() {
-        if (walkFrameCount <= 0) return;
-
-        IntRect frame = walkFrames[currentWalkFrame];
-        walkSprite.setTextureRect(frame);
-        walkSprite.setOrigin(frame.width / 2.0f, (float)frame.height);
-    }
-
-    void setupWalkAnimation(const char* sheetPath, Color backgroundColor, const IntRect* frames, int frameCount, float frameSeconds) {
-        Image image;
-        if (image.loadFromFile(sheetPath)) {
-            if (backgroundColor.a != 0) {
-                image.createMaskFromColor(backgroundColor);
-            }
-
-            walkTexture.loadFromImage(image);
-            walkSprite.setTexture(walkTexture);
-        }
-
-        walkFrameCount = frameCount < MAX_WALK_FRAMES ? frameCount : MAX_WALK_FRAMES;
-        for (int i = 0; i < walkFrameCount; i++) {
-            walkFrames[i] = frames[i];
-        }
-
-        currentWalkFrame = 0;
-        walkAnimationTimer = 0.0f;
-        walkFrameTime = frameSeconds;
-        setWalkFrame();
-    }
-
-    void updateWalkAnimation(float dt) {
-        if (walkFrameCount <= 0) return;
-
-        bool isWalking = velocityX > 0.1f || velocityX < -0.1f;
-        if (!isWalking) {
-            currentWalkFrame = 0;
-            walkAnimationTimer = 0.0f;
-            setWalkFrame();
+    // Pick the right anim for current state, advance its timer
+    void updateAnimations(float dt) {
+        bool walking = velocityX > 0.1f || velocityX < -0.1f;
+        currentAnim = walking ? ANIM_WALK : ANIM_WALK;
+        if (!walking) {
+            anims[ANIM_WALK].reset();
             return;
         }
-
-        walkAnimationTimer += dt;
-        while (walkAnimationTimer >= walkFrameTime) {
-            walkAnimationTimer -= walkFrameTime;
-            currentWalkFrame = (currentWalkFrame + 1) % walkFrameCount;
-        }
-
-        setWalkFrame();
+        anims[currentAnim].update(dt);
     }
 
-    void renderWalkAnimation(RenderWindow& window) {
-        walkSprite.setPosition(player_x + width / 2.0f, player_y + height);
-        walkSprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
-        window.draw(walkSprite);
+    // Draw the current animation frame at the player's bottom-center
+    void renderCurrent(RenderWindow& window) {
+        Animation& a = anims[currentAnim];
+        if (a.frameCount <= 0) return;
+        IntRect r = a.frames[a.currentFrame];
+        sprite.setTexture(a.texture);
+        sprite.setTextureRect(r);
+        sprite.setOrigin(r.width / 2.0f, (float)r.height);
+        sprite.setPosition(player_x + width / 2.0f, player_y + height);
+        sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+        window.draw(sprite);
     }
 public:
 
@@ -161,10 +161,7 @@ public:
         weaponSlots[1] = nullptr;
         activeWeaponIndex = 0;
         moveAcceleration = 0.6f;
-        walkFrameCount = 0;
-        currentWalkFrame = 0;
-        walkAnimationTimer = 0.0f;
-        walkFrameTime = 0.08f;
+        currentAnim = ANIM_WALK;
     }
 
     ~Player() {
@@ -380,7 +377,7 @@ public:
     }
 
     virtual void updateAnimation(float dt) {
-        updateWalkAnimation(dt);
+        updateAnimations(dt);
     }
 
     void update() {
@@ -512,27 +509,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        IntRect frames[] = {
-            IntRect(919, 7192, 29, 37),
-            IntRect(953, 7193, 29, 36),
-            IntRect(987, 7192, 30, 37),
-            IntRect(1022, 7192, 32, 37),
-            IntRect(1059, 7192, 30, 37),
-            IntRect(1094, 7193, 29, 36),
-            IntRect(1128, 7192, 29, 37),
-            IntRect(1162, 7193, 29, 36),
-            IntRect(1196, 7193, 30, 36),
-            IntRect(1231, 7192, 32, 37),
-            IntRect(1268, 7192, 30, 37),
-            IntRect(1303, 7193, 29, 36),
-            IntRect(1337, 7192, 29, 37),
-            IntRect(1371, 7193, 29, 36),
-            IntRect(1405, 7192, 34, 37),
-            IntRect(1444, 7190, 40, 39),
-            IntRect(1489, 7189, 43, 40),
-            IntRect(1537, 7188, 44, 41)
-        };
-        setupWalkAnimation("Sprites/Marco Rossi 1.png", Color(153, 217, 234), frames, 18, 0.08f);
+        // walk strip: (startX, startY, frameW, frameH, count, stride, frameTime)
+        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 919, 7192, 32, 38, 14, 34, 0.08f);
     }
 
     void flipToLeft() override {
@@ -544,7 +522,7 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        renderWalkAnimation(window);
+        renderCurrent(window);
     }
     void shoot() {
         if (dualFireActive) {
@@ -610,27 +588,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        IntRect frames[] = {
-            IntRect(7, 1608, 31, 36),
-            IntRect(43, 1610, 34, 34),
-            IntRect(82, 1612, 35, 32),
-            IntRect(121, 1612, 37, 32),
-            IntRect(163, 1611, 42, 33),
-            IntRect(208, 1605, 46, 39),
-            IntRect(257, 1605, 57, 39),
-            IntRect(317, 1608, 60, 36),
-            IntRect(381, 1609, 61, 35),
-            IntRect(446, 1609, 61, 35),
-            IntRect(510, 1613, 58, 31),
-            IntRect(572, 1614, 48, 30),
-            IntRect(627, 1615, 44, 29),
-            IntRect(677, 1615, 45, 29),
-            IntRect(726, 1614, 45, 30),
-            IntRect(775, 1608, 45, 36),
-            IntRect(824, 1609, 44, 35),
-            IntRect(872, 1613, 43, 31)
-        };
-        setupWalkAnimation("Sprites/Tarma Roving.png", Color(86, 177, 222), frames, 18, 0.08f);
+        // walk strip: tune (startX, startY) until Tarma's walk row aligns
+        anims[ANIM_WALK].load("Sprites/Tarma Roving.png", 7, 1608, 34, 38, 12, 36, 0.08f);
     }
 
     void flipToLeft() override {
@@ -642,7 +601,7 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        renderWalkAnimation(window);
+        renderCurrent(window);
     }
 
     void takeDamage(int damage) {
@@ -713,22 +672,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        IntRect frames[] = {
-            IntRect(5, 337, 30, 40),
-            IntRect(39, 337, 30, 40),
-            IntRect(73, 337, 30, 40),
-            IntRect(107, 337, 27, 40),
-            IntRect(139, 338, 27, 39),
-            IntRect(170, 338, 33, 39),
-            IntRect(207, 338, 35, 39),
-            IntRect(248, 338, 30, 39),
-            IntRect(282, 338, 27, 39),
-            IntRect(315, 337, 25, 40),
-            IntRect(345, 337, 24, 40),
-            IntRect(373, 337, 26, 40),
-            IntRect(404, 337, 28, 40)
-        };
-        setupWalkAnimation("Sprites/Eri Kasamoto.png", Color(0, 0, 0, 0), frames, 13, 0.08f);
+        // walk strip: (startX, startY, frameW, frameH, count, stride, frameTime)
+        anims[ANIM_WALK].load("Sprites/Eri Kasamoto.png", 5, 337, 30, 40, 13, 34, 0.08f);
     }
 
     void flipToLeft() override {
@@ -740,7 +685,7 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        renderWalkAnimation(window);
+        renderCurrent(window);
     }
     void throwGrenade() {
         if (doubleGrenadeActive && grenadeCount >= 2) {
@@ -807,27 +752,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        IntRect frames[] = {
-            IntRect(10, 9250, 35, 36),
-            IntRect(50, 9250, 36, 37),
-            IntRect(91, 9250, 36, 38),
-            IntRect(132, 9250, 35, 39),
-            IntRect(172, 9250, 35, 39),
-            IntRect(212, 9250, 36, 39),
-            IntRect(253, 9250, 33, 39),
-            IntRect(291, 9250, 33, 38),
-            IntRect(329, 9250, 33, 37),
-            IntRect(367, 9250, 34, 37),
-            IntRect(410, 9250, 33, 37),
-            IntRect(454, 9250, 33, 37),
-            IntRect(499, 9250, 33, 37),
-            IntRect(545, 9250, 33, 37),
-            IntRect(591, 9250, 32, 37),
-            IntRect(638, 9250, 32, 37),
-            IntRect(675, 9250, 32, 37),
-            IntRect(712, 9250, 32, 37)
-        };
-        setupWalkAnimation("Sprites/Fiolina Germi 1.png", Color(153, 217, 234), frames, 18, 0.08f);
+        // walk strip: tune (startX, startY) until Fiolina's walk row aligns
+        anims[ANIM_WALK].load("Sprites/Fiolina Germi 1.png", 10, 9250, 36, 39, 12, 41, 0.08f);
     }
 
     void flipToLeft() override {
@@ -839,7 +765,7 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        renderWalkAnimation(window);
+        renderCurrent(window);
     }
 
     void pickupWeapon(Weapon* weapon) {
