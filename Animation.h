@@ -31,8 +31,11 @@ public:
     void load(const char* path, const int* xs, const int* ys,
               const int* widths, const int* heights, int count, float seconds) {
         texture.loadFromFile(path);
+
         frameTime = seconds;
+
         frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+
         for (int i = 0; i < frameCount; i++)
             frames[i] = IntRect(xs[i], ys[i], widths[i], heights[i]);
     }
@@ -40,15 +43,23 @@ public:
     void loadLegs(const char* path, const int* xs, const int* ys,
                    const int* widths, const int* heights, int count, float seconds, int offsetY) {
         legsTexture.loadFromFile(path);
+
         legsFrameTime = seconds;
+
         legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+
         legsOffsetY = offsetY;
+
         for (int i = 0; i < legsFrameCount; i++)
             legsFrames[i] = IntRect(xs[i], ys[i], widths[i], heights[i]);
     }
 
-    void setHeadOffset(int offsetY) { headOffsetY = offsetY; }
-    void setHeadOffsetX(int offsetX) { headOffsetX = offsetX; }
+    void setHeadOffset(int offsetY) { 
+        headOffsetY = offsetY; 
+    }
+    void setHeadOffsetX(int offsetX) { 
+        headOffsetX = offsetX; 
+    }
 
     void update(float dt) {
         if (frameCount <= 0) 

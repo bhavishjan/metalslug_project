@@ -139,23 +139,37 @@ public:
         }
 
         Animation& a = anims[currentAnim];
+
         if (a.hasLegs()) {
             IntRect legsR = a.currentLegsRect();
+
             sprite.setTexture(a.getLegsTexture());
+
             sprite.setTextureRect(legsR);
+
             sprite.setOrigin(legsR.width / 2.0f, (float)legsR.height);
+
             sprite.setPosition(player_x + width / 2.0f - camX, player_y + height - camY + a.getLegsOffsetY() * scale_y);
+
             sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+
             window.draw(sprite);
         }
 
         IntRect r = a.currentRect();
+
         sprite.setTexture(a.getTexture());
+
         sprite.setTextureRect(r);
+
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
+
         float headX = player_x + width / 2.0f - camX + (facingRight ? a.getHeadOffsetX() : -a.getHeadOffsetX()) * scale_x;
+
         sprite.setPosition(headX, player_y + height - camY - a.getHeadOffsetY() * scale_y);
+
         sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+
         window.draw(sprite);
     }
 
@@ -477,38 +491,33 @@ public:
         dualFireDuration = 10.0f;
         scale_x = 2.0f;
         scale_y = 2.0f;
-        width = 60.0f;
-        height = 98.0f;
+        width = 29.0f;
+        height = 37.0f;
 
-        static const int walkHeadXs[12] = { 10, 47, 82, 115, 147, 181, 216, 254, 291, 328, 364, 400 };
-        static const int walkHeadYs[12] = { 477, 477, 477, 477, 477, 477, 477, 477, 477, 477, 477, 477 };
-        static const int walkHeadWs[12] = { 32, 30, 28, 27, 29, 30, 32, 32, 32, 31, 31, 31 };
-        static const int walkHeadHs[12] = { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29 };
+        //head
+        static const int walkHeadXs[12] = {  10,   47,   82,  115,  147,  181,  216,  254,  291,  328,  364,  400 };
+        static const int walkHeadYs[12] = { 477,  477,  477,  477,  477,  477,  477,  477,  477,  477,  477,  477 };
+        static const int walkHeadWs[12] = {  32,   30,   28,   27,   29,   30,   32,   32,   32,   31,   31,   31 };
+        static const int walkHeadHs[12] = {  29,   29,   29,   29,   29,   29,   29,   29,   29,   29,   29,   29 };
 
-        static const int walkLegsXs[12] = { 10, 36, 69, 105, 129, 149, 170, 196, 227, 263, 288, 308 };
-        static const int walkLegsYs[12] = { 511, 511, 511, 511, 511, 511, 511, 511, 511, 511, 511, 511 };
-        static const int walkLegsWs[12] = { 21, 28, 31, 19, 15, 16, 21, 26, 31, 20, 15, 16 };
-        static const int walkLegsHs[12] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 };
+        //legs
+        static const int walkLegsXs[12] = {  10,   36,   69,  105,  129,  149,  170,  196,  227,  263,  288,  308 };
+        static const int walkLegsYs[12] = { 511,  511,  511,  511,  511,  511,  511,  511,  511,  511,  511,  511 };
+        static const int walkLegsWs[12] = {  21,   28,   31,   19,   15,   16,   21,   26,   31,   20,   15,   16 };
+        static const int walkLegsHs[12] = {  20,   20,   20,   20,   20,   20,   20,   20,   20,   20,   20,   20 };
 
         anims[WALK].load("Sprites/Marco Rossi 1.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 12, 0.08f);
         anims[WALK].loadLegs("Sprites/Marco Rossi 1.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 12, 0.08f, 0);
-        anims[WALK].setHeadOffset(14);
-        anims[WALK].setHeadOffsetX(5);
+        anims[WALK].setHeadOffset(13);
+        anims[WALK].setHeadOffsetX(6);
 
-        static const int standHeadXs[4] = { 10, 44, 78, 113 };
-        static const int standHeadYs[4] = { 263, 263, 263, 263 };
-        static const int standHeadWs[4] = { 29, 29, 30, 31 };
-        static const int standHeadHs[4] = { 29, 29, 29, 29 };
+        static const int standHeadXs[] = { 10};
+        static const int standHeadYs[] = { 693};
+        static const int standHeadWs[] = { 29};
+        static const int standHeadHs[] = { 37};
 
-        static const int standLegsXs[4] = { 10, 36, 62, 88 };
-        static const int standLegsYs[4] = { 456, 456, 456, 456 };
-        static const int standLegsWs[4] = { 21, 21, 21, 21 };
-        static const int standLegsHs[4] = { 16, 16, 16, 16 };
-
-        anims[STAND].load("Sprites/Marco Rossi 1.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 4, 0.18f);
-        anims[STAND].loadLegs("Sprites/Marco Rossi 1.png", standLegsXs, standLegsYs, standLegsWs, standLegsHs, 4, 0.18f, 0);
-        anims[STAND].setHeadOffset(11);
-        anims[STAND].setHeadOffsetX(5);
+        anims[STAND].load("Sprites/Marco Rossi 1.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 1, 0.18f);
+        //there is also another part of the spritesheer named "Marco Rossi 2.png" that has other animations, we will use it later on.
     }
 
     void flipToLeft() override {
@@ -584,38 +593,30 @@ public:
         vehicleDurabilityBonus = 1.3f;
         scale_x = 2.0f;
         scale_y = 2.0f;
-        width = 60.0f;
-        height = 150.0f;
+        width = 29.0f;
+        height = 37.0f;
 
-        static const int walkHeadXs[8] = { 7, 42, 78, 112, 146, 179, 214, 247 };
-        static const int walkHeadYs[8] = { 385, 385, 385, 385, 385, 385, 385, 385 };
-        static const int walkHeadWs[8] = { 29, 28, 26, 25, 25, 25, 26, 28 };
-        static const int walkHeadHs[8] = { 36, 36, 36, 36, 36, 36, 36, 36 };
+        static const int walkHeadXs[12] = {   6,   48,   87,  124,  159,  197,  237,  278,  318,  358,  397,  435 };
+        static const int walkHeadYs[12] = { 582,  581,  581,  581,  581,  581,  582,  581,  581,  582,  582,  582 };
+        static const int walkHeadWs[12] = {  32,   30,   28,   27,   29,   30,   32,   32,   32,   31,   31,   31 };
+        static const int walkHeadHs[12] = {  28,   29,   28,   27,   28,   28,   29,   29,   28,   27,   28,   28 };
 
-        static const int walkLegsXs[8] = { 7, 44, 81, 120, 160, 194, 231, 269 };
-        static const int walkLegsYs[8] = { 421, 421, 421, 421, 421, 421, 421, 421 };
-        static const int walkLegsWs[8] = { 30, 30, 30, 30, 29, 32, 32, 31 };
-        static const int walkLegsHs[8] = { 39, 39, 39, 39, 39, 39, 39, 39 };
+        static const int walkLegsXs[12] = {  10,   46,   84,  126,  163,  200,  238,  274,  316,  359,  400,  436 };
+        static const int walkLegsYs[12] = { 618,  618,  618,  618,  618,  618,  618,  618,  618,  618,  618,  618 };
+        static const int walkLegsWs[12] = {  21,   28,   31,   19,   15,   16,   21,   26,   31,   20,   15,   18 };
+        static const int walkLegsHs[12] = {  20,   20,   16,   20,   20,   20,   20,   20,   16,   20,   20,   20 };
 
-        anims[WALK].load("Sprites/Tarma Roving.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 8, 0.08f);
-        anims[WALK].loadLegs("Sprites/Tarma Roving.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 8, 0.08f, 0);
-        anims[WALK].setHeadOffset(12);
+        anims[WALK].load("Sprites/Tarma Roving.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 12, 0.08f);
+        anims[WALK].loadLegs("Sprites/Tarma Roving.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 12, 0.08f, 0);
+        anims[WALK].setHeadOffset(11);
         anims[WALK].setHeadOffsetX(4);
 
-        static const int standHeadXs[4] = { 7, 42, 78, 115 };
-        static const int standHeadYs[4] = { 260, 260, 260, 260 };
-        static const int standHeadWs[4] = { 29, 29, 30, 31 };
-        static const int standHeadHs[4] = { 40, 40, 40, 40 };
+        static const int standHeadXs[] = { 8};
+        static const int standHeadYs[] = { 644};
+        static const int standHeadWs[] = { 29};
+        static const int standHeadHs[] = { 37};
 
-        static const int standLegsXs[4] = { 7, 45, 82, 120 };
-        static const int standLegsYs[4] = { 300, 300, 300, 300 };
-        static const int standLegsWs[4] = { 29, 29, 29, 32 };
-        static const int standLegsHs[4] = { 40, 40, 40, 40 };
-
-        anims[STAND].load("Sprites/Tarma Roving.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 4, 0.18f);
-        anims[STAND].loadLegs("Sprites/Tarma Roving.png", standLegsXs, standLegsYs, standLegsWs, standLegsHs, 4, 0.18f, 0);
-        anims[STAND].setHeadOffset(8);
-        anims[STAND].setHeadOffsetX(4);
+        anims[STAND].load("Sprites/Tarma Roving.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 1, 0.18f);
     }
 
     void flipToLeft() override {
@@ -695,22 +696,30 @@ public:
         doubleGrenadeDuration = 10.0f;
         scale_x = 2.0f;
         scale_y = 2.0f;
-        width = 60.0f;
-        height = 82.0f;
+        width = 30.0f;
+        height = 36.0f;
 
-        static const int walkXs[16] = { 5, 39, 73, 107, 141, 175, 209, 243, 277, 311, 345, 379, 413, 447, 481, 515 };
-        static const int walkYs[16] = { 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387 };
-        static const int walkWs[16] = { 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 };
-        static const int walkHs[16] = { 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40 };
+        static const int walkHeadXs[12] = {  26,   61,   96,  130,  164,  200,  236,  271,  306,  343,  379,  413 };
+        static const int walkHeadYs[12] = { 537,  538,  539,  539,  539,  539,  540,  540,  540,  540,  540,  540 };
+        static const int walkHeadWs[12] = {  32,   32,   31,   31,   31,   31,   31,   31,   32,   32,   30,   30 };
+        static const int walkHeadHs[12] = {  28,   28,   28,   28,   28,   28,   28,   28,   28,   28,   29,   29 };
 
-        anims[WALK].load("Sprites/Eri Kasamoto.png", walkXs, walkYs, walkWs, walkHs, 16, 0.08f);
+        static const int walkLegsXs[12] = { 127, 155,   178,  203,  232,  265,  297,  326,  349,  373,  400,  431 };
+        static const int walkLegsYs[12] = { 573, 572,   572,  572,  572,  573,  572,  572,  573,  573,  574,  574 };
+        static const int walkLegsWs[12] = {  24,   18,   20,   22,   25,   27,   25,   17,   18,   21,   26,   30 };
+        static const int walkLegsHs[12] = {  25,   26,   26,   26,   25,   23,   26,   26,   25,   25,   23,   25 };
 
-        static const int standXs[1] = { 5 };
-        static const int standYs[1] = { 387 };
-        static const int standWs[1] = { 30 };
-        static const int standHs[1] = { 40 };
+        anims[WALK].load("Sprites/Eri Kasamoto.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 12, 0.08f);
+        anims[WALK].loadLegs("Sprites/Eri Kasamoto.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 12, 0.08f, 0);
+        anims[WALK].setHeadOffset(11);
+        anims[WALK].setHeadOffsetX(4);
 
-        anims[STAND].load("Sprites/Eri Kasamoto.png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        static const int standHeadXs[] = { 6 };
+        static const int standHeadYs[] = { 606 };
+        static const int standHeadWs[] = { 30 };
+        static const int standHeadHs[] = { 36 };
+
+        anims[STAND].load("Sprites/Eri Kasamoto.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 1, 0.18f);
     }
 
     void flipToLeft() override {
@@ -787,22 +796,31 @@ public:
         superchargedDuration = 12.0f;
         scale_x = 2.0f;
         scale_y = 2.0f;
-        width = 60.0f;
-        height = 82.0f;
+        width = 26.0f;
+        height = 38.0f;
 
-        static const int walkXs[16] = { 10, 41, 72, 103, 134, 165, 196, 227, 258, 289, 320, 351, 382, 413, 444, 475 };
-        static const int walkYs[16] = { 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420 };
-        static const int walkWs[16] = { 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26 };
-        static const int walkHs[16] = { 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38 };
+        static const int walkHeadXs[12] = {  10,   42,   74,  106,  138,  170,  203,  236,  269,  303,  336,  367 };
+        static const int walkHeadYs[12] = { 506,  507,  508,  507,  506,  506,  507,  508,  508,  509,  507,  507 };
+        static const int walkHeadWs[12] = {  27,   27,   27,   27,   27,   28,   28,   28,   29,   28,   26,   27 };
+        static const int walkHeadHs[12] = {  26,   26,   26,   26,   26,   26,   26,   26,   26,   26,   27,   27 };
 
-        anims[WALK].load("Sprites/Fiolina Germi 1.png", walkXs, walkYs, walkWs, walkHs, 16, 0.08f);
+        static const int walkLegsXs[12] = {  10,   37,   67,   99,  129,  151,  174,  200,  231,  266,  295,  318 };
+        static const int walkLegsYs[12] = { 540,  540,  541,  540,  540,  541,  541,  541,  541,  541,  540,  540 };
+        static const int walkLegsWs[12] = {  22,   25,   27,   25,   17,   18,   21,   26,   30,  24,   18,   20 };
+        static const int walkLegsHs[12] = {  26,   25,   23,   26,   26,   25,   25,   23,   25,   25,   26,   26 };
 
-        static const int standXs[1] = { 10 };
-        static const int standYs[1] = { 420 };
-        static const int standWs[1] = { 26 };
-        static const int standHs[1] = { 38 };
+        anims[WALK].load("Sprites/Fiolina Germi 1.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 12, 0.08f);
+        anims[WALK].loadLegs("Sprites/Fiolina Germi 1.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 12, 0.08f, 0);
+        anims[WALK].setHeadOffset(11);
+        anims[WALK].setHeadOffsetX(6);
 
-        anims[STAND].load("Sprites/Fiolina Germi 1.png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        static const int standHeadXs[] = { 10 };
+        static const int standHeadYs[] = { 663 };
+        static const int standHeadWs[] = { 29 };
+        static const int standHeadHs[] = { 34 };
+
+        anims[STAND].load("Sprites/Fiolina Germi 1.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 1, 0.18f);
+		//there is also another part of the spritesheer named "Fiolina Germi 2.png" that has other animations, we will use it later on.
     }
 
     void flipToLeft() override {
@@ -1084,7 +1102,7 @@ private:
         Player* newPlayer = characters[index];
 
         if (oldPlayer && newPlayer) {
-            newPlayer->setPlayerPosition(oldPlayer->getPlayerX(), oldPlayer->getPlayerY());
+            newPlayer->setPlayerPosition(oldPlayer->getPlayerX(), oldPlayer->getPlayerY() - oldPlayer->getHeight());
             newPlayer->setVelocity(oldPlayer->getVelocityX(), oldPlayer->getVelocityY());
 
             if (oldPlayer->isFacingRight()) {

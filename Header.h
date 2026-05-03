@@ -1,21 +1,22 @@
 #pragma once
+
 #include "Block.h"
 #include "Player.h"
 using namespace sf;
 using namespace std;
 
-
 class Level {
 protected:
+
     string name;
     int    levelNumber;
 
-    //size
+    //siz
     int   biomeWidth;
     int   biomeHeight;
     float blockSize;
 
-    //biomes
+    //bioems
     PlainsBiome* plains;
     AerialBiome* aerial;
     AquaticBiome* aquatic;
@@ -649,11 +650,10 @@ public:
     void spawnMinions();
     void checkMinionBatchKilled();
     void spawnCrateAfterBatch();
+
     // Blended biome
     void activateBlendedBiome();
 };
-
-
 class Vehicle {
 protected:
     char* name;
@@ -751,8 +751,8 @@ public:
         return speed;
     }
 
-    void mountPilot(Player* Player) {
-        pilot = Player;
+    void mountPilot(Player* player) {
+        pilot = player;
         hasPilot = true;
     }
 
