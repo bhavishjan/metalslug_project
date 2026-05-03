@@ -105,17 +105,33 @@ protected:
         window.draw(sprite);
     }
 
-    // Draw the standing/idle animation as a single full-body sprite.
+    // Draw the standing/idle animation. Supports either a single full-body
+    // sprite or a layered torso + legs (same scheme as the walk animation).
     void playStandAnimation(RenderWindow& window, float camX, float camY) {
         Animation& a = anims[ANIM_STAND];
         if (!a.hasFrames()) return;
 
+        // Bottom layer: legs (only if a legs strip was loaded for this anim)
+        if (a.hasLegs()) {
+            IntRect legsR = a.currentLegsRect();
+            sprite.setTexture(a.getLegsTexture());
+            sprite.setTextureRect(legsR);
+            sprite.setOrigin(legsR.width / 2.0f, (float)legsR.height);
+            sprite.setPosition(player_x + width / 2.0f - camX,
+                               player_y + height - camY + a.getLegsOffsetY() * scale_y);
+            sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+            window.draw(sprite);
+        }
+
+        // Top layer: torso, lifted above the legs and nudged horizontally
         IntRect r = a.currentRect();
         sprite.setTexture(a.getTexture());
         sprite.setTextureRect(r);
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
-        sprite.setPosition(player_x + width / 2.0f - camX,
-                           player_y + height - camY);
+        float torsoX = player_x + width / 2.0f - camX
+                       + (facingRight ? a.getTorsoOffsetX() : -a.getTorsoOffsetX()) * scale_x;
+        sprite.setPosition(torsoX,
+                           player_y + height - camY - a.getTorsoOffsetY() * scale_y);
         sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
         window.draw(sprite);
     }
@@ -534,10 +550,18 @@ public:
         // Nudge torso right by 5 source-px so the head sits over the legs
         anims[ANIM_WALK].setTorsoOffsetX(5);
 
-        // Standing animation: 4 frames in band 5 (idle pose with pistol).
-        static const int standXs[4] = { 10, 44, 78, 113 };
-        static const int standWs[4] = { 29, 29, 30,  31 };
-        anims[ANIM_STAND].loadCustom("Sprites/Marco Rossi 1.png", standXs, standWs, 263, 29, 4, 0.18f);
+        // Standing animation = band 5 torsos + band 10 idle legs (4 frames each).
+        static const int standTorsoXs[4] = { 10, 44, 78, 113 };
+        static const int standTorsoWs[4] = { 29, 29, 30,  31 };
+        static const int standLegsXs[4]  = { 10, 36, 62,  88 };
+        static const int standLegsWs[4]  = { 21, 21, 21,  21 };
+        anims[ANIM_STAND].loadCustom("Sprites/Marco Rossi 1.png",
+                                     standTorsoXs, standTorsoWs, 263, 29, 4, 0.18f);
+        anims[ANIM_STAND].loadLegsCustom("Sprites/Marco Rossi 1.png",
+                                         standLegsXs, standLegsWs, 456, 16, 4, 0.18f, 0);
+        // Lift torso to sit on top of the legs (legs are 16 src-px tall).
+        anims[ANIM_STAND].setTorsoOffset(11);
+        anims[ANIM_STAND].setTorsoOffsetX(5);
     }
 
     void flipToLeft() override {
