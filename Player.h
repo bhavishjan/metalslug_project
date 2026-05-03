@@ -125,7 +125,7 @@ public:
     virtual void flipToLeft() = 0;
     virtual void flipToRight() = 0;
 
-    void render(RenderWindow& window, float camX = 0, float camY = 0) {
+    virtual void render(RenderWindow& window, float camX = 0, float camY = 0) {
         IntRect r = anim.currentRect();
         sprite.setTexture(anim.getTexture());
         sprite.setTextureRect(r);
@@ -351,8 +351,6 @@ public:
 
     void removeVehicleBonus() {
     }
-
-    virtual void render(RenderWindow& window, float camX = 0, float camY = 0) = 0;
 
     //GETTERS & SETTERS
     float getFireRate() {
