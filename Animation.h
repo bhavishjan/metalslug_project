@@ -21,7 +21,8 @@ private:
     int legsOffsetY;  // Vertical offset from torso to draw legs
 
 public:
-    Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f), legsFrameCount(0), legsCurrentFrame(0), legsTimer(0.0f), legsFrameTime(0.08f), legsOffsetY(0) {
+    Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f), legsFrameCount(0), 
+        legsCurrentFrame(0), legsTimer(0.0f), legsFrameTime(0.08f), legsOffsetY(0) {
     }
 
     // Build frames in a loop along a horizontal strip
@@ -44,9 +45,16 @@ public:
     // Load secondary legs layer
     void loadLegs(const char* path, int x, int y, int frameW, int frameH, int count, int stride, float seconds, int offsetY) {
         legsTexture.loadFromFile(path);
+
         legsFrameTime = seconds;
-        legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+
+		if (count > MAX_FRAMES)
+			legsFrameCount = MAX_FRAMES;
+		else
+            legsFrameCount = count;
+
         legsOffsetY = offsetY;
+
         for (int i = 0; i < legsFrameCount; i++) {
             legsFrames[i] = IntRect(x + i * stride, y, frameW, frameH);
         }
@@ -74,7 +82,12 @@ public:
         }
     }
 
-    void reset() { currentFrame = 0; timer = 0.0f; legsCurrentFrame = 0; legsTimer = 0.0f; }
+    void reset() { 
+        currentFrame = 0; 
+        timer = 0.0f; 
+        legsCurrentFrame = 0; 
+        legsTimer = 0.0f; 
+    }
 
     bool hasFrames() const {
         return frameCount > 0;
