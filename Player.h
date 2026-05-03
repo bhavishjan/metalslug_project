@@ -503,7 +503,8 @@ public:
 
         anims[ANIM_WALK].loadCustom("Sprites/Marco Rossi 1.png", torsoXs, torsoWs, 477, 29, 12, 0.08f);
         anims[ANIM_WALK].loadLegsCustom("Sprites/Marco Rossi 1.png", legsXs, legsWs, 511, 20, 12, 0.08f, 0);
-        anims[ANIM_WALK].setTorsoOffset(20); // raise torso 20 source-px (40 screen-px) above feet so its waist sits on the legs
+        // Overlap torso onto legs by 6 source-px so the waist seam disappears
+        anims[ANIM_WALK].setTorsoOffset(14);
     }
 
     void flipToLeft() override {
