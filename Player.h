@@ -27,10 +27,11 @@ private:
     float legsTimer;
     float legsFrameTime;
     int legsOffsetY;  // Vertical offset from torso to draw legs
+    int torsoOffsetY; // Vertical offset for torso (raise above ground)
 
 public:
     Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f),
-                   legsFrameCount(0), legsCurrentFrame(0), legsTimer(0.0f), legsFrameTime(0.08f), legsOffsetY(0) {}
+                   legsFrameCount(0), legsCurrentFrame(0), legsTimer(0.0f), legsFrameTime(0.08f), legsOffsetY(0), torsoOffsetY(0) {}
 
     // Build frames in a loop along a horizontal strip on the sheet
     void load(const char* path, int x, int y, int frameW, int frameH, int count, int stride, float seconds) {
@@ -82,6 +83,10 @@ public:
         return legsFrameCount > 0;
     }
 
+    void setTorsoOffset(int offset) {
+        torsoOffsetY = offset;
+    }
+
     const Texture& getTexture() const { 
         return texture; 
     }
@@ -100,6 +105,10 @@ public:
     
     int getLegsOffsetY() const {
         return legsOffsetY;
+    }
+
+    int getTorsoOffsetY() const {
+        return torsoOffsetY;
     }
 };
 
@@ -187,7 +196,7 @@ protected:
         sprite.setTextureRect(r);
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition(player_x + width / 2.0f - camX,
-                           player_y + height - camY);
+                           player_y + height - camY - a.getTorsoOffsetY());
         sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
         window.draw(sprite);
     }
@@ -584,10 +593,11 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // Torso: y=418, 34px tall, 15 frames at x=10, stride 35, width 30
-        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 418, 30, 34, 15, 35, 0.08f);
-        // Legs: y=456, 16px tall, 4 frames at x=10, stride 26, width 21, offset 28
-        anims[ANIM_WALK].loadLegs("Sprites/Marco Rossi 1.png", 10, 456, 21, 16, 4, 26, 0.08f, 28);
+        // Torso strip (band 8 near top-left): 15 frames, width ~30, stride 34, height 34
+        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 383, 30, 34, 15, 34, 0.08f);
+        anims[ANIM_WALK].setTorsoOffset(29);
+        // Legs strip (band 9 just below): 15 frames, width ~30, stride 35, height 29
+        anims[ANIM_WALK].loadLegs("Sprites/Marco Rossi 1.png", 10, 422, 30, 29, 15, 35, 0.08f, 0);
     }
 
     void flipToLeft() override {
