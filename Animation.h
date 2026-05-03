@@ -83,6 +83,59 @@ public:
     // Horizontal nudge for the torso layer to align it with the legs.
     void setTorsoOffsetX(int offsetX) { torsoOffsetX = offsetX; }
 
+    // Bake the torso + legs strips into a single sprite sheet. After calling
+    // this, the animation exposes only one texture / set of frames (each frame
+    // shows the full character already stitched together), so the renderer
+    // only needs to draw one sprite per frame. The current torsoOffsetX/Y are
+    // used to position the torso above the legs in the composite image.
+    void mergeLegsIntoTorso() {
+        if (frameCount == 0 || legsFrameCount == 0) return;
+        if (frameCount != legsFrameCount)            return;
+
+        Image torsoImg = texture.copyToImage();
+        Image legsImg  = legsTexture.copyToImage();
+
+        // Pick a single merged frame size big enough for every frame.
+        int maxFrameW = 0;
+        int torsoH    = frames[0].height;
+        int legsH     = legsFrames[0].height;
+        for (int i = 0; i < frameCount; i++) {
+            int tW = frames[i].width;
+            int lW = legsFrames[i].width;
+            int w  = (tW > lW ? tW : lW) + (torsoOffsetX > 0 ? torsoOffsetX : -torsoOffsetX) * 2;
+            if (w > maxFrameW) maxFrameW = w;
+        }
+        // Feet sit on the bottom row; torso is raised by torsoOffsetY above it.
+        int mergedH = torsoH + torsoOffsetY;
+
+        Image out;
+        out.create(maxFrameW * frameCount, mergedH, Color::Transparent);
+
+        for (int i = 0; i < frameCount; i++) {
+            int frameX   = i * maxFrameW;
+            // Legs centered horizontally, anchored to the bottom row.
+            int legX     = frameX + (maxFrameW - legsFrames[i].width) / 2;
+            int legY     = mergedH - legsFrames[i].height;
+            out.copy(legsImg, legX, legY, legsFrames[i], true);
+
+            // Torso centered horizontally + torsoOffsetX, raised by torsoOffsetY.
+            int torX     = frameX + (maxFrameW - frames[i].width) / 2 + torsoOffsetX;
+            int torY     = mergedH - torsoOffsetY - frames[i].height;
+            out.copy(torsoImg, torX, torY, frames[i], true);
+
+            // Replace the frame rect to point at the merged image.
+            frames[i] = IntRect(frameX, 0, maxFrameW, mergedH);
+        }
+
+        texture.loadFromImage(out);
+
+        // Drop the legs layer and per-frame offsets - they are baked in now.
+        legsFrameCount = 0;
+        legsOffsetY    = 0;
+        torsoOffsetY   = 0;
+        torsoOffsetX   = 0;
+    }
+
     // Advance both layers by dt seconds, wrapping around when a frame elapses.
     void update(float dt) {
         if (frameCount <= 0) return;
