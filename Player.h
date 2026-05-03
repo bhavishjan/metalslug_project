@@ -9,7 +9,6 @@ class Vehicle;
 class Pistol;
 class Knife;
 
-// Animation class is defined in Animation.h
 
 class Player {
 protected:
@@ -549,8 +548,6 @@ public:
         anims[ANIM_WALK].setTorsoOffset(14);
         // Nudge torso right by 5 source-px so the head sits over the legs
         anims[ANIM_WALK].setTorsoOffsetX(5);
-        // Bake torso + legs into one sprite sheet so only one sprite is drawn.
-        anims[ANIM_WALK].mergeLegsIntoTorso();
 
         // Standing animation = band 5 torsos + band 10 idle legs (4 frames each).
         static const int standTorsoXs[4] = { 10, 44, 78, 113 };
@@ -564,7 +561,6 @@ public:
         // Lift torso to sit on top of the legs (legs are 16 src-px tall).
         anims[ANIM_STAND].setTorsoOffset(11);
         anims[ANIM_STAND].setTorsoOffsetX(5);
-        anims[ANIM_STAND].mergeLegsIntoTorso();
     }
 
     void flipToLeft() override {
@@ -656,7 +652,6 @@ public:
         anims[ANIM_WALK].setTorsoOffset(12);
         // Nudge torso right by 4 source-px so the head sits over the legs
         anims[ANIM_WALK].setTorsoOffsetX(4);
-        anims[ANIM_WALK].mergeLegsIntoTorso();
 
         // Standing animation = y=260 torsos + y=300 idle legs (4 frames each).
         static const int standTorsoXs[4] = { 7, 42, 78, 115 };
@@ -670,7 +665,6 @@ public:
         // Lift torso to sit on top of the legs (legs are 40 src-px tall).
         anims[ANIM_STAND].setTorsoOffset(8);
         anims[ANIM_STAND].setTorsoOffsetX(4);
-        anims[ANIM_STAND].mergeLegsIntoTorso();
     }
 
     void flipToLeft() override {
