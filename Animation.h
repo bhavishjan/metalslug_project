@@ -19,10 +19,11 @@ private:
     float legsTimer;
     float legsFrameTime;
     int legsOffsetY;  // Vertical offset from torso to draw legs
+    int torsoOffsetY; // Vertical offset to raise the torso layer above the feet
 
 public:
-    Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f), legsFrameCount(0), 
-        legsCurrentFrame(0), legsTimer(0.0f), legsFrameTime(0.08f), legsOffsetY(0) {
+    Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f), legsFrameCount(0),
+        legsCurrentFrame(0), legsTimer(0.0f), legsFrameTime(0.08f), legsOffsetY(0), torsoOffsetY(0) {
     }
 
     // Build frames in a loop along a horizontal strip
@@ -39,6 +40,16 @@ public:
 
         for (int i = 0; i < frameCount; i++) {
             frames[i] = IntRect(x + i * stride, y, frameW, frameH);
+        }
+    }
+
+    // Build frames using explicit per-frame x positions and widths (y/h shared)
+    void loadCustom(const char* path, const int* xs, const int* widths, int y, int frameH, int count, float seconds) {
+        texture.loadFromFile(path);
+        frameTime = seconds;
+        frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        for (int i = 0; i < frameCount; i++) {
+            frames[i] = IntRect(xs[i], y, widths[i], frameH);
         }
     }
 
@@ -59,6 +70,19 @@ public:
             legsFrames[i] = IntRect(x + i * stride, y, frameW, frameH);
         }
     }
+
+    // Load legs layer with explicit per-frame x positions and widths
+    void loadLegsCustom(const char* path, const int* xs, const int* widths, int y, int frameH, int count, float seconds, int offsetY) {
+        legsTexture.loadFromFile(path);
+        legsFrameTime = seconds;
+        legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        legsOffsetY = offsetY;
+        for (int i = 0; i < legsFrameCount; i++) {
+            legsFrames[i] = IntRect(xs[i], y, widths[i], frameH);
+        }
+    }
+
+    void setTorsoOffset(int offset) { torsoOffsetY = offset; }
 
     void update(float dt) {
         if (frameCount <= 0)
@@ -115,5 +139,9 @@ public:
 
     int getLegsOffsetY() const {
         return legsOffsetY;
+    }
+
+    int getTorsoOffsetY() const {
+        return torsoOffsetY;
     }
 };

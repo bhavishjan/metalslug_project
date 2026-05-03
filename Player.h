@@ -1,6 +1,7 @@
 #pragma once
 #include "Header.h"
 #include "Block.h"
+#include "Animation.h"
 #include <SFML/Graphics.hpp>
 
 class Weapon;
@@ -8,130 +9,7 @@ class Vehicle;
 class Pistol;
 class Knife;
 
-// One sprite-sheet animation: texture + a uniform horizontal strip of frames
-class Animation {
-private:
-    static const int MAX_FRAMES = 32;
-    Texture texture;
-    IntRect frames[MAX_FRAMES];
-    int frameCount;
-    int currentFrame;
-    float timer;
-    float frameTime;
-    
-    // Secondary layer for legs (optional)
-    Texture legsTexture;
-    IntRect legsFrames[MAX_FRAMES];
-    int legsFrameCount;
-    int legsCurrentFrame;
-    float legsTimer;
-    float legsFrameTime;
-    int legsOffsetY;  // Vertical offset from torso to draw legs
-    int torsoOffsetY; // Vertical offset for torso (raise above ground)
-
-public:
-    Animation() : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f),
-                   legsFrameCount(0), legsCurrentFrame(0), legsTimer(0.0f), legsFrameTime(0.08f), legsOffsetY(0), torsoOffsetY(0) {}
-
-    // Build frames in a loop along a horizontal strip on the sheet
-    void load(const char* path, int x, int y, int frameW, int frameH, int count, int stride, float seconds) {
-        texture.loadFromFile(path);
-        frameTime = seconds;
-        frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
-        for (int i = 0; i < frameCount; i++) {
-            frames[i] = IntRect(x + i * stride, y, frameW, frameH);
-        }
-    }
-
-    // Build frames using explicit per-frame x positions and widths (y/h shared)
-    void loadCustom(const char* path, const int* xs, const int* widths, int y, int frameH, int count, float seconds) {
-        texture.loadFromFile(path);
-        frameTime = seconds;
-        frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
-        for (int i = 0; i < frameCount; i++) {
-            frames[i] = IntRect(xs[i], y, widths[i], frameH);
-        }
-    }
-    
-    // Load secondary legs layer
-    void loadLegs(const char* path, int x, int y, int frameW, int frameH, int count, int stride, float seconds, int offsetY) {
-        legsTexture.loadFromFile(path);
-        legsFrameTime = seconds;
-        legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
-        legsOffsetY = offsetY;
-        for (int i = 0; i < legsFrameCount; i++) {
-            legsFrames[i] = IntRect(x + i * stride, y, frameW, frameH);
-        }
-    }
-
-    // Load legs layer with explicit per-frame x positions and widths
-    void loadLegsCustom(const char* path, const int* xs, const int* widths, int y, int frameH, int count, float seconds, int offsetY) {
-        legsTexture.loadFromFile(path);
-        legsFrameTime = seconds;
-        legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
-        legsOffsetY = offsetY;
-        for (int i = 0; i < legsFrameCount; i++) {
-            legsFrames[i] = IntRect(xs[i], y, widths[i], frameH);
-        }
-    }
-
-    void update(float dt) {
-        if (frameCount <= 0) 
-            return;
-        timer += dt;
-        while (timer >= frameTime) {
-            timer -= frameTime;
-            currentFrame = (currentFrame + 1) % frameCount;
-        }
-        
-        // Update legs layer if present
-        if (legsFrameCount > 0) {
-            legsTimer += dt;
-            while (legsTimer >= legsFrameTime) {
-                legsTimer -= legsFrameTime;
-                legsCurrentFrame = (legsCurrentFrame + 1) % legsFrameCount;
-            }
-        }
-    }
-
-    void reset() { currentFrame = 0; timer = 0.0f; legsCurrentFrame = 0; legsTimer = 0.0f; }
-
-    bool hasFrames() const { 
-        return frameCount > 0; 
-    }
-    
-    bool hasLegs() const {
-        return legsFrameCount > 0;
-    }
-
-    void setTorsoOffset(int offset) {
-        torsoOffsetY = offset;
-    }
-
-    const Texture& getTexture() const { 
-        return texture; 
-    }
-    
-    const Texture& getLegsTexture() const {
-        return legsTexture;
-    }
-
-    IntRect currentRect() const {
-        return frameCount > 0 ? frames[currentFrame] : IntRect();
-    }
-    
-    IntRect currentLegsRect() const {
-        return legsFrameCount > 0 ? legsFrames[legsCurrentFrame] : IntRect();
-    }
-    
-    int getLegsOffsetY() const {
-        return legsOffsetY;
-    }
-
-    int getTorsoOffsetY() const {
-        return torsoOffsetY;
-    }
-};
+// Animation class is defined in Animation.h
 
 class Player {
 protected:
@@ -612,18 +490,20 @@ public:
         scale_x = 2.0f;
         scale_y = 2.0f;
         width = 60.0f;
-        // Torso (20px) + legs (20px) = 40 source * 2 scale = 80 screen px
-        height = 80.0f;
+        // Torso (29px) + legs (20px) = 49 source * 2 scale = 98 screen px
+        height = 98.0f;
 
-        // MS1 torso strip (band 12, y=511, h=20) + MS2 legs strip (band 13, y=536, h=20)
-        // Each frame has variable width; provide explicit (x, width) per frame.
-        static const int xs[12]      = { 10, 36, 69, 105, 129, 149, 170, 196, 227, 263, 288, 308 };
-        static const int torsoWs[12] = { 21, 28, 31,  19,  15,  16,  21,  26,  31,  20,  15,  16 };
-        static const int legsWs[12]  = { 21, 28, 31,  19,  15,  16,  21,  26,  31,  20,  15,  18 };
+        // Torso strip = band 11 (y=477, h=29) – heads + arms with gun, no legs.
+        // Legs strip  = band 12 / MS1 (y=511, h=20) – running legs only.
+        // Both strips have 12 frames at variable per-frame widths.
+        static const int torsoXs[12] = { 10, 47, 82, 115, 147, 181, 216, 254, 291, 328, 364, 400 };
+        static const int torsoWs[12] = { 32, 30, 28,  27,  29,  30,  32,  32,  32,  31,  31,  31 };
+        static const int legsXs[12]  = { 10, 36, 69, 105, 129, 149, 170, 196, 227, 263, 288, 308 };
+        static const int legsWs[12]  = { 21, 28, 31,  19,  15,  16,  21,  26,  31,  20,  15,  16 };
 
-        anims[ANIM_WALK].loadCustom("Sprites/Marco Rossi 1.png", xs, torsoWs, 511, 20, 12, 0.08f);
-        anims[ANIM_WALK].loadLegsCustom("Sprites/Marco Rossi 1.png", xs, legsWs, 536, 20, 12, 0.08f, 0);
-        anims[ANIM_WALK].setTorsoOffset(20); // raise torso 20 source-px above feet so it sits on the legs
+        anims[ANIM_WALK].loadCustom("Sprites/Marco Rossi 1.png", torsoXs, torsoWs, 477, 29, 12, 0.08f);
+        anims[ANIM_WALK].loadLegsCustom("Sprites/Marco Rossi 1.png", legsXs, legsWs, 511, 20, 12, 0.08f, 0);
+        anims[ANIM_WALK].setTorsoOffset(20); // raise torso 20 source-px (40 screen-px) above feet so its waist sits on the legs
     }
 
     void flipToLeft() override {
