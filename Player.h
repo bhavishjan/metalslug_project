@@ -185,18 +185,18 @@ protected:
             sprite.setTextureRect(legsR);
             sprite.setOrigin(legsR.width / 2.0f, (float)legsR.height);
             sprite.setPosition(player_x + width / 2.0f - camX,
-                               player_y + height - camY + a.getLegsOffsetY());
+                               player_y + height - camY + a.getLegsOffsetY() * scale_y);
             sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
             window.draw(sprite);
         }
         
-        // Draw torso on top
+        // Draw torso on top (raised by torsoOffset above legs baseline)
         IntRect r = a.currentRect();
         sprite.setTexture(a.getTexture());
         sprite.setTextureRect(r);
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition(player_x + width / 2.0f - camX,
-                           player_y + height - camY - a.getTorsoOffsetY());
+                           player_y + height - camY - a.getTorsoOffsetY() * scale_y);
         sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
         window.draw(sprite);
     }
@@ -593,11 +593,8 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // Torso strip (band 8 near top-left): 15 frames, width ~30, stride 34, height 34
+        // Top-left walk-with-pistol strip (band 8): full-body, 15 frames, ~30x34, stride 34
         anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 383, 30, 34, 15, 34, 0.08f);
-        anims[ANIM_WALK].setTorsoOffset(29);
-        // Legs strip (band 9 just below): 15 frames, width ~30, stride 35, height 29
-        anims[ANIM_WALK].loadLegs("Sprites/Marco Rossi 1.png", 10, 422, 30, 29, 15, 35, 0.08f, 0);
     }
 
     void flipToLeft() override {
