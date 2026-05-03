@@ -352,6 +352,8 @@ public:
     void removeVehicleBonus() {
     }
 
+    virtual void render(RenderWindow& window, float camX = 0, float camY = 0) = 0;
+
     //GETTERS & SETTERS
     float getFireRate() {
         return 0.2f;
