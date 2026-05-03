@@ -44,6 +44,18 @@ public:
             frames[i] = IntRect(x + i * stride, y, frameW, frameH);
     }
 
+    void loadCustom(const char* path, const int* xs, const int* widths,
+                    int y, int frameH, int count, float seconds) {
+        texture.loadFromFile(path);
+
+        frameTime = seconds;
+
+        frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+
+        for (int i = 0; i < frameCount; i++)
+            frames[i] = IntRect(xs[i], y, widths[i], frameH);
+    }
+
     void loadLegs(const char* path, int x, int y, int frameW, int frameH,
                   int count, int stride, float seconds, int offsetY) {
         legsTexture.loadFromFile(path);
