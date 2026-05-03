@@ -42,6 +42,16 @@ public:
             frames[i] = IntRect(x + i * stride, y, frameW, frameH);
         }
     }
+
+    // Build frames using explicit per-frame x positions and widths (y/h shared)
+    void loadCustom(const char* path, const int* xs, const int* widths, int y, int frameH, int count, float seconds) {
+        texture.loadFromFile(path);
+        frameTime = seconds;
+        frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        for (int i = 0; i < frameCount; i++) {
+            frames[i] = IntRect(xs[i], y, widths[i], frameH);
+        }
+    }
     
     // Load secondary legs layer
     void loadLegs(const char* path, int x, int y, int frameW, int frameH, int count, int stride, float seconds, int offsetY) {
@@ -51,6 +61,17 @@ public:
         legsOffsetY = offsetY;
         for (int i = 0; i < legsFrameCount; i++) {
             legsFrames[i] = IntRect(x + i * stride, y, frameW, frameH);
+        }
+    }
+
+    // Load legs layer with explicit per-frame x positions and widths
+    void loadLegsCustom(const char* path, const int* xs, const int* widths, int y, int frameH, int count, float seconds, int offsetY) {
+        legsTexture.loadFromFile(path);
+        legsFrameTime = seconds;
+        legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        legsOffsetY = offsetY;
+        for (int i = 0; i < legsFrameCount; i++) {
+            legsFrames[i] = IntRect(xs[i], y, widths[i], frameH);
         }
     }
 
@@ -591,11 +612,18 @@ public:
         scale_x = 2.0f;
         scale_y = 2.0f;
         width = 60.0f;
-        // Sprite is 29 source px tall * 2 scale = 58 screen px
-        height = 58.0f;
+        // Torso (20px) + legs (20px) = 40 source * 2 scale = 80 screen px
+        height = 80.0f;
 
-        // Top-left walk-with-pistol strip (band 9): full-body, 15 frames, 30x29, stride 35
-        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 422, 30, 29, 15, 35, 0.08f);
+        // MS1 torso strip (band 12, y=511, h=20) + MS2 legs strip (band 13, y=536, h=20)
+        // Each frame has variable width; provide explicit (x, width) per frame.
+        static const int xs[12]      = { 10, 36, 69, 105, 129, 149, 170, 196, 227, 263, 288, 308 };
+        static const int torsoWs[12] = { 21, 28, 31,  19,  15,  16,  21,  26,  31,  20,  15,  16 };
+        static const int legsWs[12]  = { 21, 28, 31,  19,  15,  16,  21,  26,  31,  20,  15,  18 };
+
+        anims[ANIM_WALK].loadCustom("Sprites/Marco Rossi 1.png", xs, torsoWs, 511, 20, 12, 0.08f);
+        anims[ANIM_WALK].loadLegsCustom("Sprites/Marco Rossi 1.png", xs, legsWs, 536, 20, 12, 0.08f, 0);
+        anims[ANIM_WALK].setTorsoOffset(20); // raise torso 20 source-px above feet so it sits on the legs
     }
 
     void flipToLeft() override {
