@@ -591,14 +591,11 @@ public:
         scale_x = 2.0f;
         scale_y = 2.0f;
         width = 60.0f;
-        // Visible character: torso (34px) + legs (29px) = 63 source px * 2 scale = 126
-        height = 126.0f;
+        // Sprite is 29 source px tall * 2 scale = 58 screen px
+        height = 58.0f;
 
-        // Torso strip (band 8): 15 frames, 30x34, stride 34, raised 29 source-px above feet
-        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 383, 30, 34, 15, 34, 0.08f);
-        anims[ANIM_WALK].setTorsoOffset(29);
-        // Legs strip (band 9): 15 frames, 30x29, stride 35, drawn at foot position
-        anims[ANIM_WALK].loadLegs("Sprites/Marco Rossi 1.png", 10, 422, 30, 29, 15, 35, 0.08f, 0);
+        // Top-left walk-with-pistol strip (band 9): full-body, 15 frames, 30x29, stride 35
+        anims[ANIM_WALK].load("Sprites/Marco Rossi 1.png", 10, 422, 30, 29, 15, 35, 0.08f);
     }
 
     void flipToLeft() override {
