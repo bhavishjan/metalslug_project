@@ -13,8 +13,8 @@ class Knife;
 
 class Player {
 protected:
-    // Animation slots (add more later: idle, jump, shoot, ...)
-    enum { ANIM_WALK = 0, ANIM_IDLE = 1, ANIM_JUMP = 2, ANIM_COUNT = 8 };
+    // Animation slots (add more later: jump, shoot, ...)
+    enum { ANIM_WALK = 0, ANIM_STAND = 1, ANIM_JUMP = 2, ANIM_COUNT = 8 };
     const char* name;
     float player_x;
     float player_y;
@@ -61,23 +61,26 @@ protected:
     Sprite sprite;
     int currentAnim;
 
-    // Pick the right anim for current state, advance its timer
+    // Choose between walk and stand animations based on horizontal motion,
+    // then advance the chosen animation's timer.
     void updateAnimations(float dt) {
         bool walking = velocityX > 0.1f || velocityX < -0.1f;
-        currentAnim = walking ? ANIM_WALK : ANIM_WALK;
-        if (!walking) {
-            anims[ANIM_WALK].reset();
-            return;
+        int desired = walking ? ANIM_WALK : ANIM_STAND;
+        if (desired != currentAnim) {
+            anims[currentAnim].reset();
+            currentAnim = desired;
         }
         anims[currentAnim].update(dt);
     }
 
-    // Draw the current animation at player's bottom-center, offset by camera
-    void renderCurrent(RenderWindow& window, float camX, float camY) {
-        Animation& a = anims[currentAnim];
+    // Draw the walking animation: legs (bottom layer) + torso (top layer).
+    // The torso is raised by a.getTorsoOffsetY() and nudged horizontally by
+    // a.getTorsoOffsetX() so it lines up cleanly above the legs.
+    void playWalkAnimation(RenderWindow& window, float camX, float camY) {
+        Animation& a = anims[ANIM_WALK];
         if (!a.hasFrames()) return;
-        
-        // Draw legs first if they exist
+
+        // Bottom layer: legs (only if a legs strip was loaded for this anim)
         if (a.hasLegs()) {
             IntRect legsR = a.currentLegsRect();
             sprite.setTexture(a.getLegsTexture());
@@ -88,16 +91,39 @@ protected:
             sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
             window.draw(sprite);
         }
-        
-        // Draw torso on top (raised by torsoOffset above legs baseline)
+
+        // Top layer: torso, lifted above the legs and nudged horizontally
+        IntRect r = a.currentRect();
+        sprite.setTexture(a.getTexture());
+        sprite.setTextureRect(r);
+        sprite.setOrigin(r.width / 2.0f, (float)r.height);
+        float torsoX = player_x + width / 2.0f - camX
+                       + (facingRight ? a.getTorsoOffsetX() : -a.getTorsoOffsetX()) * scale_x;
+        sprite.setPosition(torsoX,
+                           player_y + height - camY - a.getTorsoOffsetY() * scale_y);
+        sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+        window.draw(sprite);
+    }
+
+    // Draw the standing/idle animation as a single full-body sprite.
+    void playStandAnimation(RenderWindow& window, float camX, float camY) {
+        Animation& a = anims[ANIM_STAND];
+        if (!a.hasFrames()) return;
+
         IntRect r = a.currentRect();
         sprite.setTexture(a.getTexture());
         sprite.setTextureRect(r);
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition(player_x + width / 2.0f - camX,
-                           player_y + height - camY - a.getTorsoOffsetY() * scale_y);
+                           player_y + height - camY);
         sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
         window.draw(sprite);
+    }
+
+    // Dispatch to the right animation based on what the player is doing.
+    void renderCurrent(RenderWindow& window, float camX, float camY) {
+        if (currentAnim == ANIM_WALK)  playWalkAnimation(window, camX, camY);
+        else                           playStandAnimation(window, camX, camY);
     }
 public:
 
@@ -144,7 +170,7 @@ public:
         weaponSlots[1] = nullptr;
         activeWeaponIndex = 0;
         moveAcceleration = 0.6f;
-        currentAnim = ANIM_WALK;
+        currentAnim = ANIM_STAND;
     }
 
     ~Player() {
@@ -505,6 +531,13 @@ public:
         anims[ANIM_WALK].loadLegsCustom("Sprites/Marco Rossi 1.png", legsXs, legsWs, 511, 20, 12, 0.08f, 0);
         // Overlap torso onto legs by 6 source-px so the waist seam disappears
         anims[ANIM_WALK].setTorsoOffset(14);
+        // Nudge torso right by 5 source-px so the head sits over the legs
+        anims[ANIM_WALK].setTorsoOffsetX(5);
+
+        // Standing animation: 4 frames in band 5 (idle pose with pistol).
+        static const int standXs[4] = { 10, 44, 78, 113 };
+        static const int standWs[4] = { 29, 29, 30,  31 };
+        anims[ANIM_STAND].loadCustom("Sprites/Marco Rossi 1.png", standXs, standWs, 263, 29, 4, 0.18f);
     }
 
     void flipToLeft() override {
