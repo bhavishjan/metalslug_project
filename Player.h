@@ -640,12 +640,37 @@ public:
         scale_x = 2.0f;
         scale_y = 2.0f;
         width = 60.0f;
-        height = 82.0f;
+        // Torso (36px) + legs (39px) = 75 source * 2 scale = 150 screen px
+        height = 150.0f;
 
-        // Torso: y=385, 36px tall, 8 frames at x=7, stride 34, width 29
-        anims[ANIM_WALK].load("Sprites/Tarma Roving.png", 7, 385, 29, 36, 8, 34, 0.08f);
-        // Legs: y=481, 29px tall, 15 frames at x=8, stride 38, width 30, offset 32
-        anims[ANIM_WALK].loadLegs("Sprites/Tarma Roving.png", 8, 481, 30, 29, 15, 38, 0.08f, 32);
+        // Torso strip = y=385, 36px tall, 8 frames with variable widths.
+        // Legs strip  = y=421, 39px tall, 8 frames with variable widths.
+        static const int walkTorsoXs[8] = { 7, 42, 78, 112, 146, 179, 214, 247 };
+        static const int walkTorsoWs[8] = { 29, 28, 26,  25,  25,  25,  26,  28 };
+        static const int walkLegsXs[8]  = { 7, 44, 81, 120, 160, 194, 231, 269 };
+        static const int walkLegsWs[8]  = { 30, 30, 30,  30,  29,  32,  32,  31 };
+
+        anims[ANIM_WALK].loadCustom("Sprites/Tarma Roving.png", walkTorsoXs, walkTorsoWs, 385, 36, 8, 0.08f);
+        anims[ANIM_WALK].loadLegsCustom("Sprites/Tarma Roving.png", walkLegsXs, walkLegsWs, 421, 39, 8, 0.08f, 0);
+        // Overlap torso onto legs by 8 source-px so the waist seam disappears
+        anims[ANIM_WALK].setTorsoOffset(12);
+        // Nudge torso right by 4 source-px so the head sits over the legs
+        anims[ANIM_WALK].setTorsoOffsetX(4);
+        anims[ANIM_WALK].mergeLegsIntoTorso();
+
+        // Standing animation = y=260 torsos + y=300 idle legs (4 frames each).
+        static const int standTorsoXs[4] = { 7, 42, 78, 115 };
+        static const int standTorsoWs[4] = { 29, 29, 30,  31 };
+        static const int standLegsXs[4]  = { 7, 45, 82, 120 };
+        static const int standLegsWs[4]  = { 29, 29, 29,  32 };
+        anims[ANIM_STAND].loadCustom("Sprites/Tarma Roving.png",
+                                     standTorsoXs, standTorsoWs, 260, 40, 4, 0.18f);
+        anims[ANIM_STAND].loadLegsCustom("Sprites/Tarma Roving.png",
+                                         standLegsXs, standLegsWs, 300, 40, 4, 0.18f, 0);
+        // Lift torso to sit on top of the legs (legs are 40 src-px tall).
+        anims[ANIM_STAND].setTorsoOffset(8);
+        anims[ANIM_STAND].setTorsoOffsetX(4);
+        anims[ANIM_STAND].mergeLegsIntoTorso();
     }
 
     void flipToLeft() override {
