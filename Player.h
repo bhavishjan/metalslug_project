@@ -326,7 +326,7 @@ public:
     }
 
     virtual void updateAnimation(float dt) {
-        updateAnimations(dt);
+        anim.update(dt);
     }
 
     void update() {
@@ -345,8 +345,6 @@ public:
             }
         }
     }
-
-    virtual void render(RenderWindow& window, float camX = 0, float camY = 0) = 0;
 
     void applyVehicleBonus() {
     }
