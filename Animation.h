@@ -19,14 +19,14 @@ private:
     float frameTime;
     float legsFrameTime;
     int legsOffsetY;
-    int torsoOffsetY;
-    int torsoOffsetX;
+    int headOffsetY;
+    int headOffsetX;
 
 public:
     Animation()
         : frameCount(0), legsFrameCount(0), currentFrame(0), legsCurrentFrame(0),
           timer(0.0f), legsTimer(0.0f), frameTime(0.08f), legsFrameTime(0.08f),
-          legsOffsetY(0), torsoOffsetY(0), torsoOffsetX(0) {}
+          legsOffsetY(0), headOffsetY(0), headOffsetX(0) {}
 
     void load(const char* path, const int* xs, const int* ys,
               const int* widths, const int* heights, int count, float seconds) {
@@ -47,8 +47,8 @@ public:
             legsFrames[i] = IntRect(xs[i], ys[i], widths[i], heights[i]);
     }
 
-    void setTorsoOffset(int offsetY) { torsoOffsetY = offsetY; }
-    void setTorsoOffsetX(int offsetX) { torsoOffsetX = offsetX; }
+    void setHeadOffset(int offsetY) { headOffsetY = offsetY; }
+    void setHeadOffsetX(int offsetX) { headOffsetX = offsetX; }
 
     void update(float dt) {
         if (frameCount <= 0) 
@@ -101,6 +101,6 @@ public:
 
     bool hasLegs() const { return legsFrameCount > 0; }
     int getLegsOffsetY() const { return legsOffsetY; }
-    int getTorsoOffsetY() const { return torsoOffsetY; }
-    int getTorsoOffsetX() const { return torsoOffsetX; }
+    int getHeadOffsetY() const { return headOffsetY; }
+    int getHeadOffsetX() const { return headOffsetX; }
 };

@@ -140,8 +140,8 @@ public:
         sprite.setTexture(anim.getTexture());
         sprite.setTextureRect(r);
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
-        float torsoX = player_x + width / 2.0f - camX + (facingRight ? anim.getTorsoOffsetX() : -anim.getTorsoOffsetX()) * scale_x;
-        sprite.setPosition(torsoX, player_y + height - camY - anim.getTorsoOffsetY() * scale_y);
+        float headX = player_x + width / 2.0f - camX + (facingRight ? anim.getHeadOffsetX() : -anim.getHeadOffsetX()) * scale_x;
+        sprite.setPosition(headX, player_y + height - camY - anim.getHeadOffsetY() * scale_y);
         sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
         window.draw(sprite);
     }
@@ -467,20 +467,20 @@ public:
         width = 60.0f;
         height = 98.0f;
 
-        static const int torsoXs[12] = { 10, 47, 82, 115, 147, 181, 216, 254, 291, 328, 364, 400 };
-        static const int torsoYs[12] = { 477, 477, 477, 477, 477, 477, 477, 477, 477, 477, 477, 477 };
-        static const int torsoWs[12] = { 32, 30, 28, 27, 29, 30, 32, 32, 32, 31, 31, 31 };
-        static const int torsoHs[12] = { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29 };
+        static const int headXs[12] = { 10, 47, 82, 115, 147, 181, 216, 254, 291, 328, 364, 400 };
+        static const int headYs[12] = { 477, 477, 477, 477, 477, 477, 477, 477, 477, 477, 477, 477 };
+        static const int headWs[12] = { 32, 30, 28, 27, 29, 30, 32, 32, 32, 31, 31, 31 };
+        static const int headHs[12] = { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29 };
 
         static const int legsXs[12] = { 10, 36, 69, 105, 129, 149, 170, 196, 227, 263, 288, 308 };
         static const int legsYs[12] = { 511, 511, 511, 511, 511, 511, 511, 511, 511, 511, 511, 511 };
         static const int legsWs[12] = { 21, 28, 31, 19, 15, 16, 21, 26, 31, 20, 15, 16 };
         static const int legsHs[12] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 };
 
-        anim.load("Sprites/Marco Rossi 1.png", torsoXs, torsoYs, torsoWs, torsoHs, 12, 0.08f);
+        anim.load("Sprites/Marco Rossi 1.png", headXs, headYs, headWs, headHs, 12, 0.08f);
         anim.loadLegs("Sprites/Marco Rossi 1.png", legsXs, legsYs, legsWs, legsHs, 12, 0.08f, 0);
-        anim.setTorsoOffset(14);
-        anim.setTorsoOffsetX(5);
+        anim.setHeadOffset(14);
+        anim.setHeadOffsetX(5);
     }
 
     void flipToLeft() override {
