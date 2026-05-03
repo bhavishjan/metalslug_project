@@ -12,7 +12,6 @@ class Knife;
 
 class Player {
 protected:
-    const int WALK = 0, STAND = 1, JUMP = 2;
     const char* name;
     float player_x;
     float player_y;
@@ -55,9 +54,8 @@ protected:
     float scale_x;
     float scale_y;
     float moveAcceleration;
-    Animation anims[8];
+    Animation anim;
     Sprite sprite;
-    int currentAnim;
 public:
 
     Player() {
@@ -103,7 +101,6 @@ public:
         weaponSlots[1] = nullptr;
         activeWeaponIndex = 0;
         moveAcceleration = 0.6f;
-        currentAnim = STAND;
     }
 
     ~Player() {
@@ -128,107 +125,14 @@ public:
     virtual void flipToLeft() = 0;
     virtual void flipToRight() = 0;
 
-    void loadsprite(const char* path, int x, int y, int frameW, int frameH,
-        int count, int stride, float seconds) {
-        texture.loadFromFile(path);
-
-        frameTime = seconds;
-
-        if (count > MAX_FRAMES)
-            frameCount = MAX_FRAMES;
-        else
-            frameCount = count;
-
-        for (int i = 0; i < frameCount; i++)
-            frames[i] = IntRect(x + i * stride, y, frameW, frameH);
-    }
-
-    void update(float dt) {
-        if (frameCount <= 0) return;
-
-        timer += dt;
-        while (timer >= frameTime) {
-            timer -= frameTime;
-            currentFrame = (currentFrame + 1) % frameCount;
-        }
-
-        if (legsFrameCount > 0) {
-            legsTimer += dt;
-            while (legsTimer >= legsFrameTime) {
-                legsTimer -= legsFrameTime;
-                legsCurrentFrame = (legsCurrentFrame + 1) % legsFrameCount;
-            }
-        }
-    }
-
-    void updateAnimations(float dt) {
-        bool walking = velocityX > 0.1f || velocityX < -0.1f;
-        int desired = walking ? WALK : STAND;
-        if (desired != currentAnim) {
-            anims[currentAnim].reset();
-            currentAnim = desired;
-        }
-        anims[currentAnim].update(dt);
-    }
-
-    void WalkAnimation(RenderWindow& window, float camX, float camY) {
-        Animation& a = anims[WALK];
-        if (!a.hasFrames()) return;
-
-        if (a.hasLegs()) {
-            IntRect legsR = a.currentLegsRect();
-            sprite.setTexture(a.getLegsTexture());
-            sprite.setTextureRect(legsR);
-            sprite.setOrigin(legsR.width / 2.0f, (float)legsR.height);
-            sprite.setPosition(player_x + width / 2.0f - camX,
-                player_y + height - camY + a.getLegsOffsetY() * scale_y);
-            sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
-            window.draw(sprite);
-        }
-
-        IntRect r = a.currentRect();
-        sprite.setTexture(a.getTexture());
+    void render(RenderWindow& window, float camX = 0, float camY = 0) {
+        IntRect r = anim.currentRect();
+        sprite.setTexture(anim.getTexture());
         sprite.setTextureRect(r);
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
-        float torsoX = player_x + width / 2.0f - camX
-            + (facingRight ? a.getTorsoOffsetX() : -a.getTorsoOffsetX()) * scale_x;
-        sprite.setPosition(torsoX,
-            player_y + height - camY - a.getTorsoOffsetY() * scale_y);
+        sprite.setPosition(player_x + width / 2.0f - camX, player_y + height - camY);
         sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
         window.draw(sprite);
-    }
-
-    void StandAnimation(RenderWindow& window, float camX, float camY) {
-        Animation& a = anims[STAND];
-        if (!a.hasFrames()) return;
-
-        if (a.hasLegs()) {
-            IntRect legsR = a.currentLegsRect();
-            sprite.setTexture(a.getLegsTexture());
-            sprite.setTextureRect(legsR);
-            sprite.setOrigin(legsR.width / 2.0f, (float)legsR.height);
-            sprite.setPosition(player_x + width / 2.0f - camX,
-                player_y + height - camY + a.getLegsOffsetY() * scale_y);
-            sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
-            window.draw(sprite);
-        }
-
-        IntRect r = a.currentRect();
-        sprite.setTexture(a.getTexture());
-        sprite.setTextureRect(r);
-        sprite.setOrigin(r.width / 2.0f, (float)r.height);
-        float torsoX = player_x + width / 2.0f - camX
-            + (facingRight ? a.getTorsoOffsetX() : -a.getTorsoOffsetX()) * scale_x;
-        sprite.setPosition(torsoX,
-            player_y + height - camY - a.getTorsoOffsetY() * scale_y);
-        sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
-        window.draw(sprite);
-    }
-
-    // Dispatch to the right animation based on what the player is doing.
-    void renderCurrent(RenderWindow& window, float camX, float camY) {
-        if (currentAnim == WALK)  WalkAnimation(window, camX, camY);
-        else                           StandAnimation(window, camX, camY);
     }
 
     bool isFacingRight() const {
@@ -552,36 +456,15 @@ public:
         scale_x = 2.0f;
         scale_y = 2.0f;
         width = 60.0f;
-        // Torso (29px) + legs (20px) = 49 source * 2 scale = 98 screen px
         height = 98.0f;
 
-        // Torso strip = band 11 (y=477, h=29) – heads + arms with gun, no legs.
-        // Legs strip  = band 12 / MS1 (y=511, h=20) – running legs only.
-        // Both strips have 12 frames at variable per-frame widths.
-        static const int torsoXs[12] = { 10, 47, 82, 115, 147, 181, 216, 254, 291, 328, 364, 400 };
-        static const int torsoWs[12] = { 32, 30, 28,  27,  29,  30,  32,  32,  32,  31,  31,  31 };
-        static const int legsXs[12]  = { 10, 36, 69, 105, 129, 149, 170, 196, 227, 263, 288, 308 };
-        static const int legsWs[12]  = { 21, 28, 31,  19,  15,  16,  21,  26,  31,  20,  15,  16 };
+        // Walking frames: x, y, width, height for each frame
+        static const int xs[12] = { 10, 47, 82, 115, 147, 181, 216, 254, 291, 328, 364, 400 };
+        static const int ys[12] = { 477, 477, 477, 477, 477, 477, 477, 477, 477, 477, 477, 477 };
+        static const int widths[12] = { 32, 30, 28, 27, 29, 30, 32, 32, 32, 31, 31, 31 };
+        static const int heights[12] = { 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 };
 
-        anims[WALK].loadCustom("Sprites/Marco Rossi 1.png", torsoXs, torsoWs, 477, 29, 12, 0.08f);
-        anims[WALK].loadLegsCustom("Sprites/Marco Rossi 1.png", legsXs, legsWs, 511, 20, 12, 0.08f, 0);
-        // Overlap torso onto legs by 6 source-px so the waist seam disappears
-        anims[WALK].setTorsoOffset(14);
-        // Nudge torso right by 5 source-px so the head sits over the legs
-        anims[WALK].setTorsoOffsetX(5);
-
-        // Standing animation = band 5 torsos + band 10 idle legs (4 frames each).
-        static const int standTorsoXs[4] = { 10, 44, 78, 113 };
-        static const int standTorsoWs[4] = { 29, 29, 30,  31 };
-        static const int standLegsXs[4]  = { 10, 36, 62,  88 };
-        static const int standLegsWs[4]  = { 21, 21, 21,  21 };
-        anims[STAND].loadCustom("Sprites/Marco Rossi 1.png",
-                                     standTorsoXs, standTorsoWs, 263, 29, 4, 0.18f);
-        anims[STAND].loadLegsCustom("Sprites/Marco Rossi 1.png",
-                                         standLegsXs, standLegsWs, 456, 16, 4, 0.18f, 0);
-        // Lift torso to sit on top of the legs (legs are 16 src-px tall).
-        anims[STAND].setTorsoOffset(11);
-        anims[STAND].setTorsoOffsetX(5);
+        anim.load("Sprites/Marco Rossi 1.png", xs, ys, widths, heights, 12, 0.08f);
     }
 
     void flipToLeft() override {
@@ -593,8 +476,9 @@ public:
     }
 
     void render(RenderWindow& window, float camX = 0, float camY = 0) override {
-        renderCurrent(window, camX, camY);
+        Player::render(window, camX, camY);
     }
+
     void shoot() {
         if (dualFireActive) {
             cout << "Marco dual fires!" << endl;
@@ -657,35 +541,15 @@ public:
         scale_x = 2.0f;
         scale_y = 2.0f;
         width = 60.0f;
-        // Torso (36px) + legs (39px) = 75 source * 2 scale = 150 screen px
         height = 150.0f;
 
-        // Torso strip = y=385, 36px tall, 8 frames with variable widths.
-        // Legs strip  = y=421, 39px tall, 8 frames with variable widths.
-        static const int walkTorsoXs[8] = { 7, 42, 78, 112, 146, 179, 214, 247 };
-        static const int walkTorsoWs[8] = { 29, 28, 26,  25,  25,  25,  26,  28 };
-        static const int walkLegsXs[8]  = { 7, 44, 81, 120, 160, 194, 231, 269 };
-        static const int walkLegsWs[8]  = { 30, 30, 30,  30,  29,  32,  32,  31 };
+        // Walking frames: x, y, width, height for each frame
+        static const int xs[8] = { 7, 42, 78, 112, 146, 179, 214, 247 };
+        static const int ys[8] = { 385, 385, 385, 385, 385, 385, 385, 385 };
+        static const int widths[8] = { 29, 28, 26, 25, 25, 25, 26, 28 };
+        static const int heights[8] = { 75, 75, 75, 75, 75, 75, 75, 75 };
 
-        anims[WALK].loadCustom("Sprites/Tarma Roving.png", walkTorsoXs, walkTorsoWs, 385, 36, 8, 0.08f);
-        anims[WALK].loadLegsCustom("Sprites/Tarma Roving.png", walkLegsXs, walkLegsWs, 421, 39, 8, 0.08f, 0);
-        // Overlap torso onto legs by 8 source-px so the waist seam disappears
-        anims[WALK].setTorsoOffset(12);
-        // Nudge torso right by 4 source-px so the head sits over the legs
-        anims[WALK].setTorsoOffsetX(4);
-
-        // Standing animation = y=260 torsos + y=300 idle legs (4 frames each).
-        static const int standTorsoXs[4] = { 7, 42, 78, 115 };
-        static const int standTorsoWs[4] = { 29, 29, 30,  31 };
-        static const int standLegsXs[4]  = { 7, 45, 82, 120 };
-        static const int standLegsWs[4]  = { 29, 29, 29,  32 };
-        anims[STAND].loadCustom("Sprites/Tarma Roving.png",
-                                     standTorsoXs, standTorsoWs, 260, 40, 4, 0.18f);
-        anims[STAND].loadLegsCustom("Sprites/Tarma Roving.png",
-                                         standLegsXs, standLegsWs, 300, 40, 4, 0.18f, 0);
-        // Lift torso to sit on top of the legs (legs are 40 src-px tall).
-        anims[STAND].setTorsoOffset(8);
-        anims[STAND].setTorsoOffsetX(4);
+        anim.load("Sprites/Tarma Roving.png", xs, ys, widths, heights, 8, 0.08f);
     }
 
     void flipToLeft() override {
@@ -697,7 +561,7 @@ public:
     }
 
     void render(RenderWindow& window, float camX = 0, float camY = 0) override {
-        renderCurrent(window, camX, camY);
+        Player::render(window, camX, camY);
     }
 
     void takeDamage(int damage) {
@@ -768,8 +632,13 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // Full-body walking: y=387, 40px tall, 16 frames at x=5, stride 34, width 30
-        anims[WALK].load("Sprites/Eri Kasamoto.png", 5, 387, 30, 40, 16, 34, 0.08f);
+        // Walking frames: x, y, width, height for each frame
+        static const int xs[16] = { 5, 39, 73, 107, 141, 175, 209, 243, 277, 311, 345, 379, 413, 447, 481, 515 };
+        static const int ys[16] = { 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387, 387 };
+        static const int widths[16] = { 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 };
+        static const int heights[16] = { 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40 };
+
+        anim.load("Sprites/Eri Kasamoto.png", xs, ys, widths, heights, 16, 0.08f);
     }
 
     void flipToLeft() override {
@@ -781,8 +650,9 @@ public:
     }
 
     void render(RenderWindow& window, float camX = 0, float camY = 0) override {
-        renderCurrent(window, camX, camY);
+        Player::render(window, camX, camY);
     }
+
     void throwGrenade() {
         if (doubleGrenadeActive && grenadeCount >= 2) {
             cout << "Eri throws double grenades!" << endl;
@@ -848,8 +718,13 @@ public:
         width = 60.0f;
         height = 82.0f;
 
-        // Full-body walking: y=420, 38px tall, 16 frames at x=10, stride 31, width 26
-        anims[WALK].load("Sprites/Fiolina Germi 1.png", 10, 420, 26, 38, 16, 31, 0.08f);
+        // Walking frames: x, y, width, height for each frame
+        static const int xs[16] = { 10, 41, 72, 103, 134, 165, 196, 227, 258, 289, 320, 351, 382, 413, 444, 475 };
+        static const int ys[16] = { 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420, 420 };
+        static const int widths[16] = { 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26 };
+        static const int heights[16] = { 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38 };
+
+        anim.load("Sprites/Fiolina Germi 1.png", xs, ys, widths, heights, 16, 0.08f);
     }
 
     void flipToLeft() override {
@@ -861,7 +736,7 @@ public:
     }
 
     void render(RenderWindow& window, float camX = 0, float camY = 0) override {
-        renderCurrent(window, camX, camY);
+        Player::render(window, camX, camY);
     }
 
     void pickupWeapon(Weapon* weapon) {
