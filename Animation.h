@@ -7,46 +7,100 @@ private:
     static const int MAX_FRAMES = 32;
 
     Texture texture;
+    Texture legsTexture;
     IntRect frames[MAX_FRAMES];
+    IntRect legsFrames[MAX_FRAMES];
     int frameCount;
+    int legsFrameCount;
     int currentFrame;
+    int legsCurrentFrame;
     float timer;
+    float legsTimer;
     float frameTime;
+    float legsFrameTime;
+    int legsOffsetY;
+    int torsoOffsetY;
+    int torsoOffsetX;
 
 public:
     Animation()
-        : frameCount(0), currentFrame(0), timer(0.0f), frameTime(0.08f) {}
+        : frameCount(0), legsFrameCount(0), currentFrame(0), legsCurrentFrame(0),
+          timer(0.0f), legsTimer(0.0f), frameTime(0.08f), legsFrameTime(0.08f),
+          legsOffsetY(0), torsoOffsetY(0), torsoOffsetX(0) {}
 
     void load(const char* path, const int* xs, const int* ys,
               const int* widths, const int* heights, int count, float seconds) {
         texture.loadFromFile(path);
-
         frameTime = seconds;
-
-        if (count > MAX_FRAMES)
-            frameCount = MAX_FRAMES;
-        else
-            frameCount = count;
-
+        frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
         for (int i = 0; i < frameCount; i++)
             frames[i] = IntRect(xs[i], ys[i], widths[i], heights[i]);
     }
 
+    void loadLegs(const char* path, const int* xs, const int* ys,
+                   const int* widths, const int* heights, int count, float seconds, int offsetY) {
+        legsTexture.loadFromFile(path);
+        legsFrameTime = seconds;
+        legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        legsOffsetY = offsetY;
+        for (int i = 0; i < legsFrameCount; i++)
+            legsFrames[i] = IntRect(xs[i], ys[i], widths[i], heights[i]);
+    }
+
+    void setTorsoOffset(int offsetY) { torsoOffsetY = offsetY; }
+    void setTorsoOffsetX(int offsetX) { torsoOffsetX = offsetX; }
+
     void update(float dt) {
-        if (frameCount <= 0) return;
+        if (frameCount <= 0) 
+            return;
 
         timer += dt;
+
         while (timer >= frameTime) {
             timer -= frameTime;
             currentFrame = (currentFrame + 1) % frameCount;
+        }
+
+        if (legsFrameCount > 0) {
+            legsTimer += dt;
+            while (legsTimer >= legsFrameTime) {
+                legsTimer -= legsFrameTime;
+                legsCurrentFrame = (legsCurrentFrame + 1) % legsFrameCount;
+            }
         }
     }
 
     void reset() {
         currentFrame = 0;
+        legsCurrentFrame = 0;
         timer = 0.0f;
+        legsTimer = 0.0f;
     }
 
-    const Texture& getTexture() const { return texture; }
-    IntRect currentRect() const { return frameCount > 0 ? frames[currentFrame] : IntRect(); }
+    const Texture& getTexture() const { 
+        return texture; 
+    }
+
+    const Texture& getLegsTexture() const {
+        return legsTexture;
+    }
+
+    IntRect currentRect() const { 
+		if (frameCount > 0)
+            return frames[currentFrame]; 
+        else
+            return IntRect(0, 0, 0, 0);
+    }
+
+    IntRect currentLegsRect() const {
+        if (legsFrameCount > 0)
+            return legsFrames[legsCurrentFrame];
+        else
+            return IntRect(0, 0, 0, 0);
+    }
+
+    bool hasLegs() const { return legsFrameCount > 0; }
+    int getLegsOffsetY() const { return legsOffsetY; }
+    int getTorsoOffsetY() const { return torsoOffsetY; }
+    int getTorsoOffsetX() const { return torsoOffsetX; }
 };
