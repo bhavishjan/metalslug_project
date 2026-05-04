@@ -24,6 +24,7 @@
   <ItemGroup>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="GameMode.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Weapon.h" />

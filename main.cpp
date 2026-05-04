@@ -509,6 +509,7 @@ int main() {
                 Delay.restart();
             }
 
+
             // Update
             currentLevel->update(dt);
             characters.getActivePlayer()->updateAnimation(dt);
