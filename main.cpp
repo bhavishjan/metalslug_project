@@ -5,6 +5,8 @@
 #include "Header.h"
 #include "Player.h"
 #include "Weapon.h"
+#include "Enemy.h"
+#include "menu.h"
 
 using namespace sf;
 using namespace std;
@@ -16,7 +18,6 @@ int main() {
     RenderWindow window(VideoMode(screen_x, screen_y), "Metal Slug", Style::Close);
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
-
     float cameraX = 0, cameraY = 0;
 
     // -------------------------
@@ -33,155 +34,9 @@ int main() {
 
 
     // -------------------------
-    // GAME MODE MENU SHAPES
+    // MENU SYSTEM
     // -------------------------
-    RectangleShape menuBg(Vector2f(screen_x, screen_y));
-    menuBg.setFillColor(Color::Blue);
-
-    RectangleShape titleBar(Vector2f(600, 90));
-    titleBar.setFillColor(Color::Red);
-    titleBar.setPosition(500, 150);
-
-    RectangleShape survivalBtn(Vector2f(500, 70));
-    survivalBtn.setFillColor(Color::Green);
-    survivalBtn.setPosition(550, 350);
-    survivalBtn.setOutlineThickness(3);
-    survivalBtn.setOutlineColor(Color::White);
-
-    RectangleShape campaignBtn(Vector2f(500, 70));
-    campaignBtn.setFillColor(Color::Green);
-    campaignBtn.setPosition(550, 460);
-    campaignBtn.setOutlineThickness(3);
-    campaignBtn.setOutlineColor(Color::White);
-
-    // Small indicator boxes inside buttons
-    RectangleShape key1(Vector2f(40, 40));
-    key1.setFillColor(Color::Red);
-    key1.setPosition(570, 365);
-
-    RectangleShape key2(Vector2f(40, 40));
-    key2.setFillColor(Color::Red);
-    key2.setPosition(570, 475);
-
-    // text in game mode menu boxes
-    // Loading font
-    Font menuFont;
-    menuFont.loadFromFile("arial.ttf");
-
-    // Title text
-    Text titleText;
-    titleText.setFont(menuFont);
-    titleText.setString("SELECT MODE:");
-    titleText.setCharacterSize(50);
-    titleText.setFillColor(Color::White);
-    titleText.setPosition(600, 165);
-
-    // Survival button text
-    Text survivalText;
-    survivalText.setFont(menuFont);
-    survivalText.setString("1 - SURVIVAL MODE");
-    survivalText.setCharacterSize(30);
-    survivalText.setFillColor(Color::White);
-    survivalText.setPosition(630, 370);
-
-    // Campaign button text
-    Text campaignText;
-    campaignText.setFont(menuFont);
-    campaignText.setString("2 - CAMPAIGN MODE");
-    campaignText.setCharacterSize(30);
-    campaignText.setFillColor(Color::White);
-    campaignText.setPosition(630, 480);
-    // -------------------------
-    // PLAYER SELECTION MENU SHAPES
-    // -------------------------
-    RectangleShape playerSelectMenuBg(Vector2f(screen_x, screen_y));
-    playerSelectMenuBg.setFillColor(Color::Blue);
-
-    RectangleShape playerSelectTitleBar(Vector2f(700, 90));
-    playerSelectTitleBar.setFillColor(Color::Red);
-    playerSelectTitleBar.setPosition(450, 150);
-
-    RectangleShape macroRossiBtn(Vector2f(500, 70));
-    macroRossiBtn.setFillColor(Color::Green);
-    macroRossiBtn.setPosition(550, 350);
-    macroRossiBtn.setOutlineThickness(3);
-    macroRossiBtn.setOutlineColor(Color::White);
-
-    RectangleShape tarmaRovingBtn(Vector2f(500, 70));
-    tarmaRovingBtn.setFillColor(Color::Green);
-    tarmaRovingBtn.setPosition(550, 460);
-    tarmaRovingBtn.setOutlineThickness(3);
-    tarmaRovingBtn.setOutlineColor(Color::White);
-
-    RectangleShape eriKasamotoBtn(Vector2f(500, 70));
-    eriKasamotoBtn.setFillColor(Color::Green);
-    eriKasamotoBtn.setPosition(550, 570);
-    eriKasamotoBtn.setOutlineThickness(3);
-    eriKasamotoBtn.setOutlineColor(Color::White);
-
-    RectangleShape fiolinaGermiBtn(Vector2f(500, 70));
-    fiolinaGermiBtn.setFillColor(Color::Green);
-    fiolinaGermiBtn.setPosition(550, 680);
-    fiolinaGermiBtn.setOutlineThickness(3);
-    fiolinaGermiBtn.setOutlineColor(Color::White);
-
-    // Small indicator boxes inside buttons
-    RectangleShape playerSelectKey1(Vector2f(40, 40));
-    playerSelectKey1.setFillColor(Color::Red);
-    playerSelectKey1.setPosition(570, 365);
-
-    RectangleShape playerSelectKey2(Vector2f(40, 40));
-    playerSelectKey2.setFillColor(Color::Red);
-    playerSelectKey2.setPosition(570, 475);
-
-    RectangleShape playerSelectKey3(Vector2f(40, 40));
-    playerSelectKey3.setFillColor(Color::Red);
-    playerSelectKey3.setPosition(570, 585);
-
-    RectangleShape playerSelectKey4(Vector2f(40, 40));
-    playerSelectKey4.setFillColor(Color::Red);
-    playerSelectKey4.setPosition(570, 695);
-
-    // text in player selection menu boxes
-    // Title text
-    Text playerSelectTitleText;
-    playerSelectTitleText.setFont(menuFont);
-    playerSelectTitleText.setString("CHOOSE CHARACTER");
-    playerSelectTitleText.setCharacterSize(50);
-    playerSelectTitleText.setFillColor(Color::White);
-    playerSelectTitleText.setPosition(540, 165);
-
-    // Macro Rossi text
-    Text macroRossiText;
-    macroRossiText.setFont(menuFont);
-    macroRossiText.setString("1 - Macro Rossi");
-    macroRossiText.setCharacterSize(30);
-    macroRossiText.setFillColor(Color::White);
-    macroRossiText.setPosition(630, 365);
-
-    // Tarma Roving text
-    Text tarmaRovingText;
-    tarmaRovingText.setFont(menuFont);
-    tarmaRovingText.setString("2 - Tarma Roving");
-    tarmaRovingText.setCharacterSize(30);
-    tarmaRovingText.setFillColor(Color::White);
-    tarmaRovingText.setPosition(630, 480);
-
-    // Eri Kasamoto text
-    Text eriKasamotoText;
-    eriKasamotoText.setFont(menuFont);
-    eriKasamotoText.setString("3 - Eri Kasamoto");
-    eriKasamotoText.setCharacterSize(30);
-    eriKasamotoText.setFillColor(Color::White);
-    eriKasamotoText.setPosition(630, 590);
-
-    // Fiolina Germi text
-    Text fiolinaGermiText;
-    fiolinaGermiText.setFont(menuFont);
-    fiolinaGermiText.setString("4 - Fiolina Germi");
-    fiolinaGermiText.setCharacterSize(30);
-    fiolinaGermiText.setFillColor(Color::White);
-    fiolinaGermiText.setPosition(630, 700);
+    Menu menu(screen_x, screen_y);
 
     // -------------------------
     // SURVIVAL MODE VARIABLES
@@ -306,20 +161,8 @@ int main() {
         // MENU RENDER
         // =========================================
         if (gameMode == 0) {
-            window.clear(Color(20, 20, 20));
-            window.draw(menuBg);
-            window.draw(titleBar);
-            window.draw(survivalBtn);
-            window.draw(campaignBtn);
-            window.draw(key1);
-            window.draw(key2);
-
-            // Draw text
-            window.draw(titleText);
-            window.draw(survivalText);
-            window.draw(campaignText);
-
-            window.display();
+            menu.updateAnimation(dt);
+            menu.renderGameModeMenu(window);
             continue;
         }
 
@@ -327,26 +170,8 @@ int main() {
 		// Player Selection Menu Render
         // =========================================
         if (gameMode != 0 && playerSelection == false) {
-            window.clear(Color(20, 20, 20));
-            window.draw(playerSelectMenuBg);
-            window.draw(playerSelectTitleBar);
-            window.draw(macroRossiBtn);
-			window.draw(tarmaRovingBtn);
-			window.draw(eriKasamotoBtn);
-			window.draw(fiolinaGermiBtn);
-            window.draw(playerSelectKey1);
-			window.draw(playerSelectKey2);
-			window.draw(playerSelectKey3);
-			window.draw(playerSelectKey4);
-
-            // Draw text
-            window.draw(playerSelectTitleText);
-            window.draw(macroRossiText);
-            window.draw(tarmaRovingText);
-            window.draw(eriKasamotoText);
-            window.draw(fiolinaGermiText);
-
-            window.display();
+            menu.updateAnimation(dt);
+            menu.renderPlayerSelectionMenu(window);
             continue;
         }
 
