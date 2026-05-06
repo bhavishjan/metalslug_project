@@ -37,6 +37,11 @@ int main() {
     // CAMPAIGN MODE VARIABLES
     CampaignGame* campaignGame = nullptr;
 
+    // Campaign enemies
+    static const int MAX_CAMPAIGN_REBELS = 5;
+    RebelSoldier* campaignRebels[MAX_CAMPAIGN_REBELS] = {};
+    int campaignRebelCount = 0;
+
     // PLAYER SETUP
 
     float moveAcceleration = 0.6f;
@@ -112,6 +117,14 @@ int main() {
                             onGround = false;
                             cameraX = cameraY = 0;
                             Delay.restart();
+                            // Spawn rebel soldiers across the level
+                            for (int i = 0; i < MAX_CAMPAIGN_REBELS; i++) {
+                                delete campaignRebels[i];
+                                campaignRebels[i] = new RebelSoldier();
+                                campaignRebels[i]->setPosition(600.f + i * 300.f, 400.f);
+                                campaignRebels[i]->setPlayer(characters.getActivePlayer());
+                            }
+                            campaignRebelCount = MAX_CAMPAIGN_REBELS;
                             cout << "Entered Campaign Mode" << endl;
                         }
                     }
@@ -127,6 +140,11 @@ int main() {
                 survivalGame = nullptr;
                 delete campaignGame;
                 campaignGame = nullptr;
+                for (int i = 0; i < MAX_CAMPAIGN_REBELS; i++) {
+                    delete campaignRebels[i];
+                    campaignRebels[i] = nullptr;
+                }
+                campaignRebelCount = 0;
                 cameraX = cameraY = 0;
                 menu.setMenuState(0);
                 menu.resetSelection();
@@ -312,22 +330,63 @@ int main() {
         else if (gameMode == 2 && campaignGame) {
             CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
             if (campaignLevel) {
-                // X move
-                characters.getActivePlayer()->setPlayerX(characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getVelocityX());
+                float pX = characters.getActivePlayer()->getPlayerX();
+                float pY = characters.getActivePlayer()->getPlayerY();
+                float pVelocityX = characters.getActivePlayer()->getVelocityX();
+                float pVelocityY = characters.getActivePlayer()->getVelocityY();
 
-                // Y move
-                characters.getActivePlayer()->setPlayerY(characters.getActivePlayer()->getPlayerY() + characters.getActivePlayer()->getVelocityY());
+                // Apply horizontal movement
+                pX += pVelocityX;
 
-                // Screen bottom boundary
-                if (characters.getActivePlayer()->getPlayerY() + characters.getActivePlayer()->getHeight() > screen_y) {
-                    characters.getActivePlayer()->setPlayerY(screen_y - characters.getActivePlayer()->getHeight());
-                    characters.getActivePlayer()->setVelocityY(0);
+                // Step-up mechanism
+                float stepHeight = 20.0f;
+                if (pVelocityX != 0 &&
+                    campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    float tempY = pY - stepHeight;
+                    if (!campaignLevel->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                        pY = tempY;
+                    }
+                    else {
+                        pX = characters.getActivePlayer()->getPlayerX();
+                        pVelocityX = 0;
+                    }
+                }
+
+                // Apply vertical movement
+                pY += pVelocityY;
+
+                // Check vertical collision with blocks
+                if (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    if (pVelocityY > 0) {
+                        onGround = true;
+                        pVelocityY = 0;
+                        while (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                            pY -= 1;
+                        }
+                    }
+                    else {
+                        pVelocityY = 0;
+                        while (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                            pY += 1;
+                        }
+                    }
+                }
+                else {
+                    if (pVelocityY >= 0) onGround = false;
+                }
+
+                // Screen bottom boundary (fallback)
+                if (pY + characters.getActivePlayer()->getHeight() > screen_y) {
+                    pY = screen_y - characters.getActivePlayer()->getHeight();
+                    pVelocityY = 0;
                     onGround = true;
                 }
 
                 // Left bound
-                if (characters.getActivePlayer()->getPlayerX() < 0)
-                    characters.getActivePlayer()->setPlayerX(0);
+                if (pX < 0) pX = 0;
+
+                characters.getActivePlayer()->setPlayerPosition(pX, pY);
+                characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
 
                 // Camera
                 float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
@@ -344,12 +403,34 @@ int main() {
                     Delay.restart();
                 }
 
+                // Update enemies and resolve them against campaign terrain
+                for (int i = 0; i < campaignRebelCount; i++) {
+                    if (campaignRebels[i]) {
+                        campaignRebels[i]->setPlayer(characters.getActivePlayer());
+                        campaignRebels[i]->update(dt);
+                        // ground-snap enemy to campaign blocks
+                        float ex = campaignRebels[i]->getX();
+                        float ey = campaignRebels[i]->getY();
+                        float ew = 32.f, eh = 48.f;
+                        float evx = 0.f, evy = 0.f;
+                        bool eGround = false;
+                        campaignLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, eGround);
+                        if (eGround) campaignRebels[i]->setPosition(ex, ey);
+                        // fallback: screen bottom
+                        if (ey + eh > screen_y) campaignRebels[i]->setPosition(ex, (float)(screen_y - eh));
+                    }
+                }
+
                 // Update
                 campaignGame->update(dt, &characters);
 
                 // Render
                 window.clear(Color(135, 206, 235));
                 campaignGame->render(window);
+                for (int i = 0; i < campaignRebelCount; i++) {
+                    if (campaignRebels[i])
+                        campaignRebels[i]->render(window, cameraX, cameraY);
+                }
                 characters.getActivePlayer()->render(window, cameraX, cameraY);
                 window.display();
             }
@@ -361,5 +442,6 @@ int main() {
 
     delete survivalGame;
     delete campaignGame;
+    for (int i = 0; i < MAX_CAMPAIGN_REBELS; i++) delete campaignRebels[i];
     return 0;
 }

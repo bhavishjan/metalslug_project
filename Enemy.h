@@ -70,7 +70,7 @@ public:
     // pure virtuals every enemy must implement these
     virtual void attack() = 0;
     virtual void update(float deltaTime) = 0;
-    virtual void render(RenderWindow& window) = 0;
+    virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) = 0;
 
     // overide in case of special behaviour
     virtual void move(float dt) {
@@ -337,7 +337,7 @@ public:
         anims[currentAnim].update(dt);
     }
 
-    virtual void render(RenderWindow& window) {
+    virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
         if (!isAlive && currentAnim != DIE) return;
 
         Animation& a = anims[currentAnim];
@@ -349,7 +349,7 @@ public:
 
         // anchor sprite by its bottom center so feet sit on collision box bottom
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
-        sprite.setPosition(x + width / 2.0f, y + height);
+        sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
         sprite.setScale(facingRight ? 1.f : -1.f, 1.f);
 
         window.draw(sprite);
@@ -433,8 +433,8 @@ public:
         InfantryEnemy::update(dt);
     }
 
-    void render(RenderWindow& window) override {
-        InfantryEnemy::render(window);
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        InfantryEnemy::render(window, camX, camY);
     }
 };
 
@@ -566,7 +566,7 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -600,7 +600,7 @@ public:
         y += velY * dt;
     }
 
-    void render(RenderWindow& window);
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f);
 };
 
 
@@ -736,7 +736,7 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -862,7 +862,7 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -936,7 +936,7 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -1021,7 +1021,7 @@ public:
             checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -1076,7 +1076,7 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -1206,7 +1206,7 @@ public:
             attack();
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -1301,7 +1301,7 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -1355,7 +1355,7 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -1516,7 +1516,7 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
 
 
@@ -1675,5 +1675,5 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
