@@ -24,8 +24,8 @@ int main() {
     // GAME MODE: 0=Menu, 1=survival, 2=campaign
     int gameMode = 0;
 
-    // PLAYER SELECTION: 0=pending, 1=done
-    bool playerSelection = false;
+    // Character selection result
+    int selectedCharacter = 0;
 
 
     // MENU SYSTEM
@@ -68,57 +68,55 @@ int main() {
             // MENU INPUT
             if (gameMode == 0 && ev.type == Event::KeyPressed) {
                 if (ev.key.code == Keyboard::Up) {
-                    menu.moveGameModeSelectionUp();
+                    menu.moveSelectionUp();
                 }
                 else if (ev.key.code == Keyboard::Down) {
-                    menu.moveGameModeSelectionDown();
+                    menu.moveSelectionDown();
                 }
                 else if (ev.key.code == Keyboard::Enter) {
-                    int selection = menu.getGameModeSelection();
-                    if (selection == 0) {
-                        gameMode = 1;
-                        survivalGame = new SurvivalGame(screen_x, screen_y);
-                        survivalGame->setCharManager(&characters);
-                        survivalGame->start();
-                        characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
-                        characters.getActivePlayer()->setVelocity(0, 0);
-                        onGround = false;
-                        cameraX = cameraY = 0;
-                        Delay.restart();
-                        menu.resetPlayerSelection();
-                        cout << "Entered Survival Mode" << endl;
+                    int menuState = menu.getMenuState();
+                    if (menuState == 0) {
+                        // Start screen - go to character selection
+                        menu.setMenuState(1);
+                        cout << "Entered Character Selection" << endl;
                     }
-                    else if (selection == 1) {
-                        gameMode = 2;
-                        campaignGame = new CampaignGame(screen_x, screen_y);
-                        campaignGame->setCharManager(&characters);
-                        campaignGame->start();
-                        characters.getActivePlayer()->setPlayerPosition(200, 50);
-                        characters.getActivePlayer()->setVelocity(0, 0);
-                        onGround = false;
-                        cameraX = cameraY = 0;
-                        Delay.restart();
-                        menu.resetPlayerSelection();
-                        cout << "Entered Campaign Mode" << endl;
+                    else if (menuState == 1) {
+                        // Character selection - go to mode selection
+                        selectedCharacter = menu.getSelectionIndex();
+                        characters.switchCharacterToIndex(selectedCharacter);
+                        menu.setMenuState(2);
+                        cout << "Selected character at index: " << selectedCharacter << endl;
+                    }
+                    else if (menuState == 2) {
+                        // Mode selection - start game
+                        int modeSelection = menu.getSelectionIndex();
+                        if (modeSelection == 0) {
+                            gameMode = 1;
+                            survivalGame = new SurvivalGame(screen_x, screen_y);
+                            survivalGame->setCharManager(&characters);
+                            survivalGame->start();
+                            characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
+                            characters.getActivePlayer()->setVelocity(0, 0);
+                            onGround = false;
+                            cameraX = cameraY = 0;
+                            Delay.restart();
+                            cout << "Entered Survival Mode" << endl;
+                        }
+                        else if (modeSelection == 1) {
+                            gameMode = 2;
+                            campaignGame = new CampaignGame(screen_x, screen_y);
+                            campaignGame->setCharManager(&characters);
+                            campaignGame->start();
+                            characters.getActivePlayer()->setPlayerPosition(200, 50);
+                            characters.getActivePlayer()->setVelocity(0, 0);
+                            onGround = false;
+                            cameraX = cameraY = 0;
+                            Delay.restart();
+                            cout << "Entered Campaign Mode" << endl;
+                        }
                     }
                 }
             }
-
-			// PLAYER SELECTION MENU INPUT
-			if (playerSelection == false && gameMode != 0 && ev.type == Event::KeyPressed && Delay.getElapsedTime().asSeconds() > 0.2f) {
-				if (ev.key.code == Keyboard::Up) {
-                    menu.movePlayerSelectionUp();
-				}
-				else if (ev.key.code == Keyboard::Down) {
-                    menu.movePlayerSelectionDown();
-				}
-				else if (ev.key.code == Keyboard::Enter) {
-                    int selection = menu.getPlayerSelectionIndex();
-                    characters.switchCharacterToIndex(selection);
-                    playerSelection = true;
-                    cout << "Selected character at index: " << selection << endl;
-				}
-			}
         }
 
         // ESC - menu pe wapas
@@ -130,23 +128,39 @@ int main() {
                 delete campaignGame;
                 campaignGame = nullptr;
                 cameraX = cameraY = 0;
+                menu.setMenuState(0);
+                menu.resetSelection();
             }
             else {
-                window.close();
+                // If in character selection, go back to start
+                int menuState = menu.getMenuState();
+                if (menuState == 2) {
+                    menu.setMenuState(1);
+                    menu.resetSelection();
+                }
+                else if (menuState == 1) {
+                    menu.setMenuState(0);
+                    menu.resetSelection();
+                }
+                else {
+                    window.close();
+                }
             }
         }
 
         // MENU RENDER
         if (gameMode == 0) {
             menu.updateAnimation(dt);
-            menu.renderGameModeMenu(window);
-            continue;
-        }
-
-        // Player Selection Menu Render
-        if (gameMode != 0 && playerSelection == false) {
-            menu.updateAnimation(dt);
-            menu.renderPlayerSelectionMenu(window);
+            int menuState = menu.getMenuState();
+            if (menuState == 0) {
+                menu.renderStartScreen(window);
+            }
+            else if (menuState == 1) {
+                menu.renderCharacterSelection(window);
+            }
+            else if (menuState == 2) {
+                menu.renderModeSelection(window);
+            }
             continue;
         }
 

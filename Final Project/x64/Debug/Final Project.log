@@ -14,43 +14,19 @@ E:\Semester 2\OOP\OOP Final Project\Player.h(476,16): warning C4244: 'return': c
 E:\Semester 2\OOP\OOP Final Project\Weapon.h(454,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(333,14): error C3863: array type 'char [100]' is not assignable
-  (compiling source file 'main.cpp')
-  
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(391,14): error C3863: array type 'char [100]' is not assignable
-  (compiling source file 'main.cpp')
-  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(445,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'main.cpp')
-  
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(525,14): error C3863: array type 'char [100]' is not assignable
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(581,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(632,14): error C3863: array type 'char [100]' is not assignable
-  (compiling source file 'main.cpp')
-  
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(794,14): error C3863: array type 'char [100]' is not assignable
-  (compiling source file 'main.cpp')
-  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(795,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  (compiling source file 'main.cpp')
-  
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(814,14): error C3863: array type 'char [100]' is not assignable
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(854,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(898,14): error C3863: array type 'char [100]' is not assignable
-  (compiling source file 'main.cpp')
-  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(899,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  (compiling source file 'main.cpp')
-  
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(989,14): error C3863: array type 'char [100]' is not assignable
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(990,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
@@ -59,13 +35,7 @@ E:\Semester 2\OOP\OOP Final Project\Enemy.h(990,20): warning C4244: '=': convers
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(1053,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1098,14): error C3863: array type 'char [100]' is not assignable
-  (compiling source file 'main.cpp')
-  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(1099,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  (compiling source file 'main.cpp')
-  
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1221,14): error C3863: array type 'char [100]' is not assignable
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(1222,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
@@ -110,3 +80,4 @@ E:\Semester 2\OOP\OOP Final Project\main.cpp(233,107): warning C4244: 'argument'
 E:\Semester 2\OOP\OOP Final Project\main.cpp(239,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(239,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(309,71): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Final Project.vcxproj -> E:\Semester 2\OOP\OOP Final Project\x64\Debug\Final Project.exe
