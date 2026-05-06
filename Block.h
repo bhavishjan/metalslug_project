@@ -1,7 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <cstring>
 using namespace sf;
-using namespace std;
 
 
 // Biome types
@@ -372,7 +372,7 @@ public:
 //if size is more = bigger hill
 class Biome {
 protected:
-    string name;
+    char name[100];
     int    biomeType;
     float  startX, endX;
     float  startY, endY;
@@ -383,7 +383,7 @@ protected:
 
 public:
     Biome() {
-        name = "";
+        name[0] = '\0';
         biomeType = BIOME_PLAINS;
         startX = endX = 0;
         startY = 0; endY = 900;
@@ -391,8 +391,9 @@ public:
         blockCount = 0;
     }
 
-    Biome(string name, int biomeType, float startX, float endX) {
-        this->name = name;
+    Biome(const char* name, int biomeType, float startX, float endX) {
+        strncpy(this->name, name, 99);
+        this->name[99] = '\0';
         this->biomeType = biomeType;
         this->startX = startX;
         this->endX = endX;
@@ -412,7 +413,7 @@ public:
     // Pure virtual so every biome can make her terrian
     virtual void generateTerrain(int widthInBlocks, int heightInBlocks) = 0;
 
-    void loadTextures(string solidPath, string waterPath) {
+    void loadTextures(const char* solidPath, const char* waterPath) {
         solidTex.loadFromFile(solidPath);
         waterTex.loadFromFile(waterPath);
     }

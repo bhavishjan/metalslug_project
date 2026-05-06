@@ -21,37 +21,23 @@ int main() {
     window.setFramerateLimit(60);
     float cameraX = 0, cameraY = 0;
 
-    // -------------------------
-    // GAME MODE
-    // 0=Menu, 1=survival, 2=campaign
-    // -------------------------
+    // GAME MODE: 0=Menu, 1=survival, 2=campaign
     int gameMode = 0;
 
-    // -------------------------
-    // PLAYER SELECTION
-	// 0=pending 1=done
-    // -------------------------
+    // PLAYER SELECTION: 0=pending, 1=done
     bool playerSelection = false;
 
 
-    // -------------------------
     // MENU SYSTEM
-    // -------------------------
     Menu menu(screen_x, screen_y);
 
-    // -------------------------
     // SURVIVAL MODE VARIABLES
-    // -------------------------
     SurvivalGame* survivalGame = nullptr;
 
-    // -------------------------
     // CAMPAIGN MODE VARIABLES
-    // -------------------------
     CampaignGame* campaignGame = nullptr;
 
-    // -------------------------
     // PLAYER SETUP
-    // -------------------------
 
     float moveAcceleration = 0.6f;
     float friction = 0.80f;
@@ -64,18 +50,14 @@ int main() {
     bool jumpHeld = false;
 
 
-    // -------------------------
     // CHARACTER MANAGER
-    // -------------------------
     CharacterManager characters;
 
     Clock clock;
     Clock Delay;
     Event ev;
 
-    // -------------------------
     // GAME LOOP
-    // -------------------------
     while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
 
@@ -83,9 +65,7 @@ int main() {
             if (ev.type == Event::Closed)
                 window.close();
 
-            // -------------------------
             // MENU INPUT
-            // -------------------------
             if (gameMode == 0 && ev.type == Event::KeyPressed) {
                 if (ev.key.code == Keyboard::Up) {
                     menu.moveGameModeSelectionUp();
@@ -124,9 +104,7 @@ int main() {
                 }
             }
 
-			// -------------------------
 			// PLAYER SELECTION MENU INPUT
-			// -------------------------
 			if (playerSelection == false && gameMode != 0 && ev.type == Event::KeyPressed && Delay.getElapsedTime().asSeconds() > 0.2f) {
 				if (ev.key.code == Keyboard::Up) {
                     menu.movePlayerSelectionUp();
@@ -158,27 +136,21 @@ int main() {
             }
         }
 
-        // =========================================
         // MENU RENDER
-        // =========================================
         if (gameMode == 0) {
             menu.updateAnimation(dt);
             menu.renderGameModeMenu(window);
             continue;
         }
 
-        // =========================================
-		// Player Selection Menu Render
-        // =========================================
+        // Player Selection Menu Render
         if (gameMode != 0 && playerSelection == false) {
             menu.updateAnimation(dt);
             menu.renderPlayerSelectionMenu(window);
             continue;
         }
 
-		// =========================================
 		// PLAYER INPUT (dono modes ke liye same)
-		// =========================================
 		if (Keyboard::isKeyPressed(Keyboard::Left)) {
 			characters.getActivePlayer()->moveLeft();
             if (characters.getActivePlayer()->isFacingRight()) {
@@ -221,9 +193,7 @@ int main() {
 
         onGround = false;
 
-        // =========================================
         // SURVIVAL MODE
-        // =========================================
         if (gameMode == 1 && survivalGame) {
             Level* currentLevel = survivalGame->getCurrentLevel();
             if (currentLevel) {
@@ -324,9 +294,7 @@ int main() {
             }
         }
 
-        // =========================================
         // CAMPAIGN MODE
-        // =========================================
         else if (gameMode == 2 && campaignGame) {
             CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
             if (campaignLevel) {

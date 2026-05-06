@@ -1,9 +1,9 @@
 #pragma once
 #include "Player.h"
 #include <cmath>
+#include <cstring>
 #include "Weapon.h"
 
-using namespace std;
 using namespace sf;
 
 // helper function to check if two rectangles overlap
@@ -20,7 +20,7 @@ static bool rectsOverlap(float ax, float ay, float aw, float ah,
 // every enemy type inherits from this
 class Enemy {
 protected:
-    string name;
+    char name[100];
     float x, y;
     float width, height;
     float velocityX, velocityY;

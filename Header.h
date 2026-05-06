@@ -2,13 +2,13 @@
 
 #include "Block.h"
 #include "Player.h"
+#include <cstring>
 using namespace sf;
-using namespace std;
 
 class Level {
 protected:
 
-    string name;
+    char name[100];
     int    levelNumber;
 
     //siz
@@ -53,8 +53,9 @@ public:
 
 
 
-    Level(string name, int levelNumber, int biomeWidth, int biomeHeight) {
-        this->name = name;
+    Level(const char* name, int levelNumber, int biomeWidth, int biomeHeight) {
+        strncpy(this->name, name, 99);
+        this->name[99] = '\0';
         this->levelNumber = levelNumber;
         this->biomeWidth = biomeWidth;
         this->biomeHeight = biomeHeight;
@@ -95,7 +96,7 @@ public:
 
     // Common Functions
 
-    virtual void loadTextures(string solidPath, string waterPath) {
+    virtual void loadTextures(const char* solidPath, const char* waterPath) {
         if (plains)  plains->loadTextures(solidPath, waterPath);
         if (aerial)  aerial->loadTextures(solidPath, waterPath);
         if (aquatic) aquatic->loadTextures(solidPath, waterPath);
@@ -132,7 +133,7 @@ public:
     }
 
 
-    string getName() { return name; }
+    const char* getName() { return name; }
     int    getLevelNum() { return levelNumber; }
     float  getLevelEnd() { return levelEnd; }
     float  getLevelStart() { return levelStart; }
@@ -172,7 +173,7 @@ protected:
 
 public:
 
-    SurvivalLevel(string name, int levelNumber, int biomeWidth, int biomeHeight)
+    SurvivalLevel(const char* name, int levelNumber, int biomeWidth, int biomeHeight)
         : Level(name, levelNumber, biomeWidth, biomeHeight)
     {
         // Enemy counts
