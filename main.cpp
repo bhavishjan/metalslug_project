@@ -44,7 +44,7 @@ int main() {
 
     // PLAYER SETUP
 
-    float moveAcceleration = 1.2f;
+    float moveAcceleration = 0.6f;
     float friction = 0.80f;
     float airFriction = 0.95f;
     float jumpPower = -22.0f;
@@ -201,8 +201,9 @@ int main() {
             else          characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * airFriction);
         }
 
-        if (characters.getActivePlayer()->getVelocityX() > 10) characters.getActivePlayer()->setVelocityX(10);
-        if (characters.getActivePlayer()->getVelocityX() < -10) characters.getActivePlayer()->setVelocityX(-10);
+        float velCap = (gameMode == 2) ? 14.f : 6.f;
+        if (characters.getActivePlayer()->getVelocityX() >  velCap) characters.getActivePlayer()->setVelocityX( velCap);
+        if (characters.getActivePlayer()->getVelocityX() < -velCap) characters.getActivePlayer()->setVelocityX(-velCap);
 
         // JUMP
         if (Keyboard::isKeyPressed(Keyboard::Up)) {
