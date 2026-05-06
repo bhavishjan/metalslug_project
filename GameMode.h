@@ -1,7 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <cstring>
 #include "Header.h"
+using namespace std;
 using namespace sf;
 
 // Forward declarations
@@ -27,8 +27,12 @@ protected:
 
 public:
     GameMode(const char* n) {
-        strncpy(name, n, 31);
-        name[31] = '\0';
+        int i = 0;
+        while (n[i] != '\0' && i < 31) {
+            name[i] = n[i];
+            i++;
+        }
+        name[i] = '\0';
         isActive = false;
         isPaused = false;
         score = 0;

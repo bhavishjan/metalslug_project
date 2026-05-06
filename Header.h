@@ -1,8 +1,10 @@
 #pragma once
 
+#include <iostream>
 #include "Block.h"
 #include "Player.h"
-#include <cstring>
+
+using namespace std;
 using namespace sf;
 
 class Level {
@@ -54,8 +56,12 @@ public:
 
 
     Level(const char* name, int levelNumber, int biomeWidth, int biomeHeight) {
-        strncpy(this->name, name, 99);
-        this->name[99] = '\0';
+        int i = 0;
+        while (name[i] != '\0' && i < 99) {
+            this->name[i] = name[i];
+            i++;
+        }
+        this->name[i] = '\0';
         this->levelNumber = levelNumber;
         this->biomeWidth = biomeWidth;
         this->biomeHeight = biomeHeight;

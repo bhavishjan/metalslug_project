@@ -1,8 +1,8 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <cstring>
 
+using namespace std;
 using namespace sf;
 
 class Menu {

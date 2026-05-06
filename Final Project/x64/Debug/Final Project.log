@@ -1,8 +1,41 @@
 ﻿  main.cpp
+E:\Semester 2\OOP\OOP Final Project\Block.h(297,22): error C3861: 'min': identifier not found
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Block.h(298,22): error C3861: 'min': identifier not found
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Block.h(395,9): error C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  (compiling source file 'main.cpp')
+  
 E:\Semester 2\OOP\OOP Final Project\Player.h(71,22): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Player.h(72,23): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(189,13): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(189,40): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(195,13): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(195,46): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(202,13): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(202,48): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(302,9): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(302,44): error C2065: 'endl': undeclared identifier
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Player.h(473,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
@@ -11,22 +44,121 @@ E:\Semester 2\OOP\OOP Final Project\Player.h(473,16): warning C4244: 'return': c
 E:\Semester 2\OOP\OOP Final Project\Player.h(476,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
+E:\Semester 2\OOP\OOP Final Project\Player.h(537,13): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(537,44): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(545,9): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(545,41): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(636,13): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(636,43): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(739,13): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(739,54): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(765,9): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(765,41): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(777,9): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(777,39): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(841,13): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(841,58): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(866,9): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(866,43): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(950,9): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(950,54): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(954,9): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(954,53): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(1039,9): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(1039,45): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(1044,13): error C2065: 'cout': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Player.h(1044,58): error C2065: 'endl': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Header.h(58,9): error C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  (compiling source file 'main.cpp')
+  
 E:\Semester 2\OOP\OOP Final Project\Weapon.h(454,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(333,14): error C3863: array type 'char [100]' is not assignable
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(391,14): error C3863: array type 'char [100]' is not assignable
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(445,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(525,14): error C3863: array type 'char [100]' is not assignable
+  (compiling source file 'main.cpp')
+  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(581,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(632,14): error C3863: array type 'char [100]' is not assignable
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(794,14): error C3863: array type 'char [100]' is not assignable
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(795,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(814,14): error C3863: array type 'char [100]' is not assignable
+  (compiling source file 'main.cpp')
+  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(854,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(898,14): error C3863: array type 'char [100]' is not assignable
+  (compiling source file 'main.cpp')
+  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(899,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(989,14): error C3863: array type 'char [100]' is not assignable
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(990,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
@@ -35,7 +167,13 @@ E:\Semester 2\OOP\OOP Final Project\Enemy.h(990,20): warning C4244: '=': convers
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(1053,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1098,14): error C3863: array type 'char [100]' is not assignable
+  (compiling source file 'main.cpp')
+  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(1099,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1221,14): error C3863: array type 'char [100]' is not assignable
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(1222,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
@@ -72,14 +210,14 @@ E:\Semester 2\OOP\OOP Final Project\Menu.h(138,45): warning C4244:         ]
 E:\Semester 2\OOP\OOP Final Project\GameMode.h(30,9): error C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\main.cpp(242,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(242,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(244,147): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(244,104): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(259,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(259,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(263,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(263,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(269,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(269,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(341,71): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(212,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(212,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(214,147): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(214,104): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(229,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(229,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(233,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(233,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(239,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(239,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(309,71): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data

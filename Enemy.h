@@ -1,9 +1,9 @@
 #pragma once
 #include "Player.h"
 #include <cmath>
-#include <cstring>
 #include "Weapon.h"
 
+using namespace std;
 using namespace sf;
 
 // helper function to check if two rectangles overlap

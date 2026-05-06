@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <cstring>
+using namespace std;
 using namespace sf;
 
 
@@ -392,8 +392,12 @@ public:
     }
 
     Biome(const char* name, int biomeType, float startX, float endX) {
-        strncpy(this->name, name, 99);
-        this->name[99] = '\0';
+        int i = 0;
+        while (name[i] != '\0' && i < 99) {
+            this->name[i] = name[i];
+            i++;
+        }
+        this->name[i] = '\0';
         this->biomeType = biomeType;
         this->startX = startX;
         this->endX = endX;
