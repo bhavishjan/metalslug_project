@@ -1,8 +1,7 @@
-#ifndef MENU_H
-#define MENU_H
+#pragma once
 
 #include <SFML/Graphics.hpp>
-#include <string>
+#include <cstring>
 
 using namespace sf;
 
@@ -17,11 +16,16 @@ private:
     RectangleShape titleBar;
     RectangleShape survivalBtn;
     RectangleShape campaignBtn;
-    RectangleShape key1;
-    RectangleShape key2;
+    RectangleShape instructionBox;
     Text titleText;
     Text survivalText;
     Text campaignText;
+    Text instructionText;
+
+    // Arrow indicator for game mode menu
+    ConvexShape arrowIndicator;
+    int gameModeSelection; // 0 = survival, 1 = campaign
+    float arrowOffset;
 
     // Player Selection Menu Elements
     RectangleShape playerSelectMenuBg;
@@ -30,22 +34,26 @@ private:
     RectangleShape tarmaRovingBtn;
     RectangleShape eriKasamotoBtn;
     RectangleShape fiolinaGermiBtn;
-    RectangleShape playerSelectKey1;
-    RectangleShape playerSelectKey2;
-    RectangleShape playerSelectKey3;
-    RectangleShape playerSelectKey4;
+    RectangleShape playerInstructionBox;
     Text playerSelectTitleText;
     Text macroRossiText;
     Text tarmaRovingText;
     Text eriKasamotoText;
     Text fiolinaGermiText;
+    Text playerInstructionText;
+
+    // Arrow indicator for player selection
+    ConvexShape playerArrowIndicator;
+    int playerSelectionIndex; // 0-3 for characters
+    float playerArrowOffset;
 
     // Animation variables
     float animationTime;
     float pulseIntensity;
 
 public:
-    Menu(int sx, int sy) : screen_x(sx), screen_y(sy), animationTime(0), pulseIntensity(0) {
+    Menu(int sx, int sy) : screen_x(sx), screen_y(sy), animationTime(0), pulseIntensity(0), 
+                          gameModeSelection(0), arrowOffset(0), playerSelectionIndex(0), playerArrowOffset(0) {
         if (!menuFont.loadFromFile("arial.ttf")) {
             // Fallback if font fails to load
         }
@@ -79,18 +87,12 @@ public:
         campaignBtn.setOutlineThickness(2);
         campaignBtn.setOutlineColor(Color(96, 165, 250));
 
-        // Styled key indicators
-        key1.setSize(Vector2f(50, 50));
-        key1.setFillColor(Color(239, 68, 68)); // Red
-        key1.setPosition(570, 335);
-        key1.setOutlineThickness(2);
-        key1.setOutlineColor(Color(248, 113, 113));
-
-        key2.setSize(Vector2f(50, 50));
-        key2.setFillColor(Color(239, 68, 68)); // Red
-        key2.setPosition(570, 455);
-        key2.setOutlineThickness(2);
-        key2.setOutlineColor(Color(248, 113, 113));
+        // Instruction box
+        instructionBox.setSize(Vector2f(400, 80));
+        instructionBox.setFillColor(Color(30, 41, 59));
+        instructionBox.setPosition(600, 750);
+        instructionBox.setOutlineThickness(2);
+        instructionBox.setOutlineColor(Color(148, 163, 184));
 
         // Title text with shadow effect
         titleText.setFont(menuFont);
@@ -101,17 +103,34 @@ public:
 
         // Survival button text
         survivalText.setFont(menuFont);
-        survivalText.setString("1 - SURVIVAL MODE");
+        survivalText.setString("SURVIVAL MODE");
         survivalText.setCharacterSize(32);
         survivalText.setFillColor(Color(255, 255, 255));
         survivalText.setPosition(640, 340);
 
         // Campaign button text
         campaignText.setFont(menuFont);
-        campaignText.setString("2 - CAMPAIGN MODE");
+        campaignText.setString("CAMPAIGN MODE");
         campaignText.setCharacterSize(32);
         campaignText.setFillColor(Color(255, 255, 255));
         campaignText.setPosition(640, 460);
+
+        // Instruction text
+        instructionText.setFont(menuFont);
+        instructionText.setString("Use UP/DOWN arrows to navigate, ENTER to select");
+        instructionText.setCharacterSize(18);
+        instructionText.setFillColor(Color(148, 163, 184));
+        instructionText.setPosition(620, 765);
+
+        // Initialize arrow indicator
+        arrowIndicator.setPointCount(3);
+        arrowIndicator.setPoint(0, Vector2f(0, 0));
+        arrowIndicator.setPoint(1, Vector2f(-30, -15));
+        arrowIndicator.setPoint(2, Vector2f(-30, 15));
+        arrowIndicator.setFillColor(Color(255, 255, 0));
+        arrowIndicator.setOutlineThickness(2);
+        arrowIndicator.setOutlineColor(Color(255, 200, 0));
+        updateArrowPosition();
     }
 
     void initializePlayerSelectionMenu() {
@@ -151,30 +170,12 @@ public:
         fiolinaGermiBtn.setOutlineThickness(2);
         fiolinaGermiBtn.setOutlineColor(Color(167, 139, 250));
 
-        // Key indicators
-        playerSelectKey1.setSize(Vector2f(50, 50));
-        playerSelectKey1.setFillColor(Color(239, 68, 68));
-        playerSelectKey1.setPosition(570, 335);
-        playerSelectKey1.setOutlineThickness(2);
-        playerSelectKey1.setOutlineColor(Color(248, 113, 113));
-
-        playerSelectKey2.setSize(Vector2f(50, 50));
-        playerSelectKey2.setFillColor(Color(239, 68, 68));
-        playerSelectKey2.setPosition(570, 455);
-        playerSelectKey2.setOutlineThickness(2);
-        playerSelectKey2.setOutlineColor(Color(248, 113, 113));
-
-        playerSelectKey3.setSize(Vector2f(50, 50));
-        playerSelectKey3.setFillColor(Color(239, 68, 68));
-        playerSelectKey3.setPosition(570, 575);
-        playerSelectKey3.setOutlineThickness(2);
-        playerSelectKey3.setOutlineColor(Color(248, 113, 113));
-
-        playerSelectKey4.setSize(Vector2f(50, 50));
-        playerSelectKey4.setFillColor(Color(239, 68, 68));
-        playerSelectKey4.setPosition(570, 695);
-        playerSelectKey4.setOutlineThickness(2);
-        playerSelectKey4.setOutlineColor(Color(248, 113, 113));
+        // Instruction box
+        playerInstructionBox.setSize(Vector2f(400, 80));
+        playerInstructionBox.setFillColor(Color(30, 41, 59));
+        playerInstructionBox.setPosition(600, 800);
+        playerInstructionBox.setOutlineThickness(2);
+        playerInstructionBox.setOutlineColor(Color(148, 163, 184));
 
         // Text elements
         playerSelectTitleText.setFont(menuFont);
@@ -184,33 +185,114 @@ public:
         playerSelectTitleText.setPosition(520, 135);
 
         macroRossiText.setFont(menuFont);
-        macroRossiText.setString("1 - Macro Rossi");
+        macroRossiText.setString("Macro Rossi");
         macroRossiText.setCharacterSize(32);
         macroRossiText.setFillColor(Color(255, 255, 255));
         macroRossiText.setPosition(640, 340);
 
         tarmaRovingText.setFont(menuFont);
-        tarmaRovingText.setString("2 - Tarma Roving");
+        tarmaRovingText.setString("Tarma Roving");
         tarmaRovingText.setCharacterSize(32);
         tarmaRovingText.setFillColor(Color(255, 255, 255));
         tarmaRovingText.setPosition(640, 460);
 
         eriKasamotoText.setFont(menuFont);
-        eriKasamotoText.setString("3 - Eri Kasamoto");
+        eriKasamotoText.setString("Eri Kasamoto");
         eriKasamotoText.setCharacterSize(32);
         eriKasamotoText.setFillColor(Color(255, 255, 255));
         eriKasamotoText.setPosition(640, 580);
 
         fiolinaGermiText.setFont(menuFont);
-        fiolinaGermiText.setString("4 - Fiolina Germi");
+        fiolinaGermiText.setString("Fiolina Germi");
         fiolinaGermiText.setCharacterSize(32);
         fiolinaGermiText.setFillColor(Color(255, 255, 255));
         fiolinaGermiText.setPosition(640, 700);
+
+        // Instruction text
+        playerInstructionText.setFont(menuFont);
+        playerInstructionText.setString("Use UP/DOWN arrows to navigate, ENTER to select");
+        playerInstructionText.setCharacterSize(18);
+        playerInstructionText.setFillColor(Color(148, 163, 184));
+        playerInstructionText.setPosition(620, 815);
+
+        // Initialize player arrow indicator
+        playerArrowIndicator.setPointCount(3);
+        playerArrowIndicator.setPoint(0, Vector2f(0, 0));
+        playerArrowIndicator.setPoint(1, Vector2f(-30, -15));
+        playerArrowIndicator.setPoint(2, Vector2f(-30, 15));
+        playerArrowIndicator.setFillColor(Color(255, 255, 0));
+        playerArrowIndicator.setOutlineThickness(2);
+        playerArrowIndicator.setOutlineColor(Color(255, 200, 0));
+        updatePlayerArrowPosition();
     }
 
     void updateAnimation(float dt) {
         animationTime += dt;
         pulseIntensity = (sin(animationTime * 3) + 1) / 2; // 0 to 1
+    }
+
+    void updateArrowPosition() {
+        float yPos = 0;
+        if (gameModeSelection == 0) {
+            yPos = 360; // Survival button position
+        } else if (gameModeSelection == 1) {
+            yPos = 480; // Campaign button position
+        }
+        arrowIndicator.setPosition(500, yPos);
+    }
+
+    void updatePlayerArrowPosition() {
+        float yPos = 0;
+        switch (playerSelectionIndex) {
+            case 0: yPos = 360; break; // Macro Rossi
+            case 1: yPos = 480; break; // Tarma Roving
+            case 2: yPos = 600; break; // Eri Kasamoto
+            case 3: yPos = 720; break; // Fiolina Germi
+        }
+        playerArrowIndicator.setPosition(500, yPos);
+    }
+
+    // Game mode menu navigation
+    void moveGameModeSelectionUp() {
+        if (gameModeSelection > 0) {
+            gameModeSelection--;
+            updateArrowPosition();
+        }
+    }
+
+    void moveGameModeSelectionDown() {
+        if (gameModeSelection < 1) {
+            gameModeSelection++;
+            updateArrowPosition();
+        }
+    }
+
+    int getGameModeSelection() {
+        return gameModeSelection;
+    }
+
+    // Player selection menu navigation
+    void movePlayerSelectionUp() {
+        if (playerSelectionIndex > 0) {
+            playerSelectionIndex--;
+            updatePlayerArrowPosition();
+        }
+    }
+
+    void movePlayerSelectionDown() {
+        if (playerSelectionIndex < 3) {
+            playerSelectionIndex++;
+            updatePlayerArrowPosition();
+        }
+    }
+
+    int getPlayerSelectionIndex() {
+        return playerSelectionIndex;
+    }
+
+    void resetPlayerSelection() {
+        playerSelectionIndex = 0;
+        updatePlayerArrowPosition();
     }
 
     void renderGameModeMenu(RenderWindow& window) {
@@ -231,12 +313,13 @@ public:
         window.draw(titleBar);
         window.draw(survivalBtn);
         window.draw(campaignBtn);
-        window.draw(key1);
-        window.draw(key2);
+        window.draw(instructionBox);
+        window.draw(arrowIndicator);
 
         window.draw(titleText);
         window.draw(survivalText);
         window.draw(campaignText);
+        window.draw(instructionText);
 
         window.display();
     }
@@ -270,19 +353,16 @@ public:
         window.draw(tarmaRovingBtn);
         window.draw(eriKasamotoBtn);
         window.draw(fiolinaGermiBtn);
-        window.draw(playerSelectKey1);
-        window.draw(playerSelectKey2);
-        window.draw(playerSelectKey3);
-        window.draw(playerSelectKey4);
+        window.draw(playerInstructionBox);
+        window.draw(playerArrowIndicator);
 
         window.draw(playerSelectTitleText);
         window.draw(macroRossiText);
         window.draw(tarmaRovingText);
         window.draw(eriKasamotoText);
         window.draw(fiolinaGermiText);
+        window.draw(playerInstructionText);
 
         window.display();
     }
 };
-
-#endif

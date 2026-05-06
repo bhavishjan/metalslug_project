@@ -6,7 +6,8 @@
 #include "Player.h"
 #include "Weapon.h"
 #include "Enemy.h"
-#include "menu.h"
+#include "Menu.h"
+#include "GameMode.h"
 
 using namespace sf;
 using namespace std;
@@ -41,13 +42,12 @@ int main() {
     // -------------------------
     // SURVIVAL MODE VARIABLES
     // -------------------------
-    Level* currentLevel = nullptr;
-    int currentLevelNum = 1;
+    SurvivalGame* survivalGame = nullptr;
 
     // -------------------------
     // CAMPAIGN MODE VARIABLES
     // -------------------------
-    CampaignLevel* campaignLevel = nullptr;
+    CampaignGame* campaignGame = nullptr;
 
     // -------------------------
     // PLAYER SETUP
@@ -87,57 +87,58 @@ int main() {
             // MENU INPUT
             // -------------------------
             if (gameMode == 0 && ev.type == Event::KeyPressed) {
-
-                if (ev.key.code == Keyboard::Num1) {
-                    gameMode = 1;
-                    currentLevelNum = 1;
-                    currentLevel = new Level1();
-                    currentLevel->generateBiomes();
-                    characters.getActivePlayer()->setPlayerPosition(currentLevel->getPlayerSpawnX(), currentLevel->getPlayerSpawnY());
-					characters.getActivePlayer()->setVelocity(0, 0);
-                    onGround = false;
-                    cameraX = cameraY = 0;
-                    Delay.restart();
-					cout << "Entered Survival Mode" << endl;
+                if (ev.key.code == Keyboard::Up) {
+                    menu.moveGameModeSelectionUp();
                 }
-				else if (ev.key.code == Keyboard::Num2) {
-					gameMode = 2;
-					campaignLevel = new CampaignLevel(3); // Normal profile
-					for (int i = 0; i < 8; i++)
-						campaignLevel->generateChunk(i * 16);
-					characters.getActivePlayer()->setPlayerPosition(200, 50);
-					characters.getActivePlayer()->setVelocity(0, 0);
-					onGround = false;
-					cameraX = cameraY = 0;
-					Delay.restart();
-					cout << "Entered Campaign Mode" << endl;
-				}
-			}
+                else if (ev.key.code == Keyboard::Down) {
+                    menu.moveGameModeSelectionDown();
+                }
+                else if (ev.key.code == Keyboard::Enter) {
+                    int selection = menu.getGameModeSelection();
+                    if (selection == 0) {
+                        gameMode = 1;
+                        survivalGame = new SurvivalGame(screen_x, screen_y);
+                        survivalGame->setCharManager(&characters);
+                        survivalGame->start();
+                        characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
+                        characters.getActivePlayer()->setVelocity(0, 0);
+                        onGround = false;
+                        cameraX = cameraY = 0;
+                        Delay.restart();
+                        menu.resetPlayerSelection();
+                        cout << "Entered Survival Mode" << endl;
+                    }
+                    else if (selection == 1) {
+                        gameMode = 2;
+                        campaignGame = new CampaignGame(screen_x, screen_y);
+                        campaignGame->setCharManager(&characters);
+                        campaignGame->start();
+                        characters.getActivePlayer()->setPlayerPosition(200, 50);
+                        characters.getActivePlayer()->setVelocity(0, 0);
+                        onGround = false;
+                        cameraX = cameraY = 0;
+                        Delay.restart();
+                        menu.resetPlayerSelection();
+                        cout << "Entered Campaign Mode" << endl;
+                    }
+                }
+            }
 
 			// -------------------------
 			// PLAYER SELECTION MENU INPUT
 			// -------------------------
 			if (playerSelection == false && gameMode != 0 && ev.type == Event::KeyPressed && Delay.getElapsedTime().asSeconds() > 0.2f) {
-
-				if (ev.key.code == Keyboard::Num1) {
-					characters.switchCharacterToIndex(0);
-                    playerSelection = true;
-					cout << "Selected Macro Rossi" << endl;
+				if (ev.key.code == Keyboard::Up) {
+                    menu.movePlayerSelectionUp();
 				}
-				else if (ev.key.code == Keyboard::Num2) {
-					characters.switchCharacterToIndex(1);
-                    playerSelection = true;
-					cout << "Selected Tarma Roving" << endl;
+				else if (ev.key.code == Keyboard::Down) {
+                    menu.movePlayerSelectionDown();
 				}
-				else if (ev.key.code == Keyboard::Num3) {
-					characters.switchCharacterToIndex(2);
+				else if (ev.key.code == Keyboard::Enter) {
+                    int selection = menu.getPlayerSelectionIndex();
+                    characters.switchCharacterToIndex(selection);
                     playerSelection = true;
-					cout << "Selected Eri Kasamoto" << endl;
-				}
-				else if (ev.key.code == Keyboard::Num4) {
-					characters.switchCharacterToIndex(3);
-					playerSelection = true;
-					cout << "Selected Fiolina Germi" << endl;
+                    cout << "Selected character at index: " << selection << endl;
 				}
 			}
         }
@@ -146,10 +147,10 @@ int main() {
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
             if (gameMode != 0) {
                 gameMode = 0;
-                delete currentLevel;
-                currentLevel = nullptr;
-                delete campaignLevel;
-                campaignLevel = nullptr;
+                delete survivalGame;
+                survivalGame = nullptr;
+                delete campaignGame;
+                campaignGame = nullptr;
                 cameraX = cameraY = 0;
             }
             else {
@@ -223,177 +224,160 @@ int main() {
         // =========================================
         // SURVIVAL MODE
         // =========================================
-        if (gameMode == 1 && currentLevel) {
-
-            /// Get current state
-            float pX = characters.getActivePlayer()->getPlayerX();
-            float pY = characters.getActivePlayer()->getPlayerY();
-            float pVelocityX = characters.getActivePlayer()->getVelocityX();
-            float pVelocityY = characters.getActivePlayer()->getVelocityY();
-
-            // Apply horizontal movement
-            pX += pVelocityX;
-
-            // Step-up mechanism: only when moving horizontally AND blocked at current height
-            float stepHeight = 20.0f;
-            if (pVelocityX != 0 &&
-                currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                float tempY = pY - stepHeight;
-                if (!currentLevel->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    // Small obstacle — step up over it
-                    pY = tempY;
-                }
-                else {
-                    // Wall — revert horizontal movement
-                    pX = characters.getActivePlayer()->getPlayerX();
-                    pVelocityX = 0;
-                }
-            }
-
-            // Apply vertical movement
-            pY += pVelocityY;
-
-            // Check vertical collision
-            if (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                if (pVelocityY > 0) {
-                    onGround = true;
-                    pVelocityY = 0;
-                    while (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                        pY -= 1;
-                    }
-                }
-                else {
-                    pVelocityY = 0;
-                    while (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                        pY += 1;
-                    }
-                }
-            }
-            else {
-                if (pVelocityY >= 0) {
-                    onGround = false;
-                }
-            }
-
-            // Update player position and velocity
-            characters.getActivePlayer()->setPlayerPosition(pX, pY);
-            characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
-
-            // Bounds
-            if (pX < 0) {
-                characters.getActivePlayer()->setPlayerX(0);
-            }
-            if (characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getWidth() > currentLevel->getLevelEnd())
-                characters.getActivePlayer()->setPlayerX(currentLevel->getLevelEnd() - characters.getActivePlayer()->getWidth());
-
-            // Level end check
-            if (characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getWidth() >= currentLevel->getLevelEnd() - 100)
-                currentLevel->playerReachedEnd();
-
-            // Level switch
-            if (currentLevel->checkLevelComplete()) {
-                delete currentLevel;
-                currentLevel = nullptr;
-
-                if (currentLevelNum == 1) {
-                    currentLevelNum = 2;
-                    currentLevel = new Level2();
-                }
-                else if (currentLevelNum == 2) {
-                    currentLevelNum = 3;
-                    currentLevel = new Level3();
-                }
-                else {
-                    gameMode = 0;
-                }
-
-                if (currentLevel) {
-                    currentLevel->generateBiomes();
-                    characters.getActivePlayer()->setPlayerPosition(currentLevel->getPlayerSpawnX(), currentLevel->getPlayerSpawnY());
-                    pVelocityX = pVelocityY = 0;
-                    onGround = false;
-                    cameraX = cameraY = 0;
-                }
-            }
-
-            // Camera follows player smoothly, centered horizontally
+        if (gameMode == 1 && survivalGame) {
+            Level* currentLevel = survivalGame->getCurrentLevel();
             if (currentLevel) {
+                /// Get current state
+                float pX = characters.getActivePlayer()->getPlayerX();
+                float pY = characters.getActivePlayer()->getPlayerY();
+                float pVelocityX = characters.getActivePlayer()->getVelocityX();
+                float pVelocityY = characters.getActivePlayer()->getVelocityY();
+
+                // Apply horizontal movement
+                pX += pVelocityX;
+
+                // Step-up mechanism: only when moving horizontally AND blocked at current height
+                float stepHeight = 20.0f;
+                if (pVelocityX != 0 &&
+                    currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    float tempY = pY - stepHeight;
+                    if (!currentLevel->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                        // Small obstacle — step up over it
+                        pY = tempY;
+                    }
+                    else {
+                        // Wall — revert horizontal movement
+                        pX = characters.getActivePlayer()->getPlayerX();
+                        pVelocityX = 0;
+                    }
+                }
+
+                // Apply vertical movement
+                pY += pVelocityY;
+
+                // Check vertical collision
+                if (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    if (pVelocityY > 0) {
+                        onGround = true;
+                        pVelocityY = 0;
+                        while (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                            pY -= 1;
+                        }
+                    }
+                    else {
+                        pVelocityY = 0;
+                        while (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                            pY += 1;
+                        }
+                    }
+                }
+                else {
+                    if (pVelocityY >= 0) {
+                        onGround = false;
+                    }
+                }
+
+                // Update player position and velocity
+                characters.getActivePlayer()->setPlayerPosition(pX, pY);
+                characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
+
+                // Bounds
+                if (pX < 0) {
+                    characters.getActivePlayer()->setPlayerX(0);
+                }
+                if (characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getWidth() > currentLevel->getLevelEnd())
+                    characters.getActivePlayer()->setPlayerX(currentLevel->getLevelEnd() - characters.getActivePlayer()->getWidth());
+
+                // Level end check
+                if (characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getWidth() >= currentLevel->getLevelEnd() - 100)
+                    currentLevel->playerReachedEnd();
+
+                // Camera follows player smoothly, centered horizontally
                 float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
                 cameraX += (targetCamX - cameraX) * 0.2f;
                 if (cameraX < 0)
                     cameraX = 0;
                 if (cameraX > currentLevel->getLevelEnd() - screen_x)
                     cameraX = currentLevel->getLevelEnd() - screen_x;
+                cameraY = 0;
+
+                survivalGame->setCamera(cameraX, cameraY);
+
+                // Z swaps character
+                if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f)
+                {
+                    characters.switchCharacter();
+                    Delay.restart();
+                }
+
+                // Update
+                survivalGame->update(dt, &characters);
+
+                // Render
+                window.clear(Color(135, 206, 235));
+                survivalGame->render(window);
+                characters.getActivePlayer()->render(window, cameraX, cameraY);
+                window.display();
             }
-            cameraY = 0;
-
-            // Z swaps character
-            if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f)
-            {
-                characters.switchCharacter();
-                Delay.restart();
+            else {
+                gameMode = 0;
             }
-
-
-            // Update
-            currentLevel->update(dt);
-            characters.getActivePlayer()->updateAnimation(dt);
-
-            // Render
-            window.clear(Color(135, 206, 235));
-            currentLevel->render(window, cameraX, cameraY);
-            characters.getActivePlayer()->render(window, cameraX, cameraY);
-            window.display();
         }
 
         // =========================================
         // CAMPAIGN MODE
         // =========================================
-        else if (gameMode == 2 && campaignLevel) {
+        else if (gameMode == 2 && campaignGame) {
+            CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
+            if (campaignLevel) {
+                // X move
+                characters.getActivePlayer()->setPlayerX(characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getVelocityX());
 
-            // X move
-            characters.getActivePlayer()->setPlayerX(characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getVelocityX());
+                // Y move
+                characters.getActivePlayer()->setPlayerY(characters.getActivePlayer()->getPlayerY() + characters.getActivePlayer()->getVelocityY());
 
-            // Y move
-            characters.getActivePlayer()->setPlayerY(characters.getActivePlayer()->getPlayerY() + characters.getActivePlayer()->getVelocityY());
+                // Screen bottom boundary
+                if (characters.getActivePlayer()->getPlayerY() + characters.getActivePlayer()->getHeight() > screen_y) {
+                    characters.getActivePlayer()->setPlayerY(screen_y - characters.getActivePlayer()->getHeight());
+                    characters.getActivePlayer()->setVelocityY(0);
+                    onGround = true;
+                }
 
-            // Screen bottom boundary
-            if (characters.getActivePlayer()->getPlayerY() + characters.getActivePlayer()->getHeight() > screen_y) {
-                characters.getActivePlayer()->setPlayerY(screen_y - characters.getActivePlayer()->getHeight());
-                characters.getActivePlayer()->setVelocityY(0);
-                onGround = true;
+                // Left bound
+                if (characters.getActivePlayer()->getPlayerX() < 0)
+                    characters.getActivePlayer()->setPlayerX(0);
+
+                // Camera
+                float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
+                cameraX += (targetCamX - cameraX) * 0.2f;
+                if (cameraX < 0) cameraX = 0;
+                cameraY = 0;
+
+                campaignGame->setCamera(cameraX, cameraY);
+
+                // Z swaps character
+                if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f)
+                {
+                    characters.switchCharacter();
+                    Delay.restart();
+                }
+
+                // Update
+                campaignGame->update(dt, &characters);
+
+                // Render
+                window.clear(Color(135, 206, 235));
+                campaignGame->render(window);
+                characters.getActivePlayer()->render(window, cameraX, cameraY);
+                window.display();
             }
-
-            // Left bound
-            if (characters.getActivePlayer()->getPlayerX() < 0) 
-                characters.getActivePlayer()->setPlayerX(0);
-
-            // Campaign update - naye chunks auto generate honge
-            campaignLevel->update(characters.getActivePlayer()->getPlayerX());
-            characters.getActivePlayer()->updateAnimation(dt);
-
-            // Camera
-            float targetCamX = characters.getActivePlayer()->getPlayerX() - screen_x / 2.0f;
-            cameraX += (targetCamX - cameraX) * 0.2f;
-            if (cameraX < 0) cameraX = 0;
-            cameraY = 0;
-
-            // Z swaps character
-            if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f)
-            {
-                characters.switchCharacter();
-                Delay.restart();
+            else {
+                gameMode = 0;
             }
-
-            // Render
-            window.clear(Color(135, 206, 235));
-            campaignLevel->render(window, cameraX, cameraY);
-            characters.getActivePlayer()->render(window, cameraX, cameraY);
-            window.display();
         }
     }
 
-    delete currentLevel;
-    delete campaignLevel;
+    delete survivalGame;
+    delete campaignGame;
     return 0;
 }

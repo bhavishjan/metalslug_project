@@ -80,8 +80,14 @@ protected:
     int    totalEnemiesKilled;
     float  scoreMultiplier;
 
+    // Physics and game state
+    float  cameraX;
+    float  cameraY;
+    int    screenX;
+    int    screenY;
+
 public:
-    SurvivalMode() : GameMode("Survival Mode") {
+    SurvivalMode(int sx, int sy) : GameMode("Survival Mode") {
         totalLevels = 4;
         currentLevelIndex = 0;
         currentLevel = nullptr;
@@ -90,6 +96,10 @@ public:
         isFlawlessVictory = true;
         totalEnemiesKilled = 0;
         scoreMultiplier = 1.0f;
+        cameraX = 0;
+        cameraY = 0;
+        screenX = sx;
+        screenY = sy;
         for (int i = 0; i < 4; i++) levels[i] = nullptr;
     }
 
@@ -110,19 +120,24 @@ public:
         currentLevelIndex = 0;
         isFlawlessVictory = true;
         fusionUsedThisLevel = false;
+        cameraX = 0;
+        cameraY = 0;
         loadAllLevels();
         switchToLevel(0);
     }
 
-    void update(float dt) override {
+    void update(float dt, CharacterManager* characters) {
         if (!isActive || isPaused) return;
         gameTimer += dt;
-        if (currentLevel) currentLevel->update(dt);
+        if (currentLevel) {
+            currentLevel->update(dt);
+            characters->getActivePlayer()->updateAnimation(dt);
+        }
         checkLevelComplete();
     }
 
     void render(RenderWindow& window) override {
-        if (currentLevel) currentLevel->render(window, 0, 0);
+        if (currentLevel) currentLevel->render(window, cameraX, cameraY);
     }
 
     bool checkGameOver() override { return false; }
@@ -160,6 +175,24 @@ public:
     bool   getIsBossLevel() { return isBossLevel; }
     bool   getIsFlawless() { return isFlawlessVictory; }
     float  getScoreMultiplier() { return scoreMultiplier; }
+
+    void setCamera(float x, float y) { cameraX = x; cameraY = y; }
+    float getCameraX() { return cameraX; }
+    float getCameraY() { return cameraY; }
+};
+
+
+// Concrete implementation for Survival Mode
+class SurvivalGame : public SurvivalMode {
+public:
+    SurvivalGame(int sx, int sy) : SurvivalMode(sx, sy) {}
+
+    void loadAllLevels() override {
+        levels[0] = new Level1();
+        levels[1] = new Level2();
+        levels[2] = new Level3();
+        levels[3] = nullptr; // Boss level to be implemented
+    }
 };
 
 
@@ -183,8 +216,14 @@ private:
 
     int   selectedNoiseProfile;    // 1=Amplified 2=Flat 3=Normal
 
+    // Physics and game state
+    float  cameraX;
+    float  cameraY;
+    int    screenX;
+    int    screenY;
+
 public:
-    CampaignMode() : GameMode("Campaign Mode") {
+    CampaignMode(int sx, int sy) : GameMode("Campaign Mode") {
         campaignLevel = nullptr;
         killQuotaPerType = 5;
         vehicleDestroyQuota = 3;
@@ -192,6 +231,10 @@ public:
         fusionCooldownTimer = 0.0f;
         fusionCooldownDuration = 180.0f;
         selectedNoiseProfile = 3;
+        cameraX = 0;
+        cameraY = 0;
+        screenX = sx;
+        screenY = sy;
 
         for (int i = 0; i < 8; i++) enemiesKilledPerType[i] = 0;
         for (int i = 0; i < 3; i++) vehiclesDestroyedPerType[i] = 0;
@@ -206,9 +249,11 @@ public:
         isActive = true;
         isPaused = false;
         campaignLevel = new CampaignLevel(selectedNoiseProfile);
+        cameraX = 0;
+        cameraY = 0;
     }
 
-    void update(float dt) override {
+    void update(float dt, CharacterManager* characters) {
         if (!isActive || isPaused) return;
         gameTimer += dt;
 
@@ -217,12 +262,15 @@ public:
             if (fusionCooldownTimer < 0.0f) fusionCooldownTimer = 0.0f;
         }
 
-        if (campaignLevel) campaignLevel->update(0);  // player X passed at runtime
+        if (campaignLevel) {
+            campaignLevel->update(characters->getActivePlayer()->getPlayerX());
+            characters->getActivePlayer()->updateAnimation(dt);
+        }
         checkKillQuota();
     }
 
     void render(RenderWindow& window) override {
-        if (campaignLevel) campaignLevel->render(window, 0, 0);
+        if (campaignLevel) campaignLevel->render(window, cameraX, cameraY);
     }
 
     bool checkGameOver() override { return false; }
@@ -258,4 +306,15 @@ public:
     CampaignLevel* getCampaignLevel() { return campaignLevel; }
     bool           isKillQuotaDone() { return isKillQuotaReached; }
     float          getFusionCooldown() { return fusionCooldownTimer; }
+
+    void setCamera(float x, float y) { cameraX = x; cameraY = y; }
+    float getCameraX() { return cameraX; }
+    float getCameraY() { return cameraY; }
+};
+
+
+// Concrete implementation for Campaign Mode
+class CampaignGame : public CampaignMode {
+public:
+    CampaignGame(int sx, int sy) : CampaignMode(sx, sy) {}
 };
