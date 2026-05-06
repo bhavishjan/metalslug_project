@@ -350,7 +350,8 @@ public:
         // anchor sprite by its bottom center so feet sit on collision box bottom
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
-        sprite.setScale(facingRight ? 1.f : -1.f, 1.f);
+        float sc = 2.0f;
+        sprite.setScale(facingRight ? sc : -sc, sc);
 
         window.draw(sprite);
     }

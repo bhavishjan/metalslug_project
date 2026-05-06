@@ -44,7 +44,7 @@ int main() {
 
     // PLAYER SETUP
 
-    float moveAcceleration = 0.6f;
+    float moveAcceleration = 1.2f;
     float friction = 0.80f;
     float airFriction = 0.95f;
     float jumpPower = -22.0f;
@@ -201,8 +201,8 @@ int main() {
             else          characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * airFriction);
         }
 
-        if (characters.getActivePlayer()->getVelocityX() > 6) characters.getActivePlayer()->setVelocityX(6);
-        if (characters.getActivePlayer()->getVelocityX() < -6) characters.getActivePlayer()->setVelocityX(-6);
+        if (characters.getActivePlayer()->getVelocityX() > 10) characters.getActivePlayer()->setVelocityX(10);
+        if (characters.getActivePlayer()->getVelocityX() < -10) characters.getActivePlayer()->setVelocityX(-10);
 
         // JUMP
         if (Keyboard::isKeyPressed(Keyboard::Up)) {
@@ -429,15 +429,8 @@ int main() {
                 window.clear(Color(135, 206, 235));
                 campaignGame->render(window);
                 for (int i = 0; i < campaignRebelCount; i++) {
-                    if (campaignRebels[i]) {
+                    if (campaignRebels[i])
                         campaignRebels[i]->render(window, cameraX, cameraY);
-                        // debug: red box so we can see enemy even if texture missing
-                        RectangleShape dbg(Vector2f(32.f, 48.f));
-                        dbg.setFillColor(Color(255, 0, 0, 180));
-                        dbg.setPosition(campaignRebels[i]->getX() - cameraX,
-                                        campaignRebels[i]->getY() - cameraY);
-                        window.draw(dbg);
-                    }
                 }
                 characters.getActivePlayer()->render(window, cameraX, cameraY);
                 window.display();
