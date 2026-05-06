@@ -429,8 +429,15 @@ int main() {
                 window.clear(Color(135, 206, 235));
                 campaignGame->render(window);
                 for (int i = 0; i < campaignRebelCount; i++) {
-                    if (campaignRebels[i])
+                    if (campaignRebels[i]) {
                         campaignRebels[i]->render(window, cameraX, cameraY);
+                        // debug: red box so we can see enemy even if texture missing
+                        RectangleShape dbg(Vector2f(32.f, 48.f));
+                        dbg.setFillColor(Color(255, 0, 0, 180));
+                        dbg.setPosition(campaignRebels[i]->getX() - cameraX,
+                                        campaignRebels[i]->getY() - cameraY);
+                        window.draw(dbg);
+                    }
                 }
                 characters.getActivePlayer()->render(window, cameraX, cameraY);
                 window.display();
