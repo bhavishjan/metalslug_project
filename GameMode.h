@@ -126,6 +126,13 @@ public:
         switchToLevel(0);
     }
 
+    void update(float dt) override {
+        if (!isActive || isPaused) return;
+        gameTimer += dt;
+        if (currentLevel) currentLevel->update(dt);
+        checkLevelComplete();
+    }
+
     void update(float dt, CharacterManager* characters) {
         if (!isActive || isPaused) return;
         gameTimer += dt;
@@ -251,6 +258,19 @@ public:
         campaignLevel = new CampaignLevel(selectedNoiseProfile);
         cameraX = 0;
         cameraY = 0;
+    }
+
+    void update(float dt) override {
+        if (!isActive || isPaused) return;
+        gameTimer += dt;
+
+        if (fusionCooldownTimer > 0.0f) {
+            fusionCooldownTimer -= dt;
+            if (fusionCooldownTimer < 0.0f) fusionCooldownTimer = 0.0f;
+        }
+
+        if (campaignLevel) campaignLevel->update(0);
+        checkKillQuota();
     }
 
     void update(float dt, CharacterManager* characters) {
