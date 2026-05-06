@@ -284,6 +284,7 @@ public:
 
         // firing
         pistol.fire(angle);
+        fireTimer = 0.4f;   // drives SHOOT animation state
 
         // facing direction update
         facingRight = (dx > 0);
@@ -304,26 +305,52 @@ public:
             attack();
 
         pistol.update(dt);
+        if (fireTimer > 0.f) fireTimer -= dt;
         applyGravity(dt);
         checkGrounded();
         checkPlayerCollision(largestPlayer);
+
+        updateAnimState(dt);
+    }
+
+    // pick animation based on current enemy behavior and advance its frame
+    virtual void updateAnimState(float dt) {
+        int desired;
+        if (!isAlive) {
+            desired = DIE;
+        }
+        else if (fireTimer > 0.f) {
+            desired = SHOOT;
+        }
+        else if (velocityX > 0.5f || velocityX < -0.5f) {
+            desired = WALK;
+        }
+        else {
+            desired = STAND;
+        }
+
+        if (desired != currentAnim) {
+            currentAnim = desired;
+            anims[currentAnim].reset();
+        }
+
+        anims[currentAnim].update(dt);
     }
 
     virtual void render(RenderWindow& window) {
-        if (!isAlive) return;
+        if (!isAlive && currentAnim != DIE) return;
 
-        // sprite pos
-        sprite.setPosition(x, y);
+        Animation& a = anims[currentAnim];
+        IntRect r = a.currentRect();
+        if (r.width == 0 || r.height == 0) return;
 
-        // flip for left face
-        if (!facingRight) {
-            sprite.setScale(-1.f, 1.f);
-            sprite.setOrigin(width, 0);
-        }
-        else {
-            sprite.setScale(1.f, 1.f);
-            sprite.setOrigin(0, 0);
-        }
+        sprite.setTexture(a.getTexture(), true);
+        sprite.setTextureRect(r);
+
+        // anchor sprite by its bottom center so feet sit on collision box bottom
+        sprite.setOrigin(r.width / 2.0f, (float)r.height);
+        sprite.setPosition(x + width / 2.0f, y + height);
+        sprite.setScale(facingRight ? 1.f : -1.f, 1.f);
 
         window.draw(sprite);
     }
@@ -367,34 +394,34 @@ public:
         width = 32.0f;
         height = 48.0f;
 
-        // walk animation
-        static const int walkXs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkYs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkWs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkHs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        // walk animation (12 frame running cycle - row 1)
+        static const int walkXs[12] = {   3,  40,  80, 125, 170, 210, 248, 285, 326, 369, 410, 450 };
+        static const int walkYs[12] = {  44,  44,  45,  46,  45,  44,  44,  44,  45,  46,  45,  44 };
+        static const int walkWs[12] = {  34,  37,  42,  42,  37,  35,  34,  38,  40,  38,  37,  35 };
+        static const int walkHs[12] = {  37,  37,  31,  33,  35,  37,  37,  36,  30,  32,  35,  37 };
 
-        // stand animation
-        static const int standXs[1] = { 0 };
-        static const int standYs[1] = { 0 };
-        static const int standWs[1] = { 0 };
-        static const int standHs[1] = { 0 };
+        // stand animation (1 frame idle - row 0)
+        static const int standXs[1] = {  3 };
+        static const int standYs[1] = {  3 };
+        static const int standWs[1] = { 40 };
+        static const int standHs[1] = { 38 };
 
-        // shoot animation
-        static const int shootXs[4] = { 0, 0, 0, 0 };
-        static const int shootYs[4] = { 0, 0, 0, 0 };
-        static const int shootWs[4] = { 0, 0, 0, 0 };
-        static const int shootHs[4] = { 0, 0, 0, 0 };
+        // shoot animation (5 frame rifle fire - row 10)
+        static const int shootXs[5] = {   3,  45,  86, 132, 181 };
+        static const int shootYs[5] = { 441, 441, 442, 444, 444 };
+        static const int shootWs[5] = {  39,  38,  43,  46,  46 };
+        static const int shootHs[5] = {  38,  38,  37,  35,  35 };
 
-        // die animation
-        static const int dieXs[4] = { 0, 0, 0, 0 };
-        static const int dieYs[4] = { 0, 0, 0, 0 };
-        static const int dieWs[4] = { 0, 0, 0, 0 };
-        static const int dieHs[4] = { 0, 0, 0, 0 };
+        // die animation (4 frame collapse - row 20)
+        static const int dieXs[4] = {   3,  44,  86, 129 };
+        static const int dieYs[4] = { 784, 785, 786, 786 };
+        static const int dieWs[4] = {  38,  39,  40,  40 };
+        static const int dieHs[4] = {  33,  32,  31,  31 };
 
-        anims[WALK].load("Sprites/Rebel Soldier.png", walkXs, walkYs, walkWs, walkHs, 8, 0.08f);
-        anims[STAND].load("Sprites/Rebel Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
-        anims[SHOOT].load("Sprites/Rebel Soldier.png", shootXs, shootYs, shootWs, shootHs, 4, 0.10f);
-        anims[DIE].load("Sprites/Rebel Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
+        anims[WALK].load("Sprites/Enemies/Rebel Soldier.png", walkXs, walkYs, walkWs, walkHs, 12, 0.07f);
+        anims[STAND].load("Sprites/Enemies/Rebel Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[SHOOT].load("Sprites/Enemies/Rebel Soldier.png", shootXs, shootYs, shootWs, shootHs, 5, 0.08f);
+        anims[DIE].load("Sprites/Enemies/Rebel Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.15f);
     }
 
     // uses parent InfantryEnemy attack no need to override

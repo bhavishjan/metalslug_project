@@ -61,7 +61,7 @@ public:
     }
 
     void loadBackgrounds() {
-        if (startBgTexture.loadFromFile("start.jpg")) {
+        if (startBgTexture.loadFromFile("start.png")) {
             startBgSprite.setTexture(startBgTexture);
             Vector2u sz = startBgTexture.getSize();
             startBgSprite.setScale((float)screen_x / sz.x, (float)screen_y / sz.y);
@@ -122,7 +122,7 @@ public:
         charTitleBar.setFillColor(Color(220, 50, 50, 230));
 
         charTitle.setFont(menuFont);
-        charTitle.setString("SELECT HERO");
+        charTitle.setString("SELECT CHARACTER");
         charTitle.setCharacterSize(34);
         charTitle.setFillColor(Color(255, 255, 255));
         charTitle.setStyle(Text::Bold);
