@@ -20,7 +20,7 @@ static bool rectsOverlap(float ax, float ay, float aw, float ah,
 // every enemy type inherits from this
 class Enemy {
 protected:
-    char name[100];
+    const char* name;
     float x, y;
     float width, height;
     float velocityX, velocityY;

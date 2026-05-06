@@ -13,7 +13,7 @@ class Camera;
 
 class GameMode {
 protected:
-    char   name[32];
+    const char* name;
     bool   isActive;
     bool   isPaused;
     int    score;
@@ -27,12 +27,7 @@ protected:
 
 public:
     GameMode(const char* n) {
-        int i = 0;
-        while (n[i] != '\0' && i < 31) {
-            name[i] = n[i];
-            i++;
-        }
-        name[i] = '\0';
+        name = n;
         isActive = false;
         isPaused = false;
         score = 0;

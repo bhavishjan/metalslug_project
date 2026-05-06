@@ -372,7 +372,7 @@ public:
 //if size is more = bigger hill
 class Biome {
 protected:
-    char name[100];
+    const char* name;
     int    biomeType;
     float  startX, endX;
     float  startY, endY;
@@ -383,7 +383,7 @@ protected:
 
 public:
     Biome() {
-        name[0] = '\0';
+        name = "";
         biomeType = BIOME_PLAINS;
         startX = endX = 0;
         startY = 0; endY = 900;
@@ -392,12 +392,7 @@ public:
     }
 
     Biome(const char* name, int biomeType, float startX, float endX) {
-        int i = 0;
-        while (name[i] != '\0' && i < 99) {
-            this->name[i] = name[i];
-            i++;
-        }
-        this->name[i] = '\0';
+        this->name = name;
         this->biomeType = biomeType;
         this->startX = startX;
         this->endX = endX;
