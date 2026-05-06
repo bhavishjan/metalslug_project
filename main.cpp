@@ -121,8 +121,9 @@ int main() {
                             for (int i = 0; i < MAX_CAMPAIGN_REBELS; i++) {
                                 delete campaignRebels[i];
                                 campaignRebels[i] = new RebelSoldier();
-                                campaignRebels[i]->setPosition(600.f + i * 300.f, 400.f);
+                                campaignRebels[i]->setPosition(400.f + i * 200.f, 100.f);
                                 campaignRebels[i]->setPlayer(characters.getActivePlayer());
+                                campaignRebels[i]->setGroundY((float)(screen_y - 48));
                             }
                             campaignRebelCount = MAX_CAMPAIGN_REBELS;
                             cout << "Entered Campaign Mode" << endl;
@@ -408,16 +409,16 @@ int main() {
                     if (campaignRebels[i]) {
                         campaignRebels[i]->setPlayer(characters.getActivePlayer());
                         campaignRebels[i]->update(dt);
-                        // ground-snap enemy to campaign blocks
+                        // resolve against campaign blocks
                         float ex = campaignRebels[i]->getX();
                         float ey = campaignRebels[i]->getY();
                         float ew = 32.f, eh = 48.f;
                         float evx = 0.f, evy = 0.f;
                         bool eGround = false;
                         campaignLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, eGround);
-                        if (eGround) campaignRebels[i]->setPosition(ex, ey);
+                        campaignRebels[i]->setPosition(ex, ey);
                         // fallback: screen bottom
-                        if (ey + eh > screen_y) campaignRebels[i]->setPosition(ex, (float)(screen_y - eh));
+                        if (ey + eh > (float)screen_y) campaignRebels[i]->setPosition(ex, (float)(screen_y - eh));
                     }
                 }
 

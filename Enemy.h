@@ -51,6 +51,7 @@ protected:
     Player* largestPlayer;
 
     float gravityConstant = 900.0f;
+    float groundY = 852.f;  // default floor (screen_y - height)
 
 public:
     Enemy() : x(0), y(0), width(32), height(48),
@@ -147,10 +148,8 @@ public:
     }
 
     void checkGrounded() {
-        // treat any surface below enemy as ground
-        float GROUND_Y = 520.f;  // placeholder floor level
-        if (y + height >= GROUND_Y) {
-            y = GROUND_Y - height;
+        if (y + height >= groundY) {
+            y = groundY - height;
             velocityY = 0.f;
             isGrounded = true;
         }
@@ -222,6 +221,7 @@ public:
     void setPosition(float nx, float ny) { x = nx; y = ny; }
     void setPlayer(Player* p) { largestPlayer = p; }
     void setX(float nx) { x = nx; }
+    void setGroundY(float gy) { groundY = gy; }
 };
 
 
@@ -379,7 +379,7 @@ public:
         fireTimer = 0.0f;
         bulletDamage = 3;
 
-        detectionRange = 350.0f;
+        detectionRange = 800.0f;
         attackRange = 300.0f;
 
         isAlive = true;
@@ -1677,3 +1677,4 @@ public:
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
 };
+void Enemy::spawnLoot() {}
