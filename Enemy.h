@@ -229,6 +229,11 @@ public:
 // has pistol and basic movement
 class InfantryEnemy : public Enemy {
 protected:
+    static const int WALK  = 0;
+    static const int STAND = 1;
+    static const int SHOOT = 2;
+    static const int DIE   = 3;
+
     float   fireRate;
     float   fireTimer;
     int     bulletDamage;
@@ -238,12 +243,15 @@ protected:
     Pistol  pistol;
     Sprite  sprite;
     Texture texture;
+    Animation anims[4];
+    int currentAnim;
 
 public:
     InfantryEnemy() : Enemy(),
         fireRate(3.f), fireTimer(0.f),
         bulletDamage(3), batchSize(2),
-        reloadTimer(0.f), reloadDuration(2.f) {
+        reloadTimer(0.f), reloadDuration(2.f),
+        currentAnim(STAND) {
     }
 
     virtual ~InfantryEnemy() {}
@@ -358,6 +366,35 @@ public:
 
         width = 32.0f;
         height = 48.0f;
+
+        // walk animation
+        static const int walkXs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkYs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkWs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkHs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        // stand animation
+        static const int standXs[1] = { 0 };
+        static const int standYs[1] = { 0 };
+        static const int standWs[1] = { 0 };
+        static const int standHs[1] = { 0 };
+
+        // shoot animation
+        static const int shootXs[4] = { 0, 0, 0, 0 };
+        static const int shootYs[4] = { 0, 0, 0, 0 };
+        static const int shootWs[4] = { 0, 0, 0, 0 };
+        static const int shootHs[4] = { 0, 0, 0, 0 };
+
+        // die animation
+        static const int dieXs[4] = { 0, 0, 0, 0 };
+        static const int dieYs[4] = { 0, 0, 0, 0 };
+        static const int dieWs[4] = { 0, 0, 0, 0 };
+        static const int dieHs[4] = { 0, 0, 0, 0 };
+
+        anims[WALK].load("Sprites/Rebel Soldier.png", walkXs, walkYs, walkWs, walkHs, 8, 0.08f);
+        anims[STAND].load("Sprites/Rebel Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[SHOOT].load("Sprites/Rebel Soldier.png", shootXs, shootYs, shootWs, shootHs, 4, 0.10f);
+        anims[DIE].load("Sprites/Rebel Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     // uses parent InfantryEnemy attack no need to override
@@ -401,6 +438,35 @@ public:
 
         width = 32.f;
         height = 48.f;
+
+        // walk animation
+        static const int walkXs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkYs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkWs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkHs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        // stand animation
+        static const int standXs[1] = { 0 };
+        static const int standYs[1] = { 0 };
+        static const int standWs[1] = { 0 };
+        static const int standHs[1] = { 0 };
+
+        // throw grenade animation (uses SHOOT slot)
+        static const int throwXs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int throwYs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int throwWs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int throwHs[6] = { 0, 0, 0, 0, 0, 0 };
+
+        // die animation
+        static const int dieXs[4] = { 0, 0, 0, 0 };
+        static const int dieYs[4] = { 0, 0, 0, 0 };
+        static const int dieWs[4] = { 0, 0, 0, 0 };
+        static const int dieHs[4] = { 0, 0, 0, 0 };
+
+        anims[WALK].load("Sprites/Grenade Soldier.png", walkXs, walkYs, walkWs, walkHs, 8, 0.08f);
+        anims[STAND].load("Sprites/Grenade Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[SHOOT].load("Sprites/Grenade Soldier.png", throwXs, throwYs, throwWs, throwHs, 6, 0.12f);
+        anims[DIE].load("Sprites/Grenade Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void attack() override {
@@ -539,6 +605,35 @@ public:
         rocketReloadDuration = 2.5f;
         rocketReloadTimer = 0;
         activeRockets = 0;
+
+        // walk animation
+        static const int walkXs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkYs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkWs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkHs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        // stand animation
+        static const int standXs[1] = { 0 };
+        static const int standYs[1] = { 0 };
+        static const int standWs[1] = { 0 };
+        static const int standHs[1] = { 0 };
+
+        // fire rocket animation (uses SHOOT slot)
+        static const int fireXs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int fireYs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int fireWs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int fireHs[6] = { 0, 0, 0, 0, 0, 0 };
+
+        // die animation
+        static const int dieXs[4] = { 0, 0, 0, 0 };
+        static const int dieYs[4] = { 0, 0, 0, 0 };
+        static const int dieWs[4] = { 0, 0, 0, 0 };
+        static const int dieHs[4] = { 0, 0, 0, 0 };
+
+        anims[WALK].load("Sprites/Bazooka Soldier.png", walkXs, walkYs, walkWs, walkHs, 8, 0.08f);
+        anims[STAND].load("Sprites/Bazooka Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[SHOOT].load("Sprites/Bazooka Soldier.png", fireXs, fireYs, fireWs, fireHs, 6, 0.12f);
+        anims[DIE].load("Sprites/Bazooka Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void attack() override {
@@ -642,6 +737,35 @@ public:
 
         width = 40.f;   // bit wider because of shield
         height = 48.f;
+
+        // walk animation
+        static const int walkXs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkYs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkWs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        static const int walkHs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        // stand animation
+        static const int standXs[1] = { 0 };
+        static const int standYs[1] = { 0 };
+        static const int standWs[1] = { 0 };
+        static const int standHs[1] = { 0 };
+
+        // shoot animation
+        static const int shootXs[4] = { 0, 0, 0, 0 };
+        static const int shootYs[4] = { 0, 0, 0, 0 };
+        static const int shootWs[4] = { 0, 0, 0, 0 };
+        static const int shootHs[4] = { 0, 0, 0, 0 };
+
+        // die animation
+        static const int dieXs[4] = { 0, 0, 0, 0 };
+        static const int dieYs[4] = { 0, 0, 0, 0 };
+        static const int dieWs[4] = { 0, 0, 0, 0 };
+        static const int dieHs[4] = { 0, 0, 0, 0 };
+
+        anims[WALK].load("Sprites/Shielded Soldier.png", walkXs, walkYs, walkWs, walkHs, 8, 0.08f);
+        anims[STAND].load("Sprites/Shielded Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[SHOOT].load("Sprites/Shielded Soldier.png", shootXs, shootYs, shootWs, shootHs, 4, 0.10f);
+        anims[DIE].load("Sprites/Shielded Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void takeDamage(int dmg, float bulletX, float bulletY,
@@ -719,15 +843,22 @@ public:
 // gravity is ignored for these
 class AerialEnemy : public Enemy {
 protected:
+    static const int FLY     = 0;
+    static const int DESCEND = 1;
+    static const int ATTACK  = 2;
+    static const int DIE     = 3;
+
     float   flyHeight;
     bool    isDescending;
     float   descentSpeed;
     int     batchSize;
     Sprite  sprite;
     Texture texture;
+    Animation anims[4];
+    int currentAnim;
 
 public:
-    AerialEnemy() {
+    AerialEnemy() : currentAnim(FLY) {
         flyHeight = 200.f;
         isDescending = false;
         descentSpeed = 60.f;
@@ -796,6 +927,35 @@ public:
         scoreValue = 75;       // base infantry plus 25
         flyHeight = -50.f;    // starts above screen
         isDescending = true;
+
+        // fly animation
+        static const int flyXs[2] = { 0, 0 };
+        static const int flyYs[2] = { 0, 0 };
+        static const int flyWs[2] = { 0, 0 };
+        static const int flyHs[2] = { 0, 0 };
+
+        // descend animation (parachute open)
+        static const int descendXs[2] = { 0, 0 };
+        static const int descendYs[2] = { 0, 0 };
+        static const int descendWs[2] = { 0, 0 };
+        static const int descendHs[2] = { 0, 0 };
+
+        // attack animation (after landing)
+        static const int attackXs[4] = { 0, 0, 0, 0 };
+        static const int attackYs[4] = { 0, 0, 0, 0 };
+        static const int attackWs[4] = { 0, 0, 0, 0 };
+        static const int attackHs[4] = { 0, 0, 0, 0 };
+
+        // die animation
+        static const int dieXs[4] = { 0, 0, 0, 0 };
+        static const int dieYs[4] = { 0, 0, 0, 0 };
+        static const int dieWs[4] = { 0, 0, 0, 0 };
+        static const int dieHs[4] = { 0, 0, 0, 0 };
+
+        anims[FLY].load("Sprites/Paratrooper.png", flyXs, flyYs, flyWs, flyHs, 2, 0.15f);
+        anims[DESCEND].load("Sprites/Paratrooper.png", descendXs, descendYs, descendWs, descendHs, 2, 0.20f);
+        anims[ATTACK].load("Sprites/Paratrooper.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
+        anims[DIE].load("Sprites/Paratrooper.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     ~Paratrooper() {}
@@ -842,11 +1002,21 @@ public:
 // immune to bullets only fire and explosions kill them
 class UndeadEnemy : public Enemy {
 protected:
+    static const int WALK   = 0;
+    static const int ATTACK = 1;
+    static const int SHOOT  = 2;
+    static const int HURT   = 3;
+    static const int DIE    = 4;
+
     bool transformOnContact;
     bool onlyDeadFromFire;
+    Sprite  sprite;
+    Texture texture;
+    Animation anims[5];
+    int currentAnim;
 
 public:
-    UndeadEnemy() : transformOnContact(true), onlyDeadFromFire(true)
+    UndeadEnemy() : transformOnContact(true), onlyDeadFromFire(true), currentAnim(WALK)
     {
         speed = 40.f;   // undead are slow
         detectionRange = 500.f;  // but sense player from far away
@@ -904,6 +1074,42 @@ public:
         height = 52.f;
         transformOnContact = true;
         onlyDeadFromFire = true;
+
+        // walk animation (slow shamble)
+        static const int walkXs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int walkYs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int walkWs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int walkHs[6] = { 0, 0, 0, 0, 0, 0 };
+
+        // attack animation (melee transform)
+        static const int attackXs[4] = { 0, 0, 0, 0 };
+        static const int attackYs[4] = { 0, 0, 0, 0 };
+        static const int attackWs[4] = { 0, 0, 0, 0 };
+        static const int attackHs[4] = { 0, 0, 0, 0 };
+
+        // shoot animation (unused for mummy but kept for consistency)
+        static const int shootXs[1] = { 0 };
+        static const int shootYs[1] = { 0 };
+        static const int shootWs[1] = { 0 };
+        static const int shootHs[1] = { 0 };
+
+        // hurt animation (crumble)
+        static const int hurtXs[3] = { 0, 0, 0 };
+        static const int hurtYs[3] = { 0, 0, 0 };
+        static const int hurtWs[3] = { 0, 0, 0 };
+        static const int hurtHs[3] = { 0, 0, 0 };
+
+        // die animation
+        static const int dieXs[4] = { 0, 0, 0, 0 };
+        static const int dieYs[4] = { 0, 0, 0, 0 };
+        static const int dieWs[4] = { 0, 0, 0, 0 };
+        static const int dieHs[4] = { 0, 0, 0, 0 };
+
+        anims[WALK].load("Sprites/Mummy Warrior.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
+        anims[ATTACK].load("Sprites/Mummy Warrior.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
+        anims[SHOOT].load("Sprites/Mummy Warrior.png", shootXs, shootYs, shootWs, shootHs, 1, 0.18f);
+        anims[HURT].load("Sprites/Mummy Warrior.png", hurtXs, hurtYs, hurtWs, hurtHs, 3, 0.12f);
+        anims[DIE].load("Sprites/Mummy Warrior.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void move(float dt) override {
@@ -996,6 +1202,42 @@ public:
         height = 48.f;
         transformOnContact = true;
         onlyDeadFromFire = true;
+
+        // walk animation
+        static const int walkXs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int walkYs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int walkWs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int walkHs[6] = { 0, 0, 0, 0, 0, 0 };
+
+        // attack animation (melee)
+        static const int attackXs[4] = { 0, 0, 0, 0 };
+        static const int attackYs[4] = { 0, 0, 0, 0 };
+        static const int attackWs[4] = { 0, 0, 0, 0 };
+        static const int attackHs[4] = { 0, 0, 0, 0 };
+
+        // shoot animation (pistol)
+        static const int shootXs[4] = { 0, 0, 0, 0 };
+        static const int shootYs[4] = { 0, 0, 0, 0 };
+        static const int shootWs[4] = { 0, 0, 0, 0 };
+        static const int shootHs[4] = { 0, 0, 0, 0 };
+
+        // hurt animation
+        static const int hurtXs[2] = { 0, 0 };
+        static const int hurtYs[2] = { 0, 0 };
+        static const int hurtWs[2] = { 0, 0 };
+        static const int hurtHs[2] = { 0, 0 };
+
+        // die animation
+        static const int dieXs[4] = { 0, 0, 0, 0 };
+        static const int dieYs[4] = { 0, 0, 0, 0 };
+        static const int dieWs[4] = { 0, 0, 0, 0 };
+        static const int dieHs[4] = { 0, 0, 0, 0 };
+
+        anims[WALK].load("Sprites/Zombie.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
+        anims[ATTACK].load("Sprites/Zombie.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
+        anims[SHOOT].load("Sprites/Zombie.png", shootXs, shootYs, shootWs, shootHs, 4, 0.10f);
+        anims[HURT].load("Sprites/Zombie.png", hurtXs, hurtYs, hurtWs, hurtHs, 2, 0.12f);
+        anims[DIE].load("Sprites/Zombie.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void move(float dt) override {
@@ -1040,13 +1282,24 @@ public:
 // has 2 phases like martian
 class AlienEnemy : public Enemy {
 protected:
+    static const int PHASE1  = 0;
+    static const int PHASE2  = 1;
+    static const int ATTACK1 = 2;
+    static const int ATTACK2 = 3;
+    static const int HURT    = 4;
+    static const int DIE     = 5;
+
     int   phase;
     float massPhase;
     int   batchSize;
     float switchPhase;
+    Sprite  sprite;
+    Texture texture;
+    Animation anims[6];
+    int currentAnim;
 
 public:
-    AlienEnemy() {
+    AlienEnemy() : currentAnim(PHASE1) {
         speed = 70.f;
         detectionRange = 500.f;
         attackRange = 400.f;
@@ -1113,6 +1366,49 @@ public:
         fireSum = 0.f;
         isOnFlatGround = false;
         fireBombTimer = 0.f;
+
+        // phase 1 (pod flying)
+        static const int phase1Xs[4] = { 0, 0, 0, 0 };
+        static const int phase1Ys[4] = { 0, 0, 0, 0 };
+        static const int phase1Ws[4] = { 0, 0, 0, 0 };
+        static const int phase1Hs[4] = { 0, 0, 0, 0 };
+
+        // phase 2 (martian on foot)
+        static const int phase2Xs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int phase2Ys[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int phase2Ws[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int phase2Hs[6] = { 0, 0, 0, 0, 0, 0 };
+
+        // attack1 (energy beam from pod)
+        static const int attack1Xs[4] = { 0, 0, 0, 0 };
+        static const int attack1Ys[4] = { 0, 0, 0, 0 };
+        static const int attack1Ws[4] = { 0, 0, 0, 0 };
+        static const int attack1Hs[4] = { 0, 0, 0, 0 };
+
+        // attack2 (pistol on foot)
+        static const int attack2Xs[4] = { 0, 0, 0, 0 };
+        static const int attack2Ys[4] = { 0, 0, 0, 0 };
+        static const int attack2Ws[4] = { 0, 0, 0, 0 };
+        static const int attack2Hs[4] = { 0, 0, 0, 0 };
+
+        // hurt animation
+        static const int hurtXs[2] = { 0, 0 };
+        static const int hurtYs[2] = { 0, 0 };
+        static const int hurtWs[2] = { 0, 0 };
+        static const int hurtHs[2] = { 0, 0 };
+
+        // die animation
+        static const int dieXs[4] = { 0, 0, 0, 0 };
+        static const int dieYs[4] = { 0, 0, 0, 0 };
+        static const int dieWs[4] = { 0, 0, 0, 0 };
+        static const int dieHs[4] = { 0, 0, 0, 0 };
+
+        anims[PHASE1].load("Sprites/Martian.png", phase1Xs, phase1Ys, phase1Ws, phase1Hs, 4, 0.10f);
+        anims[PHASE2].load("Sprites/Martian.png", phase2Xs, phase2Ys, phase2Ws, phase2Hs, 6, 0.10f);
+        anims[ATTACK1].load("Sprites/Martian.png", attack1Xs, attack1Ys, attack1Ws, attack1Hs, 4, 0.10f);
+        anims[ATTACK2].load("Sprites/Martian.png", attack2Xs, attack2Ys, attack2Ws, attack2Hs, 4, 0.10f);
+        anims[HURT].load("Sprites/Martian.png", hurtXs, hurtYs, hurtWs, hurtHs, 2, 0.12f);
+        anims[DIE].load("Sprites/Martian.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void move(float dt) override {
@@ -1227,6 +1523,49 @@ public:
         height = 60.f;
         detectionRange = 600.f;
         attackRange = 500.f;
+
+        // idle animation (uses PHASE1 slot)
+        static const int idleXs[2] = { 0, 0 };
+        static const int idleYs[2] = { 0, 0 };
+        static const int idleWs[2] = { 0, 0 };
+        static const int idleHs[2] = { 0, 0 };
+
+        // moving animation (uses PHASE2 slot)
+        static const int moveXs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int moveYs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int moveWs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int moveHs[6] = { 0, 0, 0, 0, 0, 0 };
+
+        // missile attack animation (uses ATTACK1 slot)
+        static const int missileXs[5] = { 0, 0, 0, 0, 0 };
+        static const int missileYs[5] = { 0, 0, 0, 0, 0 };
+        static const int missileWs[5] = { 0, 0, 0, 0, 0 };
+        static const int missileHs[5] = { 0, 0, 0, 0, 0 };
+
+        // flamethrower animation (uses ATTACK2 slot)
+        static const int flameXs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int flameYs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int flameWs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int flameHs[6] = { 0, 0, 0, 0, 0, 0 };
+
+        // hurt animation
+        static const int hurtXs[2] = { 0, 0 };
+        static const int hurtYs[2] = { 0, 0 };
+        static const int hurtWs[2] = { 0, 0 };
+        static const int hurtHs[2] = { 0, 0 };
+
+        // die animation (explosion)
+        static const int dieXs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int dieYs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int dieWs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int dieHs[6] = { 0, 0, 0, 0, 0, 0 };
+
+        anims[PHASE1].load("Sprites/Iron Nokana.png", idleXs, idleYs, idleWs, idleHs, 2, 0.20f);
+        anims[PHASE2].load("Sprites/Iron Nokana.png", moveXs, moveYs, moveWs, moveHs, 6, 0.10f);
+        anims[ATTACK1].load("Sprites/Iron Nokana.png", missileXs, missileYs, missileWs, missileHs, 5, 0.12f);
+        anims[ATTACK2].load("Sprites/Iron Nokana.png", flameXs, flameYs, flameWs, flameHs, 6, 0.10f);
+        anims[HURT].load("Sprites/Iron Nokana.png", hurtXs, hurtYs, hurtWs, hurtHs, 2, 0.12f);
+        anims[DIE].load("Sprites/Iron Nokana.png", dieXs, dieYs, dieWs, dieHs, 6, 0.15f);
     }
 
     // only moves on flat terrain
