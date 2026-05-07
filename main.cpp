@@ -44,7 +44,7 @@ int main() {
     float moveAcceleration = 0.6f;
     float friction = 0.80f;
     float airFriction = 0.95f;
-    float jumpPower = -22.0f;
+    float jumpPower = -35.0f;
     float gravity = 50.0f;
     float maxFallSpeed = 25.0f;
 
@@ -368,6 +368,7 @@ int main() {
                     survivalRebels[i]->setPlayer(characters.getActivePlayer());
                     survivalRebels[i]->update(dt); // sets velocityX/Y only, no position change
                     survivalRebels[i]->applyGravity(dt); // accumulate velocityY externally
+                    survivalRebels[i]->detectPlayer(characters.getActivePlayer()); // check if player is nearby
 
                     float enemy_x  = survivalRebels[i]->getX();
                     float enemy_y  = survivalRebels[i]->getY();

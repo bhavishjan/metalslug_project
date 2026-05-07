@@ -6,8 +6,6 @@
 using namespace std;
 using namespace sf;
 
-const int screen_x = 1600;
-const int screen_y = 900;
 
 // helper function to check if two rectangles overlap
 // used for collision detection between enemies and player
@@ -53,8 +51,8 @@ protected:
     bool  isTargetingPlayer;
     Player* largestPlayer;
 
-    float gravityConstant = 80.0f;
-    float groundY = screen_y - height;  // default floor (screen_y - height)
+    float gravityConstant = 200.0f;
+    float groundY = 1600 - height;  // default floor (screen_y - height)
 public:
     Enemy() : x(0), y(0), width(32), height(48),
         velocityX(0), velocityY(0),

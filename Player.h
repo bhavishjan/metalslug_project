@@ -132,7 +132,7 @@ public:
     virtual void flipToRight() = 0;
 
     virtual void render(RenderWindow& window, float camX = 0, float camY = 0) {
-        if (velocityX > 0.1f || velocityX < -0.1f) {
+        if (velocityX > 1.0f || velocityX < -1.0f) {
             currentAnim = WALK;
         } else {
             currentAnim = STAND;

@@ -3,6 +3,9 @@
 using namespace std;
 using namespace sf;
 
+const int screen_x = 1600;
+const int screen_y = 900;
+
 // Biome types
 static const int BIOME_AERIAL = 0;
 static  const int BIOME_PLAINS = 1;
