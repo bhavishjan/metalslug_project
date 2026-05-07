@@ -37,9 +37,9 @@ int main() {
     // CAMPAIGN MODE VARIABLES
     CampaignGame* campaignGame = nullptr;
 
-    // Survival mode enemies
-    static const int MAX_REBELS = 5;
-    RebelSoldier* survivalRebels[MAX_REBELS] = {};
+    // Survival mode enemies (all types pooled together)
+    static const int MAX_SURVIVAL_ENEMIES = 12;
+    Enemy* survivalRebels[MAX_SURVIVAL_ENEMIES] = {};
     int survivalRebelCount = 0;
 
     // PLAYER SETUP
@@ -105,15 +105,45 @@ int main() {
                             onGround = false;
                             cameraX = cameraY = 0;
                             Delay.restart();
-                            // Spawn rebel soldiers in survival mode
-                            for (int i = 0; i < MAX_REBELS; i++) {
+                            // Spawn all infantry enemy types in survival mode
+                            for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) {
                                 delete survivalRebels[i];
-                                survivalRebels[i] = new RebelSoldier();
-                                survivalRebels[i]->setPosition(400.f + i * 300.f, 100.f);
-                                survivalRebels[i]->setPlayer(characters.getActivePlayer());
-                                survivalRebels[i]->setGroundY((float)(screen_y - 48));
+                                survivalRebels[i] = nullptr;
                             }
-                            survivalRebelCount = MAX_REBELS;
+                            int ei = 0;
+                            // 4 Rebel Soldiers
+                            for (int i = 0; i < 4; i++) {
+                                survivalRebels[ei] = new RebelSoldier();
+                                survivalRebels[ei]->setPosition(300.f + i * 350.f, 100.f);
+                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                                ei++;
+                            }
+                            // 3 Grenade Soldiers
+                            for (int i = 0; i < 3; i++) {
+                                survivalRebels[ei] = new GrenadeSoldier();
+                                survivalRebels[ei]->setPosition(500.f + i * 400.f, 100.f);
+                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                                ei++;
+                            }
+                            // 3 Bazooka Soldiers
+                            for (int i = 0; i < 3; i++) {
+                                survivalRebels[ei] = new BazookaSoldier();
+                                survivalRebels[ei]->setPosition(600.f + i * 400.f, 100.f);
+                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                                ei++;
+                            }
+                            // 2 Shielded Soldiers
+                            for (int i = 0; i < 2; i++) {
+                                survivalRebels[ei] = new ShieldedSoldier();
+                                survivalRebels[ei]->setPosition(800.f + i * 500.f, 100.f);
+                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                                ei++;
+                            }
+                            survivalRebelCount = ei;
                             cout << "Entered Survival Mode" << endl;
                         }
                         else if (modeSelection == 1) {
@@ -141,7 +171,7 @@ int main() {
                 survivalGame = nullptr;
                 delete campaignGame;
                 campaignGame = nullptr;
-                for (int i = 0; i < MAX_REBELS; i++) {
+                for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) {
                     delete survivalRebels[i];
                     survivalRebels[i] = nullptr;
                 }
@@ -511,6 +541,6 @@ int main() {
 
     delete survivalGame;
     delete campaignGame;
-    for (int i = 0; i < MAX_REBELS; i++) delete survivalRebels[i];
+    for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) delete survivalRebels[i];
     return 0;
 }

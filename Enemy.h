@@ -484,34 +484,34 @@ public:
         width = 32.f;
         height = 48.f;
 
-        // walk animation
-        static const int walkXs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkYs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkWs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkHs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        // walk animation - row Y=17 (7 frames)
+        static const int walkXs[7] = {  2,  25,  51,  81, 110, 153, 203 };
+        static const int walkYs[7] = { 35,  25,  19,  17,  20,  24,  25 };
+        static const int walkWs[7] = { 18,  21,  26,  25,  36,  46,  46 };
+        static const int walkHs[7] = { 17,  27,  33,  35,  32,  28,  27 };
 
-        // stand animation
-        static const int standXs[1] = { 0 };
-        static const int standYs[1] = { 0 };
-        static const int standWs[1] = { 0 };
-        static const int standHs[1] = { 0 };
+        // stand animation - first frame of walk row
+        static const int standXs[1] = {  81 };
+        static const int standYs[1] = {  17 };
+        static const int standWs[1] = {  25 };
+        static const int standHs[1] = {  35 };
 
-        // throw grenade animation (uses SHOOT slot)
-        static const int throwXs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int throwYs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int throwWs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int throwHs[6] = { 0, 0, 0, 0, 0, 0 };
+        // throw grenade animation - row Y=54 (5 frames)
+        static const int throwXs[5] = {  2,  45,  90, 125, 157 };
+        static const int throwYs[5] = { 54,  74,  67,  66,  70 };
+        static const int throwWs[5] = { 42,  39,  30,  26,  37 };
+        static const int throwHs[5] = { 47,  27,  34,  35,  31 };
 
-        // die animation
-        static const int dieXs[4] = { 0, 0, 0, 0 };
-        static const int dieYs[4] = { 0, 0, 0, 0 };
-        static const int dieWs[4] = { 0, 0, 0, 0 };
-        static const int dieHs[4] = { 0, 0, 0, 0 };
+        // die animation - row Y=162 (6 frames)
+        static const int dieXs[6] = {   2,  68, 103, 130, 155, 180 };
+        static const int dieYs[6] = { 162, 165, 167, 167, 167, 167 };
+        static const int dieWs[6] = {  65,  30,  23,  20,  20,  21 };
+        static const int dieHs[6] = {  49,  46,  28,  30,  32,  30 };
 
-        anims[WALK].load("Sprites/Grenade Soldier.png", walkXs, walkYs, walkWs, walkHs, 8, 0.08f);
-        anims[STAND].load("Sprites/Grenade Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
-        anims[SHOOT].load("Sprites/Grenade Soldier.png", throwXs, throwYs, throwWs, throwHs, 6, 0.12f);
-        anims[DIE].load("Sprites/Grenade Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
+        anims[WALK].load("Sprites/Enemies/Rebel Soldier (RPG-2).png", walkXs, walkYs, walkWs, walkHs, 7, 0.08f);
+        anims[STAND].load("Sprites/Enemies/Rebel Soldier (RPG-2).png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[SHOOT].load("Sprites/Enemies/Rebel Soldier (RPG-2).png", throwXs, throwYs, throwWs, throwHs, 5, 0.12f);
+        anims[DIE].load("Sprites/Enemies/Rebel Soldier (RPG-2).png", dieXs, dieYs, dieWs, dieHs, 6, 0.15f);
     }
 
     void attack() override {
@@ -584,7 +584,9 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        InfantryEnemy::render(window, camX, camY);
+    }
 };
 
 
@@ -651,34 +653,34 @@ public:
         rocketReloadTimer = 0;
         activeRockets = 0;
 
-        // walk animation
-        static const int walkXs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkYs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkWs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkHs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        // walk animation - row Y=3 H=45 (6 frames)
+        static const int walkXs[6] = {   3,  42,  83, 124, 163, 204 };
+        static const int walkYs[6] = {   3,   3,   5,   6,   5,   3 };
+        static const int walkWs[6] = {  36,  38,  38,  36,  38,  38 };
+        static const int walkHs[6] = {  45,  45,  43,  42,  43,  45 };
 
-        // stand animation
-        static const int standXs[1] = { 0 };
-        static const int standYs[1] = { 0 };
-        static const int standWs[1] = { 0 };
-        static const int standHs[1] = { 0 };
+        // stand animation - row Y=51 H=43 first frame
+        static const int standXs[1] = {   3 };
+        static const int standYs[1] = {  55 };
+        static const int standWs[1] = {  41 };
+        static const int standHs[1] = {  39 };
 
-        // fire rocket animation (uses SHOOT slot)
-        static const int fireXs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int fireYs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int fireWs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int fireHs[6] = { 0, 0, 0, 0, 0, 0 };
+        // fire rocket animation - row Y=241 H=44 (3 frames)
+        static const int fireXs[3] = {   3,  45,  89 };
+        static const int fireYs[3] = { 241, 243, 245 };
+        static const int fireWs[3] = {  39,  41,  41 };
+        static const int fireHs[3] = {  44,  42,  40 };
 
-        // die animation
-        static const int dieXs[4] = { 0, 0, 0, 0 };
-        static const int dieYs[4] = { 0, 0, 0, 0 };
-        static const int dieWs[4] = { 0, 0, 0, 0 };
-        static const int dieHs[4] = { 0, 0, 0, 0 };
+        // die animation - row Y=395 H=51 (9 frames)
+        static const int dieXs[9] = {   3,  52,  99, 147, 191, 235, 279, 318, 361 };
+        static const int dieYs[9] = { 404, 407, 401, 403, 398, 398, 398, 395, 399 };
+        static const int dieWs[9] = {  46,  44,  45,  41,  41,  41,  36,  38,  31 };
+        static const int dieHs[9] = {  42,  39,  45,  43,  48,  48,  48,  51,  47 };
 
-        anims[WALK].load("Sprites/Bazooka Soldier.png", walkXs, walkYs, walkWs, walkHs, 8, 0.08f);
-        anims[STAND].load("Sprites/Bazooka Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
-        anims[SHOOT].load("Sprites/Bazooka Soldier.png", fireXs, fireYs, fireWs, fireHs, 6, 0.12f);
-        anims[DIE].load("Sprites/Bazooka Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
+        anims[WALK].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", walkXs, walkYs, walkWs, walkHs, 6, 0.08f);
+        anims[STAND].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[SHOOT].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", fireXs, fireYs, fireWs, fireHs, 3, 0.14f);
+        anims[DIE].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", dieXs, dieYs, dieWs, dieHs, 9, 0.12f);
     }
 
     void attack() override {
@@ -754,7 +756,9 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        InfantryEnemy::render(window, camX, camY);
+    }
 };
 
 
@@ -783,34 +787,34 @@ public:
         width = 40.f;   // bit wider because of shield
         height = 48.f;
 
-        // walk animation
-        static const int walkXs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkYs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkWs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        static const int walkHs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        // walk animation - row Y=4 H=39 (6 frames)
+        static const int walkXs[6] = {   3,  38,  73, 107, 143, 177 };
+        static const int walkYs[6] = {   5,   5,   5,   4,   5,   5 };
+        static const int walkWs[6] = {  32,  32,  31,  32,  31,  32 };
+        static const int walkHs[6] = {  38,  38,  38,  39,  38,  38 };
 
-        // stand animation
-        static const int standXs[1] = { 0 };
-        static const int standYs[1] = { 0 };
-        static const int standWs[1] = { 0 };
-        static const int standHs[1] = { 0 };
+        // stand animation - row Y=131 H=38 first frame
+        static const int standXs[1] = {   3 };
+        static const int standYs[1] = { 131 };
+        static const int standWs[1] = {  32 };
+        static const int standHs[1] = {  38 };
 
-        // shoot animation
-        static const int shootXs[4] = { 0, 0, 0, 0 };
-        static const int shootYs[4] = { 0, 0, 0, 0 };
-        static const int shootWs[4] = { 0, 0, 0, 0 };
-        static const int shootHs[4] = { 0, 0, 0, 0 };
+        // shoot animation - row Y=379 H=48 (9 frames)
+        static const int shootXs[9] = {   3,  39,  82, 126, 167, 218, 274, 326, 369 };
+        static const int shootYs[9] = { 389, 388, 379, 379, 385, 389, 389, 387, 393 };
+        static const int shootWs[9] = {  33,  40,  41,  38,  48,  53,  49,  40,  55 };
+        static const int shootHs[9] = {  38,  39,  48,  48,  42,  38,  38,  40,  34 };
 
-        // die animation
-        static const int dieXs[4] = { 0, 0, 0, 0 };
-        static const int dieYs[4] = { 0, 0, 0, 0 };
-        static const int dieWs[4] = { 0, 0, 0, 0 };
-        static const int dieHs[4] = { 0, 0, 0, 0 };
+        // die animation - row Y=481 H=44 (9 frames)
+        static const int dieXs[9] = {   3,  37,  72, 115, 162, 209, 257, 305, 353 };
+        static const int dieYs[9] = { 481, 482, 482, 482, 483, 484, 485, 484, 483 };
+        static const int dieWs[9] = {  31,  32,  38,  44,  44,  45,  45,  45,  44 };
+        static const int dieHs[9] = {  39,  40,  40,  41,  41,  40,  40,  40,  41 };
 
-        anims[WALK].load("Sprites/Shielded Soldier.png", walkXs, walkYs, walkWs, walkHs, 8, 0.08f);
-        anims[STAND].load("Sprites/Shielded Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
-        anims[SHOOT].load("Sprites/Shielded Soldier.png", shootXs, shootYs, shootWs, shootHs, 4, 0.10f);
-        anims[DIE].load("Sprites/Shielded Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
+        anims[WALK].load("Sprites/Enemies/Rebel Soldier (Shield).png", walkXs, walkYs, walkWs, walkHs, 6, 0.08f);
+        anims[STAND].load("Sprites/Enemies/Rebel Soldier (Shield).png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[SHOOT].load("Sprites/Enemies/Rebel Soldier (Shield).png", shootXs, shootYs, shootWs, shootHs, 9, 0.10f);
+        anims[DIE].load("Sprites/Enemies/Rebel Soldier (Shield).png", dieXs, dieYs, dieWs, dieHs, 9, 0.12f);
     }
 
     void takeDamage(int dmg, float bulletX, float bulletY,
@@ -880,7 +884,9 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        InfantryEnemy::render(window, camX, camY);
+    }
 };
 
 
@@ -1224,7 +1230,9 @@ public:
             attack();
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        InfantryEnemy::render(window, camX, camY);
+    }
 };
 
 
