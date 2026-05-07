@@ -524,19 +524,19 @@ public:
         width = 25.f;
         height = 35.f;
 
-        // walk animation - row Y=17 (7 frames)
+        // walk animation 
         static const int walkXs[7] = {  2,  25,  51,  81, 110, 153, 203 };
         static const int walkYs[7] = { 35,  25,  19,  17,  20,  24,  25 };
         static const int walkWs[7] = { 18,  21,  26,  25,  36,  46,  46 };
         static const int walkHs[7] = { 17,  27,  33,  35,  32,  28,  27 };
 
         // stand animation - first frame of walk row
-        static const int standXs[1] = {  81 };
-        static const int standYs[1] = {  17 };
-        static const int standWs[1] = {  25 };
-        static const int standHs[1] = {  35 };
+        static const int standXs[1] = {  203 };
+        static const int standYs[1] = {  25 };
+        static const int standWs[1] = {  46 };
+        static const int standHs[1] = {  27 };
 
-        // throw grenade animation - row Y=54 (5 frames)
+        // throw grenade animation 
         static const int throwXs[5] = {  2,  45,  90, 125, 157 };
         static const int throwYs[5] = { 54,  74,  67,  66,  70 };
         static const int throwWs[5] = { 42,  39,  30,  26,  37 };
@@ -690,17 +690,17 @@ public:
         rocketReloadTimer = 0;
         activeRockets = 0;
 
-        // walk animation - row Y=3 H=45 (6 frames)
-        static const int walkXs[6] = {   3,  42,  83, 124, 163, 204 };
-        static const int walkYs[6] = {   3,   3,   5,   6,   5,   3 };
-        static const int walkWs[6] = {  36,  38,  38,  36,  38,  38 };
-        static const int walkHs[6] = {  45,  45,  43,  42,  43,  45 };
+        // walk animation 
+        static const int walkXs[11] = {   3,  47,  91, 134, 178, 221, 265,  309,  350,  390, 429};
+        static const int walkYs[11] = {  55,  54,  53,  54,  56,  55,  54,   53,   52,   51,  53 };
+        static const int walkWs[11] = {  41,  41,  40,  41,  40,  41,  41,   38,   37,   36,  37 };
+        static const int walkHs[11] = {  39,  40,  40,  39,  38,  39,  40,   41,   41,   42,  41 };
 
-        // stand animation - row Y=51 H=43 first frame
+        // stand animation 
         static const int standXs[1] = {   3 };
-        static const int standYs[1] = {  55 };
-        static const int standWs[1] = {  41 };
-        static const int standHs[1] = {  39 };
+        static const int standYs[1] = {   3 };
+        static const int standWs[1] = {  36 };
+        static const int standHs[1] = {  45 };
 
         // fire rocket animation - row Y=241 H=44 (3 frames)
         static const int fireXs[3] = {   3,  45,  89 };
@@ -787,6 +787,12 @@ public:
         // update all active rockets
         for (int i = 0; i < activeRockets; ++i)
             rockets[i].update(dt);
+
+        pistol.update(dt);
+        if (fireTimer > 0.f)
+            fireTimer -= dt;
+
+        updateAnimState(dt);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -820,19 +826,19 @@ public:
         width = 55.f; 
         height = 48.f;
 
-        // walk animation - row Y=4 H=39 (6 frames)
-        static const int walkXs[6] = {   3,  38,  73, 107, 143, 177 };
-        static const int walkYs[6] = {   5,   5,   5,   4,   5,   5 };
-        static const int walkWs[6] = {  32,  32,  31,  32,  31,  32 };
-        static const int walkHs[6] = {  38,  38,  38,  39,  38,  38 };
+        // walk animation -
+        static const int walkXs[12] = { 3,   35,  66,  99, 133, 167, 202, 235, 267, 298, 329, 359 };
+        static const int walkYs[12] = { 47,  46,  46,  47,  49,  48,  47,  46,  46,  47,  49,  48 };
+        static const int walkWs[12] = { 29,  28,  30,  31,  31,  32,  30,  29,  28,  28,  27,  27 };
+        static const int walkHs[12] = { 40,  41,  40,  39,  38,  39,  40,  41,  40,  39,  38,  39 };
 
-        // stand animation - row Y=131 H=38 first frame
-        static const int standXs[1] = {   3 };
-        static const int standYs[1] = { 131 };
-        static const int standWs[1] = {  32 };
-        static const int standHs[1] = {  38 };
+        // stand animation -
+        static const int standXs[6] = {  3, 38, 73, 107, 143, 177 };
+        static const int standYs[6] = {  5,  5,  5,   5,   5,   5 };
+        static const int standWs[6] = { 32, 32, 31,  32,  31,  32 };
+        static const int standHs[6] = { 38, 38, 38,  39,  38,  38 };
 
-        // shoot animation - row Y=379 H=48 (9 frames)
+        // shoot animation 
         static const int shootXs[9] = {   3,  39,  82, 126, 167, 218, 274, 326, 369 };
         static const int shootYs[9] = { 389, 388, 379, 379, 385, 389, 389, 387, 393 };
         static const int shootWs[9] = {  33,  40,  41,  38,  48,  53,  49,  40,  55 };
@@ -844,8 +850,8 @@ public:
         static const int dieWs[9] = {  31,  32,  38,  44,  44,  45,  45,  45,  44 };
         static const int dieHs[9] = {  39,  40,  40,  41,  41,  40,  40,  40,  41 };
 
-        anims[WALK].load("Sprites/Enemies/Rebel Soldier (Shield).png", walkXs, walkYs, walkWs, walkHs, 6, 0.08f);
-        anims[STAND].load("Sprites/Enemies/Rebel Soldier (Shield).png", standXs, standYs, standWs, standHs, 1, 0.18f);
+        anims[WALK].load("Sprites/Enemies/Rebel Soldier (Shield).png", walkXs, walkYs, walkWs, walkHs, 12, 0.08f);
+        anims[STAND].load("Sprites/Enemies/Rebel Soldier (Shield).png", standXs, standYs, standWs, standHs, 6, 0.18f);
         anims[SHOOT].load("Sprites/Enemies/Rebel Soldier (Shield).png", shootXs, shootYs, shootWs, shootHs, 9, 0.10f);
         anims[DIE].load("Sprites/Enemies/Rebel Soldier (Shield).png", dieXs, dieYs, dieWs, dieHs, 9, 0.12f);
     }
@@ -912,6 +918,10 @@ public:
             attack();
 
         pistol.update(dt);
+        if (fireTimer > 0.f)
+            fireTimer -= dt;
+
+        updateAnimState(dt);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -1111,9 +1121,10 @@ protected:
     Texture texture;
     Animation anims[5];
     int currentAnim;
+    bool isCrumbled;
 
 public:
-    UndeadEnemy() : transformOnContact(true), onlyDeadFromFire(true), currentAnim(WALK)
+    UndeadEnemy() : transformOnContact(true), onlyDeadFromFire(true), currentAnim(WALK), isCrumbled(false)
     {
         speed = 40.f;   // undead are slow
         detectionRange = 500.f;  // but sense player from far away
@@ -1141,6 +1152,30 @@ public:
         if (!isAlive || !largestPlayer) return;
         detectPlayer(largestPlayer);
         move(dt);
+        updateAnimState(dt);
+    }
+
+    virtual void updateAnimState(float dt) {
+        int desired;
+        if (!isAlive) {
+            desired = DIE;
+        }
+        else if (isCrumbled) {
+            desired = HURT;
+        }
+        else if (velocityX > 0.5f || velocityX < -0.5f) {
+            desired = WALK;
+        }
+        else {
+            desired = WALK;
+        }
+
+        if (desired != currentAnim) {
+            currentAnim = desired;
+            anims[currentAnim].reset();
+        }
+
+        anims[currentAnim].update(dt);
     }
 
     virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -1151,7 +1186,7 @@ public:
         sprite.setTexture(a.getTexture(), true);
         sprite.setTextureRect(r);
         float sc = 2.0f;
-        float scX = facingRight ? sc : -sc;
+        float scX = facingRight ? -sc : sc;
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
         sprite.setScale(scX, sc);
@@ -1184,22 +1219,16 @@ public:
 
 
         // walk animation (slow shamble)
-        static const int walkXs[6] = { 10, 64, 118, 171, 10, 64 };
-        static const int walkYs[6] = { 18, 18, 19, 19, 18, 18 };
-        static const int walkWs[6] = { 49, 49, 48, 48, 49, 49 };
-        static const int walkHs[6] = { 43, 43, 42, 42, 43, 43 };
+        static const int walkXs[18] = { 196, 232, 270, 312, 353, 394, 432, 472, 508, 548, 592, 638, 680, 721, 768, 804, 843, 883 };
+        static const int walkYs[18] = { 1010, 1010, 1010, 1010, 1011, 1010, 1010, 1010, 1010, 1010, 1010, 1010, 1010, 1010, 1010, 1010, 1010, 1010 };
+        static const int walkWs[18] = { 31, 35, 36, 37, 33, 32, 32, 35, 36, 34, 32, 34, 33, 38, 32, 36, 33, 31 };
+        static const int walkHs[18] = { 45, 45, 45, 45, 44, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45 };
 
         // attack animation (melee transform)
         static const int attackXs[4] = { 10, 59, 105, 146 };
         static const int attackYs[4] = { 140, 140, 140, 140 };
         static const int attackWs[4] = { 44, 41, 36, 28 };
         static const int attackHs[4] = { 44, 44, 44, 44 };
-
-        // shoot animation (unused for mummy but kept for consistency)
-        static const int shootXs[1] = { 0 };
-        static const int shootYs[1] = { 0 };
-        static const int shootWs[1] = { 0 };
-        static const int shootHs[1] = { 0 };
 
         // hurt animation (crumble)
         static const int hurtXs[3] = { 10, 64, 118 };
@@ -1213,11 +1242,10 @@ public:
         static const int dieWs[4] = { 48, 51, 50, 52 };
         static const int dieHs[4] = { 43, 37, 22, 63 };
 
-        anims[WALK].load("Sprites/Mummy.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
-        anims[ATTACK].load("Sprites/Mummy.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
-        anims[SHOOT].load("Sprites/Mummy.png", shootXs, shootYs, shootWs, shootHs, 1, 0.18f);
-        anims[HURT].load("Sprites/Mummy.png", hurtXs, hurtYs, hurtWs, hurtHs, 3, 0.12f);
-        anims[DIE].load("Sprites/Mummy.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
+        anims[WALK].load("Sprites/Enemies/Mummy Warrior.png", walkXs, walkYs, walkWs, walkHs, 18, 0.12f);
+        anims[ATTACK].load("Sprites/Enemies/Mummy Warrior.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
+        anims[HURT].load("Sprites/Enemies/Mummy Warrior.png", hurtXs, hurtYs, hurtWs, hurtHs, 3, 0.12f);
+        anims[DIE].load("Sprites/Enemies/Mummy Warrior.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void move(float dt) override {
@@ -1226,8 +1254,7 @@ public:
         // always chases player with slow shamble
         if (largestPlayer)
             chasePlayer(largestPlayer);
-
-        x += velocityX * dt;
+        // x position updated externally in main.cpp after collision checks
     }
 
     void attack() override {
@@ -1283,6 +1310,8 @@ public:
         float dist = sqrt(dx * dx + dy * dy);
         if (dist < attackRange && !isCrumbled)
             attack();
+
+        updateAnimState(dt);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
