@@ -1423,7 +1423,7 @@ public:
     // child classes override this for phase switching logic
     virtual void updatePhase() {}
 
-    void attack() override;
+    virtual void attack() override = 0;
 
     void update(float dt) override {
         if (!isAlive || !largestPlayer) return;
