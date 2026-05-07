@@ -6,8 +6,8 @@
 using namespace std;
 using namespace sf;
 
-extern const int screen_x;
-extern const int screen_y;
+const int screen_x = 1600;
+const int screen_y = 900;
 
 // helper function to check if two rectangles overlap
 // used for collision detection between enemies and player

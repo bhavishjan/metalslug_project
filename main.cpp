@@ -12,9 +12,6 @@
 using namespace sf;
 using namespace std;
 
-const int screen_x = 1600;
-const int screen_y = 900;
-
 int main() {
     RenderWindow window(VideoMode(screen_x, screen_y), "Metal Slug", Style::Close);
     window.setVerticalSyncEnabled(true);
