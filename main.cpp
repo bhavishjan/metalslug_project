@@ -324,7 +324,6 @@ int main() {
                     survivalRebels[i]->setPlayer(characters.getActivePlayer());
                     survivalRebels[i]->update(dt);
 
-                    // apply vertical movement externally (gravity was only accumulated)
                     float ex  = survivalRebels[i]->getX();
                     float ey  = survivalRebels[i]->getY();
                     float evy = survivalRebels[i]->getVelocityY();
@@ -335,7 +334,7 @@ int main() {
                     bool  eGnd = false;
                     currentLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, eGnd);
 
-                    // move y then vertical resolve
+                    // vertical: move y then resolve
                     ey += evy * dt;
                     float evx2 = 0.f, evy2 = evy;
                     bool  eGnd2 = false;
@@ -352,42 +351,29 @@ int main() {
                     survivalRebels[i]->setVelocityY(evy2);
                     survivalRebels[i]->setGrounded(eGnd2);
 
-                    // stop enemy at player boundary — neither body moves the other
+                    // stop enemy at player boundary
                     survivalRebels[i]->checkPlayerCollision(characters.getActivePlayer());
-                }
 
-                // enemy-enemy AABB separation — 3 iterations for stability
-                for (int iter = 0; iter < 3; iter++) {
-                    for (int i = 0; i < survivalRebelCount; i++) {
-                        if (!survivalRebels[i]) continue;
-                        for (int j = i + 1; j < survivalRebelCount; j++) {
-                            if (!survivalRebels[j]) continue;
-                            float ax = survivalRebels[i]->getX(), ay = survivalRebels[i]->getY();
-                            float bx = survivalRebels[j]->getX(), by = survivalRebels[j]->getY();
-                            float ew = 32.f, eh = 48.f;
-                            if (!(ax < bx + ew && ax + ew > bx && ay < by + eh && ay + eh > by)) continue;
-                            float olL = (ax + ew) - bx;
-                            float olR = (bx + ew) - ax;
-                            float half;
-                            if (olL < olR) {
-                                half = olL / 2.f;
-                                survivalRebels[i]->setPosition(ax - half, ay);
-                                survivalRebels[j]->setPosition(bx + half, by);
-                            }
-                            else {
-                                half = olR / 2.f;
-                                survivalRebels[i]->setPosition(ax + half, ay);
-                                survivalRebels[j]->setPosition(bx - half, by);
-                            }
+                    // stop enemy i against all already-resolved enemies j < i
+                    for (int j = 0; j < i; j++) {
+                        if (!survivalRebels[j]) continue;
+                        float ax = survivalRebels[i]->getX(), ay = survivalRebels[i]->getY();
+                        float bx = survivalRebels[j]->getX(), by = survivalRebels[j]->getY();
+                        if (!(ax < bx + ew && ax + ew > bx && ay < by + eh && ay + eh > by)) continue;
+                        float olL = (ax + ew) - bx;  // i is right of j
+                        float olR = (bx + ew) - ax;  // i is left  of j
+                        if (olL < olR) {
+                            survivalRebels[i]->setPosition(bx - ew, ay);
                         }
-                    }
-                    // re-snap both enemies to terrain after each separation iteration
-                    for (int i = 0; i < survivalRebelCount; i++) {
-                        if (!survivalRebels[i]) continue;
-                        float ex = survivalRebels[i]->getX(), ey = survivalRebels[i]->getY();
-                        float evx = 0.f, evy = 0.f; bool eg = false;
-                        currentLevel->resolveCollisions(ex, ey, 32.f, 48.f, evx, evy, eg);
-                        survivalRebels[i]->setPosition(ex, ey);
+                        else {
+                            survivalRebels[i]->setPosition(bx + ew, ay);
+                        }
+                        // zero i's velocity so it doesn't keep driving in
+                        float zx = 0.f, zy = survivalRebels[i]->getVelocityY();
+                        bool zg = false;
+                        float nex = survivalRebels[i]->getX(), ney = survivalRebels[i]->getY();
+                        currentLevel->resolveCollisions(nex, ney, ew, eh, zx, zy, zg);
+                        survivalRebels[i]->setPosition(nex, ney);
                     }
                 }
 
