@@ -224,6 +224,8 @@ public:
     float getHP()       const { return hp; }
     float getMaxHP()    const { return (float)maxHp; }
     bool  isDead()      const { return !isAlive; }
+    virtual float getWidth() const { return width; }
+    virtual float getHeight() const { return height; }
 
     void setPosition(float nx, float ny) { x = nx; y = ny; }
     void setPlayer(Player* p) { largestPlayer = p; }
@@ -644,6 +646,9 @@ public:
         width = 40.f;
         height = 48.f;
 
+        float getWidth() const override { return 40.f; }
+        float getHeight() const override { return 48.f; }
+
         rocketReloadDuration = 2.5f;
         rocketReloadTimer = 0;
         activeRockets = 0;
@@ -778,6 +783,9 @@ public:
         width = 40.f;   // bit wider because of shield
         height = 48.f;
 
+        float getWidth() const override { return 40.f; }
+        float getHeight() const override { return 48.f; }
+
         // walk animation - row Y=4 H=39 (6 frames)
         static const int walkXs[6] = {   3,  38,  73, 107, 143, 177 };
         static const int walkYs[6] = {   5,   5,   5,   4,   5,   5 };
@@ -908,6 +916,9 @@ public:
         width = 32.f;
         height = 32.f;
         isGrounded = true;  // aerial enemies ignore gravity
+
+        float getWidth() const override { return 32.f; }
+        float getHeight() const override { return 32.f; }
     }
 
     virtual ~AerialEnemy() {}
@@ -1138,6 +1149,9 @@ public:
         height = 52.f;
         transformOnContact = true;
         onlyDeadFromFire = true;
+
+        float getWidth() const override { return 32.f; }
+        float getHeight() const override { return 52.f; }
 
         // walk animation (slow shamble)
         static const int walkXs[6] = { 0, 0, 0, 0, 0, 0 };
@@ -1432,6 +1446,9 @@ public:
 
         podX = x;
         podY = y - 80.f;   // pod hovers above martian
+
+        float getWidth() const override { return 40.f; }
+        float getHeight() const override { return 56.f; }
         isPodAlive = true;
         podTimer = 0.f;
         beamActive = false;
@@ -1599,6 +1616,9 @@ public:
         height = 60.f;
         detectionRange = 600.f;
         attackRange = 500.f;
+
+        float getWidth() const override { return 80.f; }
+        float getHeight() const override { return 60.f; }
 
         // idle animation (uses PHASE1 slot)
         static const int idleXs[2] = { 0, 0 };
