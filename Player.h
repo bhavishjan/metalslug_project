@@ -58,6 +58,11 @@ protected:
     float scale_x;
     float scale_y;
     float moveAcceleration;
+    float gravity;
+    float jumpPower;
+    float friction;
+    float airFriction;
+    float maxFallSpeed;
     Animation anims[8];
     Sprite sprite;
     int currentAnim;
@@ -106,6 +111,11 @@ public:
         weaponSlots[1] = nullptr;
         activeWeaponIndex = 0;
         moveAcceleration = 0.6f;
+        gravity = 30.0f;
+        jumpPower = -22.0f;
+        friction = 0.80f;
+        airFriction = 0.95f;
+        maxFallSpeed = 25.0f;
         currentAnim = STAND;
     }
 
@@ -127,6 +137,14 @@ public:
     void moveRight() {
         velocityX += moveAcceleration;
     }
+
+    float getGravity() const { return gravity; }
+    float getJumpPower() const { return jumpPower; }
+    float getFriction() const { return friction; }
+    float getAirFriction() const { return airFriction; }
+    float getMaxFallSpeed() const { return maxFallSpeed; }
+    void setGravity(float g) { gravity = g; }
+    void setJumpPower(float jp) { jumpPower = jp; }
 
     virtual void flipToLeft() = 0;
     virtual void flipToRight() = 0;
