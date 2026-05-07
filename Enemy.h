@@ -321,8 +321,6 @@ public:
         pistol.update(dt);
         if (fireTimer > 0.f)  
             fireTimer -= dt;
-        applyGravity(dt);
-        checkGrounded();
 
         updateAnimState(dt);
     }
@@ -579,9 +577,6 @@ public:
             attack();
 
         pistol.update(dt);
-        applyGravity(dt);
-        checkGrounded();
-        checkPlayerCollision(largestPlayer);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -750,10 +745,6 @@ public:
         // update all active rockets
         for (int i = 0; i < activeRockets; ++i)
             rockets[i].update(dt);
-
-        applyGravity(dt);
-        checkGrounded();
-        checkPlayerCollision(largestPlayer);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -879,9 +870,6 @@ public:
             attack();
 
         pistol.update(dt);
-        applyGravity(dt);
-        checkGrounded();
-        checkPlayerCollision(largestPlayer);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -1110,9 +1098,6 @@ public:
         if (!isAlive || !largestPlayer) return;
         detectPlayer(largestPlayer);
         move(dt);
-        applyGravity(dt);
-        checkGrounded();
-        checkPlayerCollision(largestPlayer);
     }
 
     virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -1247,8 +1232,6 @@ public:
 
         detectPlayer(largestPlayer);
         move(dt);
-        applyGravity(dt);
-        checkGrounded();
 
         // on contact transform the player
         float dx = largestPlayer->getPlayerX() - x;
@@ -1349,10 +1332,7 @@ public:
         if (!isAlive || !largestPlayer) return;
         detectPlayer(largestPlayer);
         move(dt);
-        applyGravity(dt);
-        checkGrounded();
         attack();
-        checkPlayerCollision(largestPlayer);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -1406,9 +1386,6 @@ public:
         updatePhase();
         detectPlayer(largestPlayer);
         move(dt);
-        applyGravity(dt);
-        checkGrounded();
-        checkPlayerCollision(largestPlayer);
     }
 
     virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
