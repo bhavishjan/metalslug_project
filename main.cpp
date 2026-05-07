@@ -238,6 +238,7 @@ int main() {
 
         // JUMP
         if (Keyboard::isKeyPressed(Keyboard::Up)) {
+            cout << "Jump key pressed, setting velocityY to " << jumpPower << endl;
             characters.getActivePlayer()->setVelocityY(jumpPower);
             onGround = false;
             jumpHeld = true;
