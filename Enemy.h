@@ -347,11 +347,12 @@ public:
         sprite.setTexture(a.getTexture(), true);
         sprite.setTextureRect(r);
 
-        // anchor sprite by its bottom center so feet sit on collision box bottom
+        // anchor sprite by its bottom center, flip horizontally when facing left
+        float sc = 2.0f;
+        float scX = facingRight ? sc : -sc;
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
-        float sc = 2.0f;
-        sprite.setScale(facingRight ? sc : -sc, sc);
+        sprite.setScale(scX, sc);
 
         window.draw(sprite);
     }
@@ -407,11 +408,11 @@ public:
         static const int standWs[1] = { 40 };
         static const int standHs[1] = { 38 };
 
-        // shoot animation (5 frame rifle fire - row 10)
-        static const int shootXs[5] = {   3,  45,  86, 132, 181 };
-        static const int shootYs[5] = { 441, 441, 442, 444, 444 };
-        static const int shootWs[5] = {  39,  38,  43,  46,  46 };
-        static const int shootHs[5] = {  38,  38,  37,  35,  35 };
+        // shoot animation (10 frame rifle fire - row 8, y≈330)
+        static const int shootXs[10] = {   3,  44,  87, 131, 174, 216, 257, 298, 339, 380 };
+        static const int shootYs[10] = { 330, 330, 330, 330, 330, 330, 330, 330, 330, 330 };
+        static const int shootWs[10] = {  38,  40,  41,  40,  39,  38,  38,  38,  38,  38 };
+        static const int shootHs[10] = {  40,  40,  40,  40,  40,  40,  40,  40,  40,  40 };
 
         // die animation (4 frame collapse - row 20)
         static const int dieXs[4] = {   3,  44,  86, 129 };
@@ -421,7 +422,7 @@ public:
 
         anims[WALK].load("Sprites/Enemies/Rebel Soldier.png", walkXs, walkYs, walkWs, walkHs, 12, 0.07f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
-        anims[SHOOT].load("Sprites/Enemies/Rebel Soldier.png", shootXs, shootYs, shootWs, shootHs, 5, 0.08f);
+        anims[SHOOT].load("Sprites/Enemies/Rebel Soldier.png", shootXs, shootYs, shootWs, shootHs, 10, 0.08f);
         anims[DIE].load("Sprites/Enemies/Rebel Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.15f);
     }
 
