@@ -157,45 +157,31 @@ public:
         }
     }
 
-    // separate enemy from player using minimum overlap axis
+    // push player away from this enemy (enemy stays fixed)
+    // only horizontal — player cannot walk through enemy
     void checkPlayerCollision(Player* player) {
         if (!player || !isAlive) return;
 
         float px = player->getPlayerX();
         float py = player->getPlayerY();
-        float pw = player->getWidth();
-        float ph = player->getHeight();
+        float pw = (float)player->getWidth();
+        float ph = (float)player->getHeight();
 
         if (!rectsOverlap(x, y, width, height, px, py, pw, ph)) return;
 
-        float overlapLeft   = (x + width) - px;
-        float overlapRight  = (px + pw)   - x;
-        float overlapTop    = (y + height) - py;
-        float overlapBottom = (py + ph)    - y;
+        float overlapLeft  = (x + width) - px;   // player is to the right of enemy
+        float overlapRight = (px + pw)   - x;    // player is to the left of enemy
 
-        float minX;
-        if (overlapLeft < overlapRight) minX = overlapLeft;
-        else minX = overlapRight;
-        float minY;
-        if (overlapTop < overlapBottom) minY = overlapTop;
-        else minY = overlapBottom;
-
-        if (minX < minY) {
-            // horizontal separation — push enemy sideways
-            if (overlapLeft < overlapRight)
-                x -= overlapLeft;
-            else
-                x += overlapRight;
-            velocityX = 0.f;
+        // only resolve horizontally — player cannot push enemy sideways
+        if (overlapLeft < overlapRight) {
+            // player approached from right side — push player to right of enemy
+            player->setPlayerX(x + width);
         }
         else {
-            // vertical separation — push enemy up/down
-            if (overlapTop < overlapBottom)
-                y -= overlapTop;
-            else
-                y += overlapBottom;
-            velocityY = 0.f;
+            // player approached from left side — push player to left of enemy
+            player->setPlayerX(x - pw);
         }
+        player->setVelocityX(0.f);
     }
 
     // call when enemy dies chance of food drop
@@ -339,7 +325,6 @@ public:
             fireTimer -= dt;
         applyGravity(dt);
         checkGrounded();
-        checkPlayerCollision(largestPlayer);
 
         updateAnimState(dt);
     }

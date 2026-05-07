@@ -351,6 +351,9 @@ int main() {
                     survivalRebels[i]->setPosition(ex, ey);
                     survivalRebels[i]->setVelocityY(evy2);
                     survivalRebels[i]->setGrounded(eGnd2);
+
+                    // push player away — enemy is immovable wall
+                    survivalRebels[i]->checkPlayerCollision(characters.getActivePlayer());
                 }
 
                 // enemy-enemy separation pass

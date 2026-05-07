@@ -20,37 +20,37 @@ E:\Semester 2\OOP\OOP Final Project\Player.h(485,16): warning C4244: 'return': c
 E:\Semester 2\OOP\OOP Final Project\Weapon.h(454,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(166,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
 E:\Semester 2\OOP\OOP Final Project\Enemy.h(167,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(168,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(573,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(570,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(738,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(735,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(988,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(985,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1086,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1083,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1131,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1128,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1258,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1255,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1368,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1365,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1414,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1411,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  (compiling source file 'main.cpp')
-  
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1578,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1581,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Menu.h(91,79): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
@@ -77,25 +77,25 @@ E:\Semester 2\OOP\OOP Final Project\Menu.h(346,62): warning C4244: 'argument': c
 E:\Semester 2\OOP\OOP Final Project\Menu.h(346,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\main.cpp(248,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(248,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(250,147): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(250,104): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(265,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(265,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(269,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(269,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(275,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(275,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(369,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(369,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(371,148): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(371,105): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(384,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(384,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(388,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(388,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(394,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(394,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(405,35): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(250,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(250,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(252,147): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(252,104): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(267,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(267,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(271,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(271,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(277,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(277,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(417,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(417,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(419,148): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(419,105): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(432,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(432,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(436,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(436,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(442,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(442,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(453,35): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   Final Project.vcxproj -> E:\Semester 2\OOP\OOP Final Project\x64\Debug\Final Project.exe
