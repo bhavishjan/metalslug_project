@@ -256,8 +256,6 @@ int main() {
         if (characters.getActivePlayer()->getVelocityY() > maxFallSpeed)
             characters.getActivePlayer()->setVelocityY(maxFallSpeed);
 
-        onGround = false;
-
         // SURVIVAL MODE
         if (gameMode == 1 && survivalGame) {
             Level* currentLevel = survivalGame->getCurrentLevel();
