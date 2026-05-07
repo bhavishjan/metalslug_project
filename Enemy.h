@@ -51,7 +51,7 @@ protected:
     bool  isTargetingPlayer;
     Player* largestPlayer;
 
-    float gravityConstant = 80.0f;
+    float gravityConstant = 200.0f;
     float groundY = 1600 - height;  // default floor (screen_y - height)
 public:
     Enemy() : x(0), y(0), width(32), height(48),
