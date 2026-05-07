@@ -114,7 +114,7 @@ int main() {
                             // 4 Rebel Soldiers
                             for (int i = 0; i < 4; i++) {
                                 survivalRebels[ei] = new RebelSoldier();
-                                survivalRebels[ei]->setPosition(300.f + i * 350.f, 100.f);
+                                survivalRebels[ei]->setPosition(300.f + i * 350.f, 0.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
@@ -122,7 +122,7 @@ int main() {
                             // 3 Grenade Soldiers
                             for (int i = 0; i < 3; i++) {
                                 survivalRebels[ei] = new GrenadeSoldier();
-                                survivalRebels[ei]->setPosition(500.f + i * 400.f, 100.f);
+                                survivalRebels[ei]->setPosition(500.f + i * 400.f, 0.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
@@ -130,7 +130,7 @@ int main() {
                             // 3 Bazooka Soldiers
                             for (int i = 0; i < 3; i++) {
                                 survivalRebels[ei] = new BazookaSoldier();
-                                survivalRebels[ei]->setPosition(600.f + i * 400.f, 100.f);
+                                survivalRebels[ei]->setPosition(600.f + i * 400.f, 0.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
@@ -138,7 +138,7 @@ int main() {
                             // 2 Shielded Soldiers
                             for (int i = 0; i < 2; i++) {
                                 survivalRebels[ei] = new ShieldedSoldier();
-                                survivalRebels[ei]->setPosition(800.f + i * 500.f, 100.f);
+                                survivalRebels[ei]->setPosition(800.f + i * 500.f, 0.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
