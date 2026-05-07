@@ -318,63 +318,62 @@ int main() {
                     Delay.restart();
                 }
 
-                // Update survival enemies
+                // Update survival enemies — full external movement pipeline
                 for (int i = 0; i < survivalRebelCount; i++) {
                     if (!survivalRebels[i]) continue;
                     survivalRebels[i]->setPlayer(characters.getActivePlayer());
-                    survivalRebels[i]->update(dt);
+                    survivalRebels[i]->update(dt); // sets velocityX/Y only, no position change
 
                     float ex  = survivalRebels[i]->getX();
                     float ey  = survivalRebels[i]->getY();
+                    float evx = survivalRebels[i]->getVelocityX();
                     float evy = survivalRebels[i]->getVelocityY();
-                    float ew  = 32.f, eh = 48.f;
+                    const float ew = 32.f, eh = 48.f;
 
-                    // horizontal block resolve
-                    float evx = 0.f;
-                    bool  eGnd = false;
-                    currentLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, eGnd);
+                    // --- HORIZONTAL ---
+                    float proposedX = ex + evx * dt;
 
-                    // vertical: move y then resolve
+                    // 1. block collision on x
+                    float bvx = evx, bvy = 0.f; bool bg = false;
+                    currentLevel->resolveCollisions(proposedX, ey, ew, eh, bvx, bvy, bg);
+
+                    // 2. player boundary on x — revert if would overlap player
+                    float px = characters.getActivePlayer()->getPlayerX();
+                    float py = characters.getActivePlayer()->getPlayerY();
+                    float pw = (float)characters.getActivePlayer()->getWidth();
+                    float ph = (float)characters.getActivePlayer()->getHeight();
+                    if (proposedX < px + pw && proposedX + ew > px &&
+                        ey        < py + ph && ey        + eh > py) {
+                        proposedX = ex; // revert — enemy stops at player edge
+                    }
+
+                    // 3. enemy-enemy boundary on x — revert against all j < i
+                    for (int j = 0; j < i; j++) {
+                        if (!survivalRebels[j]) continue;
+                        float bx2 = survivalRebels[j]->getX();
+                        float by2 = survivalRebels[j]->getY();
+                        if (proposedX < bx2 + ew && proposedX + ew > bx2 &&
+                            ey        < by2 + eh && ey        + eh > by2) {
+                            proposedX = ex; // revert — enemy stops at neighbour edge
+                        }
+                    }
+
+                    ex = proposedX;
+
+                    // --- VERTICAL ---
                     ey += evy * dt;
-                    float evx2 = 0.f, evy2 = evy;
-                    bool  eGnd2 = false;
-                    currentLevel->resolveCollisions(ex, ey, ew, eh, evx2, evy2, eGnd2);
+                    float evx2 = 0.f, evy2 = evy; bool eGnd = false;
+                    currentLevel->resolveCollisions(ex, ey, ew, eh, evx2, evy2, eGnd);
 
-                    // screen bottom fallback
                     if (ey + eh > (float)screen_y) {
-                        ey = (float)(screen_y - eh);
-                        evy2 = 0.f;
-                        eGnd2 = true;
+                        ey    = (float)(screen_y - eh);
+                        evy2  = 0.f;
+                        eGnd  = true;
                     }
 
                     survivalRebels[i]->setPosition(ex, ey);
                     survivalRebels[i]->setVelocityY(evy2);
-                    survivalRebels[i]->setGrounded(eGnd2);
-
-                    // stop enemy at player boundary
-                    survivalRebels[i]->checkPlayerCollision(characters.getActivePlayer());
-
-                    // stop enemy i against all already-resolved enemies j < i
-                    for (int j = 0; j < i; j++) {
-                        if (!survivalRebels[j]) continue;
-                        float ax = survivalRebels[i]->getX(), ay = survivalRebels[i]->getY();
-                        float bx = survivalRebels[j]->getX(), by = survivalRebels[j]->getY();
-                        if (!(ax < bx + ew && ax + ew > bx && ay < by + eh && ay + eh > by)) continue;
-                        float olL = (ax + ew) - bx;  // i is right of j
-                        float olR = (bx + ew) - ax;  // i is left  of j
-                        if (olL < olR) {
-                            survivalRebels[i]->setPosition(bx - ew, ay);
-                        }
-                        else {
-                            survivalRebels[i]->setPosition(bx + ew, ay);
-                        }
-                        // zero i's velocity so it doesn't keep driving in
-                        float zx = 0.f, zy = survivalRebels[i]->getVelocityY();
-                        bool zg = false;
-                        float nex = survivalRebels[i]->getX(), ney = survivalRebels[i]->getY();
-                        currentLevel->resolveCollisions(nex, ney, ew, eh, zx, zy, zg);
-                        survivalRebels[i]->setPosition(nex, ney);
-                    }
+                    survivalRebels[i]->setGrounded(eGnd);
                 }
 
                 // Update

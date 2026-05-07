@@ -77,7 +77,7 @@ public:
     virtual void move(float dt) {
         if (isTargetingPlayer) chasePlayer(largestPlayer);
         else                   patrol();
-        x += velocityX * dt;
+        // x position updated externally in main.cpp after collision checks
     }
 
     virtual void takeDamage(int dmg, float bulletX = 0, float bulletY = 0,
@@ -272,7 +272,7 @@ public:
             chasePlayer(largestPlayer);
         else
             patrol();
-        x += velocityX * deltaTime;  // pos update
+        // x position updated externally in main.cpp after collision checks
     }
 
     void attack() override {
