@@ -57,7 +57,7 @@ public:
     Enemy() : x(0), y(0), width(32), height(48),
         velocityX(0), velocityY(0),
         hp(1), maxHp(1), speed(80.f), damage(1),
-        isAlive(true), isGrounded(true), isCrouched(false),
+        isAlive(true), isGrounded(false), isCrouched(false),
         facingRight(true), spawnX(0), spawnY(0),
         scoreValue(0), isShielded(false), aggressionLevel(1.f),
         hasGrudge(false), grudgeMultiplier(1.f), isEnhanced(false),
