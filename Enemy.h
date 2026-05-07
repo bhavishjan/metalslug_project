@@ -157,8 +157,7 @@ public:
         }
     }
 
-    // push player away from this enemy (enemy stays fixed)
-    // only horizontal — player cannot walk through enemy
+    // block enemy movement into player — revert enemy x so they stop at player edge
     void checkPlayerCollision(Player* player) {
         if (!player || !isAlive) return;
 
@@ -169,19 +168,17 @@ public:
 
         if (!rectsOverlap(x, y, width, height, px, py, pw, ph)) return;
 
-        float overlapLeft  = (x + width) - px;   // player is to the right of enemy
-        float overlapRight = (px + pw)   - x;    // player is to the left of enemy
+        float overlapLeft  = (x + width) - px;
+        float overlapRight = (px + pw)   - x;
 
-        // only resolve horizontally — player cannot push enemy sideways
+        // stop enemy at player boundary — neither pushed
         if (overlapLeft < overlapRight) {
-            // player approached from right side — push player to right of enemy
-            player->setPlayerX(x + width);
+            x -= overlapLeft;   // enemy was moving right, push enemy back left
         }
         else {
-            // player approached from left side — push player to left of enemy
-            player->setPlayerX(x - pw);
+            x += overlapRight;  // enemy was moving left, push enemy back right
         }
-        player->setVelocityX(0.f);
+        velocityX = 0.f;
     }
 
     // call when enemy dies chance of food drop

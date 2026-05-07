@@ -352,35 +352,42 @@ int main() {
                     survivalRebels[i]->setVelocityY(evy2);
                     survivalRebels[i]->setGrounded(eGnd2);
 
-                    // push player away — enemy is immovable wall
+                    // stop enemy at player boundary — neither body moves the other
                     survivalRebels[i]->checkPlayerCollision(characters.getActivePlayer());
                 }
 
-                // enemy-enemy separation pass
-                for (int i = 0; i < survivalRebelCount; i++) {
-                    if (!survivalRebels[i]) continue;
-                    for (int j = i + 1; j < survivalRebelCount; j++) {
-                        if (!survivalRebels[j]) continue;
-                        float ax = survivalRebels[i]->getX(), ay = survivalRebels[i]->getY();
-                        float bx = survivalRebels[j]->getX(), by = survivalRebels[j]->getY();
-                        float ew = 32.f, eh = 48.f;
-                        // check overlap
-                        if (ax < bx + ew && ax + ew > bx && ay < by + eh && ay + eh > by) {
+                // enemy-enemy AABB separation — 3 iterations for stability
+                for (int iter = 0; iter < 3; iter++) {
+                    for (int i = 0; i < survivalRebelCount; i++) {
+                        if (!survivalRebels[i]) continue;
+                        for (int j = i + 1; j < survivalRebelCount; j++) {
+                            if (!survivalRebels[j]) continue;
+                            float ax = survivalRebels[i]->getX(), ay = survivalRebels[i]->getY();
+                            float bx = survivalRebels[j]->getX(), by = survivalRebels[j]->getY();
+                            float ew = 32.f, eh = 48.f;
+                            if (!(ax < bx + ew && ax + ew > bx && ay < by + eh && ay + eh > by)) continue;
                             float olL = (ax + ew) - bx;
                             float olR = (bx + ew) - ax;
-                            float push;
-                            if (olL < olR) push = olL;
-                            else push = olR;
-                            float half = push / 2.f;
+                            float half;
                             if (olL < olR) {
+                                half = olL / 2.f;
                                 survivalRebels[i]->setPosition(ax - half, ay);
                                 survivalRebels[j]->setPosition(bx + half, by);
                             }
                             else {
+                                half = olR / 2.f;
                                 survivalRebels[i]->setPosition(ax + half, ay);
                                 survivalRebels[j]->setPosition(bx - half, by);
                             }
                         }
+                    }
+                    // re-snap both enemies to terrain after each separation iteration
+                    for (int i = 0; i < survivalRebelCount; i++) {
+                        if (!survivalRebels[i]) continue;
+                        float ex = survivalRebels[i]->getX(), ey = survivalRebels[i]->getY();
+                        float evx = 0.f, evy = 0.f; bool eg = false;
+                        currentLevel->resolveCollisions(ex, ey, 32.f, 48.f, evx, evy, eg);
+                        survivalRebels[i]->setPosition(ex, ey);
                     }
                 }
 
