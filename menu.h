@@ -61,17 +61,17 @@ public:
     }
 
     void loadBackgrounds() {
-        if (startBgTexture.loadFromFile("start.png")) {
+        if (startBgTexture.loadFromFile("Sprites/start.png")) {
             startBgSprite.setTexture(startBgTexture);
             Vector2u sz = startBgTexture.getSize();
             startBgSprite.setScale((float)screen_x / sz.x, (float)screen_y / sz.y);
         }
-        if (characterBgTexture.loadFromFile("choose_character.jpg")) {
+        if (characterBgTexture.loadFromFile("Sprites/choose_character.jpg")) {
             characterBgSprite.setTexture(characterBgTexture);
             Vector2u sz = characterBgTexture.getSize();
             characterBgSprite.setScale((float)screen_x / sz.x, (float)screen_y / sz.y);
         }
-        if (modeBgTexture.loadFromFile("choose_mode.jpg")) {
+        if (modeBgTexture.loadFromFile("Sprites/choose_mode.jpg")) {
             modeBgSprite.setTexture(modeBgTexture);
             Vector2u sz = modeBgTexture.getSize();
             modeBgSprite.setScale((float)screen_x / sz.x, (float)screen_y / sz.y);

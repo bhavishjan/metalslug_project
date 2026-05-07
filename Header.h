@@ -314,7 +314,7 @@ public:
         aquatic = new AquaticBiome(aerialEnd, aquaticEnd);
 
         // Textures load k
-        loadTextures("Sprites/blocks/stone.png",
+        loadTextures("Sprites/blocks/dirt.png",
             "Sprites/blocks/water.png");
 
         // Terrain generate 
@@ -429,7 +429,7 @@ public:
         aquatic = new AquaticBiome(plainsEnd, aerialEnd);
 
         plains = new PlainsBiome(aerialEnd, aquaticEnd);
-        loadTextures("Sprites/blocks/stone.png",
+        loadTextures("Sprites/blocks/dirt.png",
             "Sprites/blocks/water.png");
 
         // Level 2 HAS MORE HILLS
@@ -544,7 +544,7 @@ public:
 
         aerial = new AerialBiome(plainsEnd, aerialEnd);
         plains = new PlainsBiome(aerialEnd, aquaticEnd);
-        loadTextures("Sprites/blocks/stone.png",
+        loadTextures("Sprites/blocks/dirt.png",
             "Sprites/blocks/water.png");
         aquatic->generateTerrain(biomeWidth, biomeHeight);
         aerial->generateTerrain(biomeWidth, biomeHeight);

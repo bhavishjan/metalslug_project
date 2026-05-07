@@ -805,7 +805,7 @@ public:
             b = new PlainsBiome(startX, endX, true);
 
         // Texture aur terrain - virtual functions call honge
-        b->loadTextures("Sprites/blocks/stone.png", "Sprites/blocks/water.png");
+        b->loadTextures("Sprites/blocks/dirt.png", "Sprites/blocks/water.png");
         b->generateTerrain(generationChunkSize, 20);
 
         if (biomeCount < maxBiomes)

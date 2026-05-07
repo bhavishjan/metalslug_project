@@ -190,14 +190,30 @@ public:
 
 // Concrete implementation for Survival Mode
 class SurvivalGame : public SurvivalMode {
+private:
+    Texture backgroundTexture;
+    Sprite backgroundSprite;
+
 public:
-    SurvivalGame(int sx, int sy) : SurvivalMode(sx, sy) {}
+    SurvivalGame(int sx, int sy) : SurvivalMode(sx, sy) {
+        if (backgroundTexture.loadFromFile("Sprites/background.jpg")) {
+            backgroundSprite.setTexture(backgroundTexture);
+            Vector2u sz = backgroundTexture.getSize();
+            backgroundSprite.setScale((float)screenX / sz.x, (float)screenY / sz.y);
+        }
+    }
 
     void loadAllLevels() override {
         levels[0] = new Level1();
         levels[1] = new Level2();
         levels[2] = new Level3();
         levels[3] = nullptr; // Boss level to be implemented
+    }
+
+    void render(RenderWindow& window) override {
+        backgroundSprite.setPosition(0, 0);
+        window.draw(backgroundSprite);
+        if (currentLevel) currentLevel->render(window, cameraX, cameraY);
     }
 };
 
@@ -228,6 +244,9 @@ private:
     int    screenX;
     int    screenY;
 
+    Texture backgroundTexture;
+    Sprite backgroundSprite;
+
 public:
     CampaignMode(int sx, int sy) : GameMode("Campaign Mode") {
         campaignLevel = nullptr;
@@ -244,6 +263,12 @@ public:
 
         for (int i = 0; i < 8; i++) enemiesKilledPerType[i] = 0;
         for (int i = 0; i < 3; i++) vehiclesDestroyedPerType[i] = 0;
+
+        if (backgroundTexture.loadFromFile("Sprites/background.jpg")) {
+            backgroundSprite.setTexture(backgroundTexture);
+            Vector2u sz = backgroundTexture.getSize();
+            backgroundSprite.setScale((float)screenX / sz.x, (float)screenY / sz.y);
+        }
     }
 
     ~CampaignMode() {
@@ -289,6 +314,8 @@ public:
     }
 
     void render(RenderWindow& window) override {
+        backgroundSprite.setPosition(0, 0);
+        window.draw(backgroundSprite);
         if (campaignLevel) campaignLevel->render(window, cameraX, cameraY);
     }
 
