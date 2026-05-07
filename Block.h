@@ -379,6 +379,7 @@ protected:
     Block** blocks;//agggregation with block
     int    blockCount;
     Texture solidTex;
+    Texture dirtTex;
     Texture waterTex;
 
 public:
@@ -414,6 +415,7 @@ public:
 
     void loadTextures(const char* solidPath, const char* waterPath) {
         solidTex.loadFromFile(solidPath);
+        dirtTex.loadFromFile("Sprites/blocks/dirt.png");
         waterTex.loadFromFile(waterPath);
     }
 
@@ -510,14 +512,18 @@ public:
 
             for (int row = sr; row < heightInBlocks; row++) {
                 //GEN BLOCKS AT BOTTOM OF SUR
-                float y = row * 64.0f;
+                float y = screen_y - (heightInBlocks - row) * 64.0f;
                 Block* b;
 
                 if (row == heightInBlocks - 1)
                     b = new IndestructibleBlock(x, y, BIOME_PLAINS, row);
                 else {
                     b = new Block(x, y, BLOCK_SOLID, BIOME_PLAINS);
-                    b->setTexture(solidTex);
+                    // Top layer uses grass, bottom layers use dirt
+                    if (row == sr)
+                        b->setTexture(solidTex); // grass
+                    else
+                        b->setTexture(dirtTex); // dirt
                 }
                 blocks[blockCount++] = b;
             }
@@ -578,7 +584,7 @@ public:
             if (surfaceRow >= heightInBlocks - 1) surfaceRow = heightInBlocks - 2;
 
             for (int row = surfaceRow; row < heightInBlocks; row++) {
-                float y = row * 64.0f;
+                float y = screen_y - (heightInBlocks - row) * 64.0f;
                 Block* b;
 
                 if (row == heightInBlocks - 1) {
@@ -586,7 +592,11 @@ public:
                 }
                 else {
                     b = new Block(x, y, BLOCK_SOLID, BIOME_AERIAL);
-                    b->setTexture(solidTex);
+                    // Top layer uses grass, bottom layers use dirt
+                    if (row == surfaceRow)
+                        b->setTexture(solidTex); // grass
+                    else
+                        b->setTexture(dirtTex); // dirt
                 }
                 blocks[blockCount++] = b;
             }
@@ -644,7 +654,7 @@ public:
             if (floorRow >= heightInBlocks - 1)    floorRow = heightInBlocks - 2;
 
             for (int row = seaLevelRow; row < heightInBlocks; row++) {
-                float y = row * 64.0f;
+                float y = screen_y - (heightInBlocks - row) * 64.0f;
                 Block* b;
 
                 if (row < floorRow) {
@@ -660,7 +670,11 @@ public:
                 else {
                     // Sea floor solid
                     b = new Block(x, y, BLOCK_SOLID, BIOME_AQUATIC);
-                    b->setTexture(solidTex);
+                    // Top layer uses grass, bottom layers use dirt
+                    if (row == floorRow)
+                        b->setTexture(solidTex); // grass
+                    else
+                        b->setTexture(dirtTex); // dirt
                 }
                 blocks[blockCount++] = b;
             }

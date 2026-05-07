@@ -196,7 +196,7 @@ private:
 
 public:
     SurvivalGame(int sx, int sy) : SurvivalMode(sx, sy) {
-        if (backgroundTexture.loadFromFile("Sprites/background.jpg")) {
+        if (backgroundTexture.loadFromFile("Sprites/background.png")) {
             backgroundSprite.setTexture(backgroundTexture);
             Vector2u sz = backgroundTexture.getSize();
             backgroundSprite.setScale((float)screenX / sz.x, (float)screenY / sz.y);
@@ -264,7 +264,7 @@ public:
         for (int i = 0; i < 8; i++) enemiesKilledPerType[i] = 0;
         for (int i = 0; i < 3; i++) vehiclesDestroyedPerType[i] = 0;
 
-        if (backgroundTexture.loadFromFile("Sprites/background.jpg")) {
+        if (backgroundTexture.loadFromFile("Sprites/background.png")) {
             backgroundSprite.setTexture(backgroundTexture);
             Vector2u sz = backgroundTexture.getSize();
             backgroundSprite.setScale((float)screenX / sz.x, (float)screenY / sz.y);

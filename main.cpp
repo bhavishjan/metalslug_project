@@ -384,10 +384,21 @@ int main() {
 
                     // 1. block collision on x — use same method as player
                     if (currentLevel->checkCollision(newX, enemy_y, enemy_w, enemy_h)) {
-                        // hit a wall — flip direction for next frame
-                        enemy_vx = -enemy_vx;
-                        survivalRebels[i]->setVelocityX(enemy_vx);
-                        newX = enemy_x; // stay put this frame
+                        // hit a wall
+                        if (survivalRebels[i]->isTargetingPlayer) {
+                            // chasing player: jump to pass the wall
+                            if (survivalRebels[i]->isGrounded()) {
+                                survivalRebels[i]->setVelocityY(-300.0f); // jump
+                                survivalRebels[i]->setGrounded(false);
+                            }
+                            // continue moving
+                        }
+                        else {
+                            // patrolling: flip direction
+                            enemy_vx = -enemy_vx;
+                            survivalRebels[i]->setVelocityX(enemy_vx);
+                            newX = enemy_x; // stay put this frame
+                        }
                     }
 
                     // 2. player boundary on x — revert if would overlap player
@@ -451,9 +462,9 @@ int main() {
                     }
 
                     // Debug output for first enemy only
-                    if (i == 0) {
-                        cout << "Enemy 0: pos(" << enemy_x << "," << enemy_y << ") vel(" << enemy_vx << "," << enemy_vy << ") grounded=" << onGround << " size(" << enemy_w << "," << enemy_h    << ")" << endl;
-                    }
+                    // if (i == 0) {
+                    //     cout << "Enemy 0: pos(" << enemy_x << "," << enemy_y << ") vel(" << enemy_vx << "," << enemy_vy << ") grounded=" << onGround << " size(" << enemy_w << "," << enemy_h << ")" << endl;
+                    // }
 
                     survivalRebels[i]->setVelocityY(enemy_vy);
                     survivalRebels[i]->setGrounded(onGround);
