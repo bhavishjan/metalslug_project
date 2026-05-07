@@ -201,7 +201,9 @@ int main() {
             else          characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * airFriction);
         }
 
-        float velCap = (gameMode == 2) ? 14.f : 6.f;
+        float velCap;
+        if (gameMode == 2) velCap = 14.f;
+        else velCap = 6.f;
         if (characters.getActivePlayer()->getVelocityX() >  velCap) characters.getActivePlayer()->setVelocityX( velCap);
         if (characters.getActivePlayer()->getVelocityX() < -velCap) characters.getActivePlayer()->setVelocityX(-velCap);
 

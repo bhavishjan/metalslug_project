@@ -239,7 +239,10 @@ public:
     }
 
     void moveSelectionDown() {
-        int maxIdx = (menuState == 1) ? 3 : (menuState == 2) ? 1 : 0;
+        int maxIdx;
+        if (menuState == 1) maxIdx = 3;
+        else if (menuState == 2) maxIdx = 1;
+        else maxIdx = 0;
         if (selectionIndex < maxIdx) selectionIndex++;
     }
 

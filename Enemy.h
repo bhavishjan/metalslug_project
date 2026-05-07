@@ -349,7 +349,9 @@ public:
 
         // anchor sprite by its bottom center, flip horizontally when facing left
         float sc = 2.0f;
-        float scX = facingRight ? sc : -sc;
+        float scX;
+        if (facingRight) scX = sc;
+        else scX = -sc;
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
         sprite.setScale(scX, sc);
@@ -1446,7 +1448,8 @@ public:
             if (largestPlayer) {
                 float targetX = largestPlayer->getPlayerX() - width * 0.5f;
                 float dx = targetX - x;
-                velocityX = (dx > 0 ? 1.f : -1.f) * speed;
+                if (dx > 0) velocityX = 1.f * speed;
+                else velocityX = -1.f * speed;
                 facingRight = (dx > 0);
             }
             // hover at fixed height no vertical movement

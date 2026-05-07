@@ -151,7 +151,10 @@ public:
 
             sprite.setPosition(player_x + width / 2.0f - camX, player_y + height - camY + a.getLegsOffsetY() * scale_y);
 
-            sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+            float legsSx;
+            if (facingRight) legsSx = scale_x;
+            else legsSx = -scale_x;
+            sprite.setScale(legsSx, scale_y);
 
             window.draw(sprite);
         }
@@ -164,11 +167,17 @@ public:
 
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
 
-        float headX = player_x + width / 2.0f - camX + (facingRight ? a.getHeadOffsetX() : -a.getHeadOffsetX()) * scale_x;
+        float headOffX;
+        if (facingRight) headOffX = a.getHeadOffsetX();
+        else headOffX = -a.getHeadOffsetX();
+        float headX = player_x + width / 2.0f - camX + headOffX * scale_x;
 
         sprite.setPosition(headX, player_y + height - camY - a.getHeadOffsetY() * scale_y);
 
-        sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+        float headSx;
+        if (facingRight) headSx = scale_x;
+        else headSx = -scale_x;
+        sprite.setScale(headSx, scale_y);
 
         window.draw(sprite);
     }
@@ -563,7 +572,8 @@ public:
     }
 
     float getFireRate() {
-        return dualFireActive ? 0.1f : 0.2f;
+        if (dualFireActive) return 0.1f;
+        else return 0.2f;
     }
 
     int getGrenadeCount() {
@@ -766,11 +776,13 @@ public:
     }
 
     int getGrenadeCount() {
-        return doubleGrenadeActive ? grenadeCount * 2 : grenadeCount;
+        if (doubleGrenadeActive) return grenadeCount * 2;
+        else return grenadeCount;
     }
 
     float getBlastRadius() {
-        return doubleGrenadeActive ? 80.0f : 50.0f;
+        if (doubleGrenadeActive) return 80.0f;
+        else return 50.0f;
     }
 
     void meleeAttack() {
@@ -859,7 +871,8 @@ public:
     }
 
     float getFireRate() {
-        return superchargedActive ? 0.1f : 0.2f;
+        if (superchargedActive) return 0.1f;
+        else return 0.2f;
     }
 
     void meleeAttack() {
@@ -868,7 +881,8 @@ public:
     }
 
     int getGrenadeCount() {
-        return superchargedActive ? grenadeCount + 5 : grenadeCount;
+        if (superchargedActive) return grenadeCount + 5;
+        else return grenadeCount;
     }
 };
 

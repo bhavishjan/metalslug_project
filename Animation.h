@@ -34,7 +34,8 @@ public:
 
         frameTime = seconds;
 
-        frameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        if (count > MAX_FRAMES) frameCount = MAX_FRAMES;
+        else frameCount = count;
 
         for (int i = 0; i < frameCount; i++)
             frames[i] = IntRect(xs[i], ys[i], widths[i], heights[i]);
@@ -46,7 +47,8 @@ public:
 
         legsFrameTime = seconds;
 
-        legsFrameCount = count > MAX_FRAMES ? MAX_FRAMES : count;
+        if (count > MAX_FRAMES) legsFrameCount = MAX_FRAMES;
+        else legsFrameCount = count;
 
         legsOffsetY = offsetY;
 
