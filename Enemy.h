@@ -481,8 +481,8 @@ public:
         detectionRange = 400.f;
         attackRange = 350.f;  // grenade has longer range
 
-        width = 32.f;
-        height = 48.f;
+        width = 25.f;
+        height = 35.f;
 
         // walk animation - row Y=17 (7 frames)
         static const int walkXs[7] = {  2,  25,  51,  81, 110, 153, 203 };
@@ -646,9 +646,6 @@ public:
         width = 40.f;
         height = 48.f;
 
-        float getWidth() const override { return 40.f; }
-        float getHeight() const override { return 48.f; }
-
         rocketReloadDuration = 2.5f;
         rocketReloadTimer = 0;
         activeRockets = 0;
@@ -780,11 +777,8 @@ public:
         detectionRange = 300.f;
         attackRange = 250.f;
 
-        width = 40.f;   // bit wider because of shield
+        width = 55.f; 
         height = 48.f;
-
-        float getWidth() const override { return 40.f; }
-        float getHeight() const override { return 48.f; }
 
         // walk animation - row Y=4 H=39 (6 frames)
         static const int walkXs[6] = {   3,  38,  73, 107, 143, 177 };
@@ -917,8 +911,6 @@ public:
         height = 32.f;
         isGrounded = true;  // aerial enemies ignore gravity
 
-        float getWidth() const override { return 32.f; }
-        float getHeight() const override { return 32.f; }
     }
 
     virtual ~AerialEnemy() {}
@@ -1150,8 +1142,6 @@ public:
         transformOnContact = true;
         onlyDeadFromFire = true;
 
-        float getWidth() const override { return 32.f; }
-        float getHeight() const override { return 52.f; }
 
         // walk animation (slow shamble)
         static const int walkXs[6] = { 0, 0, 0, 0, 0, 0 };
@@ -1446,9 +1436,6 @@ public:
 
         podX = x;
         podY = y - 80.f;   // pod hovers above martian
-
-        float getWidth() const override { return 40.f; }
-        float getHeight() const override { return 56.f; }
         isPodAlive = true;
         podTimer = 0.f;
         beamActive = false;
@@ -1617,8 +1604,7 @@ public:
         detectionRange = 600.f;
         attackRange = 500.f;
 
-        float getWidth() const override { return 80.f; }
-        float getHeight() const override { return 60.f; }
+
 
         // idle animation (uses PHASE1 slot)
         static const int idleXs[2] = { 0, 0 };

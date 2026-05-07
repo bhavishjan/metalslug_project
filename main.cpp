@@ -382,11 +382,8 @@ int main() {
                     // --- HORIZONTAL ---
                     float proposedX = ex + evx * dt;
 
-                    // 1. block collision on x — if blocked, flip direction (turn around)
-                    float savedProposedX = proposedX;
-                    float bvx = evx, bvy = 0.f; bool bg = false;
-                    currentLevel->resolveCollisions(proposedX, ey, ew, eh, bvx, bvy, bg);
-                    if (proposedX != savedProposedX) {
+                    // 1. block collision on x — use same method as player
+                    if (currentLevel->checkCollision(proposedX, ey, ew, eh)) {
                         // hit a wall — flip direction for next frame
                         evx = -evx;
                         survivalRebels[i]->setVelocityX(evx);
@@ -420,21 +417,46 @@ int main() {
 
                     // --- VERTICAL ---
                     ey += evy * dt;
-                    float evx2 = 0.f, evy2 = evy; bool eGnd = false;
-                    currentLevel->resolveCollisions(ex, ey, ew, eh, evx2, evy2, eGnd);
+                    
+                    // Use same collision method as player
+                    if (currentLevel->checkCollision(ex, ey, ew, eh)) {
+                        if (evy > 0) {
+                            // Falling down - landed on ground
+                            evy = 0;
+                            eGnd = true;
+                            // Move up until no collision
+                            while (currentLevel->checkCollision(ex, ey, ew, eh)) {
+                                ey -= 1;
+                            }
+                        }
+                        else {
+                            // Moving up - hit ceiling
+                            evy = 0;
+                            // Move down until no collision
+                            while (currentLevel->checkCollision(ex, ey, ew, eh)) {
+                                ey += 1;
+                            }
+                        }
+                    }
+                    else {
+                        if (evy >= 0) {
+                            eGnd = false;
+                        }
+                    }
 
+                    // Screen bottom boundary (fallback)
                     if (ey + eh > (float)screen_y) {
-                        ey    = (float)(screen_y - eh);
-                        evy2  = 0.f;
-                        eGnd  = true;
+                        ey = (float)(screen_y - eh);
+                        evy = 0;
+                        eGnd = true;
                     }
 
                     // Debug output for first enemy only
                     if (i == 0) {
-                        cout << "Enemy 0: pos(" << ex << "," << ey << ") vel(" << evx << "," << evy2 << ") grounded=" << eGnd << " size(" << ew << "," << eh << ")" << endl;
+                        cout << "Enemy 0: pos(" << ex << "," << ey << ") vel(" << evx << "," << evy << ") grounded=" << eGnd << " size(" << ew << "," << eh << ")" << endl;
                     }
 
-                    survivalRebels[i]->setVelocityY(evy2);
+                    survivalRebels[i]->setVelocityY(evy);
                     survivalRebels[i]->setGrounded(eGnd);
                     survivalRebels[i]->setPosition(ex, ey);
                 }
