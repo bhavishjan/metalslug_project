@@ -285,8 +285,8 @@ int main() {
                     }
                 }
 
-                // Enemy wall — stop player if walking into any enemy
-                {
+                // Enemy wall — stop player if walking into any enemy (only when moving horizontally)
+                if (pVelocityX != 0 && onGround) {
                     float pW = (float)characters.getActivePlayer()->getWidth();
                     float pH = (float)characters.getActivePlayer()->getHeight();
                     for (int i = 0; i < survivalRebelCount; i++) {
@@ -384,7 +384,7 @@ int main() {
                         if (survivalRebels[i]->getIsTargetingPlayer()) {
                             // chasing player: jump to pass the wall
                             if (survivalRebels[i]->getIsGrounded()) {
-                                survivalRebels[i]->setVelocityY(-500.0f); // jump
+                                survivalRebels[i]->setVelocityY(-700.0f); // jump
                                 survivalRebels[i]->setGrounded(false);
                             }
                             // continue moving
@@ -424,6 +424,13 @@ int main() {
                     // --- VERTICAL ---
                     enemy_y += enemy_vy * dt;
 
+                    // Screen bottom boundary (enforce before collision check)
+                    if (enemy_y + enemy_h > (float)screen_y) {
+                        enemy_y = (float)(screen_y - enemy_h);
+                        enemy_vy = 0;
+                        onGround = true;
+                    }
+
                     // 4. player boundary on y — push enemy away if overlapping player vertically
                     if (enemy_x < px + pw && enemy_x + enemy_w > px &&
                         enemy_y < py + ph && enemy_y + enemy_h > py) {
@@ -440,7 +447,7 @@ int main() {
                         else if (minOverlap == overlapTop) enemy_y -= overlapTop;
                         else enemy_y += overlapBottom;
                     }
-                    
+
                     // Use same collision method as player
                     if (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
                         if (enemy_vy > 0) {
@@ -465,13 +472,6 @@ int main() {
                         if (enemy_vy >= 0) {
                             onGround = false;
                         }
-                    }
-
-                    // Screen bottom boundary (fallback)
-                    if (enemy_y + enemy_h > (float)screen_y) {
-                        enemy_y = (float)(screen_y - enemy_h);
-                        enemy_vy = 0;
-                        onGround = true;
                     }
 
                     // Debug output for first enemy only
