@@ -44,11 +44,11 @@ int main() {
     float moveAcceleration = 0.6f;
     float friction = 0.80f;
     float airFriction = 0.95f;
-    float jumpPower = -45.0f;
+    float jumpPower = -22.0f;
     float gravity = 50.0f;
     float maxFallSpeed = 25.0f;
 
-    bool onGround = true;
+    bool onGround = false;
     bool jumpHeld = false;
 
 
@@ -97,9 +97,9 @@ int main() {
                             survivalGame = new SurvivalGame(screen_x, screen_y);
                             survivalGame->setCharManager(&characters);
                             survivalGame->start();
-                            characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), 700.f);
+                            characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
                             characters.getActivePlayer()->setVelocity(0, 0);
-                            onGround = true;
+                            onGround = false;
                             cameraX = cameraY = 0;
                             Delay.restart();
                             // Spawn all infantry enemy types in survival mode
@@ -238,10 +238,11 @@ int main() {
 
         // JUMP
         if (Keyboard::isKeyPressed(Keyboard::Up)) {
-            cout << "Jump key pressed, setting velocityY to " << jumpPower << endl;
-            characters.getActivePlayer()->setVelocityY(jumpPower);
-            onGround = false;
-            jumpHeld = true;
+            if (onGround) {
+                characters.getActivePlayer()->setVelocityY(jumpPower);
+                onGround = false;
+                jumpHeld = true;
+            }
         }
         else {
             jumpHeld = false;
@@ -321,16 +322,9 @@ int main() {
                     }
                 }
                 else {
-                    if (pVelocityY > 0) {
-                        onGround = false; // falling through air
+                    if (pVelocityY >= 0) {
+                        onGround = false;
                     }
-                }
-
-                // Screen bottom boundary (fallback)
-                if (pY + characters.getActivePlayer()->getHeight() > screen_y) {
-                    pY = screen_y - characters.getActivePlayer()->getHeight();
-                    pVelocityY = 0;
-                    onGround = true;
                 }
                 
                 // Update player position and velocity
@@ -388,8 +382,10 @@ int main() {
                         // hit a wall
                         if (survivalRebels[i]->getIsTargetingPlayer()) {
                             // chasing player: jump to pass the wall
-                            survivalRebels[i]->setVelocityY(-700.0f); // jump
-                            survivalRebels[i]->setGrounded(false);
+                            if (survivalRebels[i]->getIsGrounded()) {
+                                survivalRebels[i]->setVelocityY(-500.0f); // jump
+                                survivalRebels[i]->setGrounded(false);
+                            }
                             // continue moving
                         }
                         else {
@@ -426,30 +422,6 @@ int main() {
                     enemy_x = newX;
                     // --- VERTICAL ---
                     enemy_y += enemy_vy * dt;
-
-                    // Screen bottom boundary (enforce before collision check)
-                    if (enemy_y + enemy_h > (float)screen_y) {
-                        enemy_y = (float)(screen_y - enemy_h);
-                        enemy_vy = 0;
-                        onGround = true;
-                    }
-
-                    // 4. player boundary on y — push enemy away if overlapping player vertically
-                    if (enemy_x < px + pw && enemy_x + enemy_w > px &&
-                        enemy_y < py + ph && enemy_y + enemy_h > py) {
-                        // Calculate overlap on both axes
-                        float overlapLeft = (px + pw) - enemy_x;
-                        float overlapRight = (enemy_x + enemy_w) - px;
-                        float overlapTop = (py + ph) - enemy_y;
-                        float overlapBottom = (enemy_y + enemy_h) - py;
-
-                        // Find smallest overlap and push enemy that direction
-                        float minOverlap = min(min(overlapLeft, overlapRight), min(overlapTop, overlapBottom));
-                        if (minOverlap == overlapLeft) enemy_x -= overlapLeft;
-                        else if (minOverlap == overlapRight) enemy_x += overlapRight;
-                        else if (minOverlap == overlapTop) enemy_y -= overlapTop;
-                        else enemy_y += overlapBottom;
-                    }
 
                     // Use same collision method as player
                     if (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
