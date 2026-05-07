@@ -297,8 +297,9 @@ int main() {
                     for (int i = 0; i < survivalRebelCount; i++) {
                         if (!survivalRebels[i]) continue;
                         float ex2 = survivalRebels[i]->getX(), ey2 = survivalRebels[i]->getY();
-                        if (pX < ex2 + 32.f && pX + pW > ex2 &&
-                            pY < ey2 + 48.f && pY + pH > ey2) {
+                        float ew2 = survivalRebels[i]->getWidth(), eh2 = survivalRebels[i]->getHeight();
+                        if (pX < ex2 + ew2 && pX + pW > ex2 &&
+                            pY < ey2 + eh2 && pY + pH > ey2) {
                             pX = characters.getActivePlayer()->getPlayerX();
                             pVelocityX = 0;
                             break;
@@ -375,7 +376,8 @@ int main() {
                     float ey  = survivalRebels[i]->getY();
                     float evx = survivalRebels[i]->getVelocityX();
                     float evy = survivalRebels[i]->getVelocityY();
-                    const float ew = 32.f, eh = 48.f;
+                    const float ew = survivalRebels[i]->getWidth();
+                    const float eh = survivalRebels[i]->getHeight();
 
                     // --- HORIZONTAL ---
                     float proposedX = ex + evx * dt;
@@ -406,8 +408,10 @@ int main() {
                         if (!survivalRebels[j]) continue;
                         float bx2 = survivalRebels[j]->getX();
                         float by2 = survivalRebels[j]->getY();
-                        if (proposedX < bx2 + ew && proposedX + ew > bx2 &&
-                            ey        < by2 + eh && ey        + eh > by2) {
+                        float bw2 = survivalRebels[j]->getWidth();
+                        float bh2 = survivalRebels[j]->getHeight();
+                        if (proposedX < bx2 + bw2 && proposedX + ew > bx2 &&
+                            ey        < by2 + bh2 && ey        + eh > by2) {
                             proposedX = ex; // revert — enemy stops at neighbour edge
                         }
                     }
@@ -425,9 +429,14 @@ int main() {
                         eGnd  = true;
                     }
 
-                    survivalRebels[i]->setPosition(ex, ey);
+                    // Debug output for first enemy only
+                    if (i == 0) {
+                        cout << "Enemy 0: pos(" << ex << "," << ey << ") vel(" << evx << "," << evy2 << ") grounded=" << eGnd << " size(" << ew << "," << eh << ")" << endl;
+                    }
+
                     survivalRebels[i]->setVelocityY(evy2);
                     survivalRebels[i]->setGrounded(eGnd);
+                    survivalRebels[i]->setPosition(ex, ey);
                 }
 
                 // Update
