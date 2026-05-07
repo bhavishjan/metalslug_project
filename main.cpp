@@ -260,6 +260,22 @@ int main() {
                     }
                 }
 
+                // Enemy wall — stop player if walking into any enemy
+                {
+                    float pW = (float)characters.getActivePlayer()->getWidth();
+                    float pH = (float)characters.getActivePlayer()->getHeight();
+                    for (int i = 0; i < survivalRebelCount; i++) {
+                        if (!survivalRebels[i]) continue;
+                        float ex2 = survivalRebels[i]->getX(), ey2 = survivalRebels[i]->getY();
+                        if (pX < ex2 + 32.f && pX + pW > ex2 &&
+                            pY < ey2 + 48.f && pY + pH > ey2) {
+                            pX = characters.getActivePlayer()->getPlayerX();
+                            pVelocityX = 0;
+                            break;
+                        }
+                    }
+                }
+
                 // Apply vertical movement
                 pY += pVelocityY;
 
@@ -333,9 +349,16 @@ int main() {
                     // --- HORIZONTAL ---
                     float proposedX = ex + evx * dt;
 
-                    // 1. block collision on x
+                    // 1. block collision on x — if blocked, flip direction (turn around)
+                    float savedProposedX = proposedX;
                     float bvx = evx, bvy = 0.f; bool bg = false;
                     currentLevel->resolveCollisions(proposedX, ey, ew, eh, bvx, bvy, bg);
+                    if (proposedX != savedProposedX) {
+                        // hit a wall — flip direction for next frame
+                        evx = -evx;
+                        survivalRebels[i]->setVelocityX(evx);
+                        proposedX = ex; // stay put this frame
+                    }
 
                     // 2. player boundary on x — revert if would overlap player
                     float px = characters.getActivePlayer()->getPlayerX();

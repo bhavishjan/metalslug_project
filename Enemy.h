@@ -232,6 +232,7 @@ public:
     float getVelocityY() const { return velocityY; }
     void  setVelocityY(float vy) { velocityY = vy; }
     float getVelocityX() const { return velocityX; }
+    void  setVelocityX(float vx) { velocityX = vx; }
     void  setGrounded(bool g) { isGrounded = g; if (g) velocityY = 0.f; }
 };
 
