@@ -372,22 +372,22 @@ int main() {
                     survivalRebels[i]->update(dt); // sets velocityX/Y only, no position change
                     survivalRebels[i]->applyGravity(dt); // accumulate velocityY externally
 
-                    float ex  = survivalRebels[i]->getX();
-                    float ey  = survivalRebels[i]->getY();
-                    float evx = survivalRebels[i]->getVelocityX();
-                    float evy = survivalRebels[i]->getVelocityY();
-                    const float ew = survivalRebels[i]->getWidth();
-                    const float eh = survivalRebels[i]->getHeight();
+                    float enemy_x  = survivalRebels[i]->getX();
+                    float enemy_y  = survivalRebels[i]->getY();
+                    float enemy_vx = survivalRebels[i]->getVelocityX();
+                    float enemy_vy = survivalRebels[i]->getVelocityY();
+                    const float enemy_w = survivalRebels[i]->getWidth();
+                    const float enemy_h = survivalRebels[i]->getHeight();
 
-                    // --- HORIZONTAL ---
-                    float proposedX = ex + evx * dt;
+                    // horizontal
+                    float newX = enemy_x + enemy_vx * dt;
 
                     // 1. block collision on x — use same method as player
-                    if (currentLevel->checkCollision(proposedX, ey, ew, eh)) {
+                    if (currentLevel->checkCollision(newX, enemy_y, enemy_w, enemy_h)) {
                         // hit a wall — flip direction for next frame
-                        evx = -evx;
-                        survivalRebels[i]->setVelocityX(evx);
-                        proposedX = ex; // stay put this frame
+                        enemy_vx = -enemy_vx;
+                        survivalRebels[i]->setVelocityX(enemy_vx);
+                        newX = enemy_x; // stay put this frame
                     }
 
                     // 2. player boundary on x — revert if would overlap player
@@ -395,9 +395,9 @@ int main() {
                     float py = characters.getActivePlayer()->getPlayerY();
                     float pw = (float)characters.getActivePlayer()->getWidth();
                     float ph = (float)characters.getActivePlayer()->getHeight();
-                    if (proposedX < px + pw && proposedX + ew > px &&
-                        ey        < py + ph && ey        + eh > py) {
-                        proposedX = ex; // revert — enemy stops at player edge
+                    if (newX < px + pw && newX + enemy_w > px &&
+                        enemy_y        < py + ph && enemy_y        + enemy_h > py) {
+                        newX = enemy_x; // revert — enemy stops at player edge
                     }
 
                     // 3. enemy-enemy boundary on x — revert against all j < i
@@ -407,58 +407,57 @@ int main() {
                         float by2 = survivalRebels[j]->getY();
                         float bw2 = survivalRebels[j]->getWidth();
                         float bh2 = survivalRebels[j]->getHeight();
-                        if (proposedX < bx2 + bw2 && proposedX + ew > bx2 &&
-                            ey        < by2 + bh2 && ey        + eh > by2) {
-                            proposedX = ex; // revert — enemy stops at neighbour edge
+                        if (newX < bx2 + bw2 && newX + enemy_w > bx2 &&
+                            enemy_y        < by2 + bh2 && enemy_y        + enemy_h > by2) {
+                            newX = enemy_x; // revert — enemy stops at neighbour edge
                         }
                     }
 
-                    ex = proposedX;
-
+                    enemy_x = newX;
                     // --- VERTICAL ---
-                    ey += evy * dt;
+                    enemy_y += enemy_vy * dt;
                     
                     // Use same collision method as player
-                    if (currentLevel->checkCollision(ex, ey, ew, eh)) {
-                        if (evy > 0) {
+                    if (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
+                        if (enemy_vy > 0) {
                             // Falling down - landed on ground
-                            evy = 0;
-                            eGnd = true;
+                            enemy_vy = 0;
+                            onGround = true;
                             // Move up until no collision
-                            while (currentLevel->checkCollision(ex, ey, ew, eh)) {
-                                ey -= 1;
+                            while (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
+                                enemy_y -= 1;
                             }
                         }
                         else {
                             // Moving up - hit ceiling
-                            evy = 0;
+                            enemy_vy = 0;
                             // Move down until no collision
-                            while (currentLevel->checkCollision(ex, ey, ew, eh)) {
-                                ey += 1;
+                            while (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
+                                enemy_y += 1;
                             }
                         }
                     }
                     else {
-                        if (evy >= 0) {
-                            eGnd = false;
+                        if (enemy_vy >= 0) {
+                            onGround = false;
                         }
                     }
 
                     // Screen bottom boundary (fallback)
-                    if (ey + eh > (float)screen_y) {
-                        ey = (float)(screen_y - eh);
-                        evy = 0;
-                        eGnd = true;
+                    if (enemy_y + enemy_h > (float)screen_y) {
+                        enemy_y = (float)(screen_y - enemy_h);
+                        enemy_vy = 0;
+                        onGround = true;
                     }
 
                     // Debug output for first enemy only
                     if (i == 0) {
-                        cout << "Enemy 0: pos(" << ex << "," << ey << ") vel(" << evx << "," << evy << ") grounded=" << eGnd << " size(" << ew << "," << eh << ")" << endl;
+                        cout << "Enemy 0: pos(" << enemy_x << "," << enemy_y << ") vel(" << enemy_vx << "," << enemy_vy << ") grounded=" << onGround << " size(" << enemy_w << "," << enemy_h    << ")" << endl;
                     }
 
-                    survivalRebels[i]->setVelocityY(evy);
-                    survivalRebels[i]->setGrounded(eGnd);
-                    survivalRebels[i]->setPosition(ex, ey);
+                    survivalRebels[i]->setVelocityY(enemy_vy);
+                    survivalRebels[i]->setGrounded(onGround);
+                    survivalRebels[i]->setPosition(enemy_x, enemy_y);
                 }
 
                 // Update

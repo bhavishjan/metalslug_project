@@ -50,7 +50,7 @@ protected:
     bool  isTargetingPlayer;
     Player* largestPlayer;
 
-    float gravityConstant = 900.0f;
+    float gravityConstant = 1.0f;
     float groundY = 852.f;  // default floor (screen_y - height)
 
 public:
