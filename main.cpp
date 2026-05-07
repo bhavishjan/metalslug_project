@@ -97,7 +97,7 @@ int main() {
                             survivalGame = new SurvivalGame(screen_x, screen_y);
                             survivalGame->setCharManager(&characters);
                             survivalGame->start();
-                            characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
+                            characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), 200.f);
                             characters.getActivePlayer()->setVelocity(0, 0);
                             onGround = false;
                             cameraX = cameraY = 0;
@@ -322,11 +322,18 @@ int main() {
                     }
                 }
                 else {
-                    if (pVelocityY >= 0) {
-                        onGround = false;
+                    if (pVelocityY > 0) {
+                        onGround = false; // falling through air
                     }
                 }
 
+                // Screen bottom boundary (fallback)
+                if (pY + characters.getActivePlayer()->getHeight() > screen_y) {
+                    pY = screen_y - characters.getActivePlayer()->getHeight();
+                    pVelocityY = 0;
+                    onGround = true;
+                }
+                
                 // Update player position and velocity
                 characters.getActivePlayer()->setPlayerPosition(pX, pY);
                 characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
