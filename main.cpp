@@ -97,9 +97,9 @@ int main() {
                             survivalGame = new SurvivalGame(screen_x, screen_y);
                             survivalGame->setCharManager(&characters);
                             survivalGame->start();
-                            characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), 200.f);
+                            characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), 700.f);
                             characters.getActivePlayer()->setVelocity(0, 0);
-                            onGround = false;
+                            onGround = true;
                             cameraX = cameraY = 0;
                             Delay.restart();
                             // Spawn all infantry enemy types in survival mode
@@ -238,11 +238,9 @@ int main() {
 
         // JUMP
         if (Keyboard::isKeyPressed(Keyboard::Up)) {
-            if (onGround) {
-                characters.getActivePlayer()->setVelocityY(jumpPower);
-                onGround = false;
-                jumpHeld = true;
-            }
+            characters.getActivePlayer()->setVelocityY(jumpPower);
+            onGround = false;
+            jumpHeld = true;
         }
         else {
             jumpHeld = false;
@@ -389,10 +387,8 @@ int main() {
                         // hit a wall
                         if (survivalRebels[i]->getIsTargetingPlayer()) {
                             // chasing player: jump to pass the wall
-                            if (survivalRebels[i]->getIsGrounded()) {
-                                survivalRebels[i]->setVelocityY(-700.0f); // jump
-                                survivalRebels[i]->setGrounded(false);
-                            }
+                            survivalRebels[i]->setVelocityY(-700.0f); // jump
+                            survivalRebels[i]->setGrounded(false);
                             // continue moving
                         }
                         else {
