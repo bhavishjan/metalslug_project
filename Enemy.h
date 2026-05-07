@@ -6,6 +6,9 @@
 using namespace std;
 using namespace sf;
 
+extern const int screen_x;
+extern const int screen_y;
+
 // helper function to check if two rectangles overlap
 // used for collision detection between enemies and player
 static bool rectsOverlap(float ax, float ay, float aw, float ah,
