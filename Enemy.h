@@ -1184,16 +1184,16 @@ public:
 
 
         // walk animation (slow shamble)
-        static const int walkXs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int walkYs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int walkWs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int walkHs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int walkXs[6] = { 10, 64, 118, 171, 10, 64 };
+        static const int walkYs[6] = { 18, 18, 19, 19, 18, 18 };
+        static const int walkWs[6] = { 49, 49, 48, 48, 49, 49 };
+        static const int walkHs[6] = { 43, 43, 42, 42, 43, 43 };
 
         // attack animation (melee transform)
-        static const int attackXs[4] = { 0, 0, 0, 0 };
-        static const int attackYs[4] = { 0, 0, 0, 0 };
-        static const int attackWs[4] = { 0, 0, 0, 0 };
-        static const int attackHs[4] = { 0, 0, 0, 0 };
+        static const int attackXs[4] = { 10, 59, 105, 146 };
+        static const int attackYs[4] = { 140, 140, 140, 140 };
+        static const int attackWs[4] = { 44, 41, 36, 28 };
+        static const int attackHs[4] = { 44, 44, 44, 44 };
 
         // shoot animation (unused for mummy but kept for consistency)
         static const int shootXs[1] = { 0 };
@@ -1202,16 +1202,16 @@ public:
         static const int shootHs[1] = { 0 };
 
         // hurt animation (crumble)
-        static const int hurtXs[3] = { 0, 0, 0 };
-        static const int hurtYs[3] = { 0, 0, 0 };
-        static const int hurtWs[3] = { 0, 0, 0 };
-        static const int hurtHs[3] = { 0, 0, 0 };
+        static const int hurtXs[3] = { 10, 64, 118 };
+        static const int hurtYs[3] = { 460, 460, 460 };
+        static const int hurtWs[3] = { 36, 36, 36 };
+        static const int hurtHs[3] = { 21, 21, 21 };
 
         // die animation
-        static const int dieXs[4] = { 0, 0, 0, 0 };
-        static const int dieYs[4] = { 0, 0, 0, 0 };
-        static const int dieWs[4] = { 0, 0, 0, 0 };
-        static const int dieHs[4] = { 0, 0, 0, 0 };
+        static const int dieXs[4] = { 10, 10, 10, 10 };
+        static const int dieYs[4] = { 831, 879, 926, 953 };
+        static const int dieWs[4] = { 48, 51, 50, 52 };
+        static const int dieHs[4] = { 43, 37, 22, 63 };
 
         anims[WALK].load("Sprites/Mummy Warrior.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
         anims[ATTACK].load("Sprites/Mummy Warrior.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
@@ -1312,34 +1312,34 @@ public:
         onlyDeadFromFire = true;
 
         // walk animation
-        static const int walkXs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int walkYs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int walkWs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int walkHs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int walkXs[6] = { 10, 64, 118, 171, 10, 64 };
+        static const int walkYs[6] = { 18, 18, 19, 19, 18, 18 };
+        static const int walkWs[6] = { 49, 49, 48, 48, 49, 49 };
+        static const int walkHs[6] = { 43, 43, 42, 42, 43, 43 };
 
         // attack animation (melee)
-        static const int attackXs[4] = { 0, 0, 0, 0 };
-        static const int attackYs[4] = { 0, 0, 0, 0 };
-        static const int attackWs[4] = { 0, 0, 0, 0 };
-        static const int attackHs[4] = { 0, 0, 0, 0 };
+        static const int attackXs[4] = { 10, 59, 105, 146 };
+        static const int attackYs[4] = { 140, 140, 140, 140 };
+        static const int attackWs[4] = { 44, 41, 36, 28 };
+        static const int attackHs[4] = { 44, 44, 44, 44 };
 
         // shoot animation (pistol)
-        static const int shootXs[4] = { 0, 0, 0, 0 };
-        static const int shootYs[4] = { 0, 0, 0, 0 };
-        static const int shootWs[4] = { 0, 0, 0, 0 };
-        static const int shootHs[4] = { 0, 0, 0, 0 };
+        static const int shootXs[4] = { 10, 62, 111, 158 };
+        static const int shootYs[4] = { 202, 202, 202, 202 };
+        static const int shootWs[4] = { 47, 44, 42, 45 };
+        static const int shootHs[4] = { 44, 44, 44, 44 };
 
         // hurt animation
-        static const int hurtXs[2] = { 0, 0 };
-        static const int hurtYs[2] = { 0, 0 };
-        static const int hurtWs[2] = { 0, 0 };
-        static const int hurtHs[2] = { 0, 0 };
+        static const int hurtXs[2] = { 10, 64 };
+        static const int hurtYs[2] = { 460, 460 };
+        static const int hurtWs[2] = { 36, 36 };
+        static const int hurtHs[2] = { 21, 21 };
 
         // die animation
-        static const int dieXs[4] = { 0, 0, 0, 0 };
-        static const int dieYs[4] = { 0, 0, 0, 0 };
-        static const int dieWs[4] = { 0, 0, 0, 0 };
-        static const int dieHs[4] = { 0, 0, 0, 0 };
+        static const int dieXs[4] = { 10, 10, 10, 10 };
+        static const int dieYs[4] = { 831, 879, 926, 953 };
+        static const int dieWs[4] = { 48, 51, 50, 52 };
+        static const int dieHs[4] = { 43, 37, 22, 63 };
 
         anims[WALK].load("Sprites/Zombie.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
         anims[ATTACK].load("Sprites/Zombie.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
@@ -1485,40 +1485,40 @@ public:
         fireBombTimer = 0.f;
 
         // phase 1 (pod flying)
-        static const int phase1Xs[4] = { 0, 0, 0, 0 };
-        static const int phase1Ys[4] = { 0, 0, 0, 0 };
-        static const int phase1Ws[4] = { 0, 0, 0, 0 };
-        static const int phase1Hs[4] = { 0, 0, 0, 0 };
+        static const int phase1Xs[4] = { 10, 64, 118, 171 };
+        static const int phase1Ys[4] = { 18, 18, 19, 19 };
+        static const int phase1Ws[4] = { 49, 49, 48, 48 };
+        static const int phase1Hs[4] = { 43, 43, 42, 42 };
 
         // phase 2 (martian on foot)
-        static const int phase2Xs[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int phase2Ys[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int phase2Ws[6] = { 0, 0, 0, 0, 0, 0 };
-        static const int phase2Hs[6] = { 0, 0, 0, 0, 0, 0 };
+        static const int phase2Xs[6] = { 10, 64, 119, 174, 10, 64 };
+        static const int phase2Ys[6] = { 79, 79, 80, 80, 79, 79 };
+        static const int phase2Ws[6] = { 49, 50, 50, 51, 49, 50 };
+        static const int phase2Hs[6] = { 43, 43, 42, 42, 43, 43 };
 
         // attack1 (energy beam from pod)
-        static const int attack1Xs[4] = { 0, 0, 0, 0 };
-        static const int attack1Ys[4] = { 0, 0, 0, 0 };
-        static const int attack1Ws[4] = { 0, 0, 0, 0 };
-        static const int attack1Hs[4] = { 0, 0, 0, 0 };
+        static const int attack1Xs[4] = { 10, 59, 105, 146 };
+        static const int attack1Ys[4] = { 140, 140, 140, 140 };
+        static const int attack1Ws[4] = { 44, 41, 36, 28 };
+        static const int attack1Hs[4] = { 44, 44, 44, 44 };
 
         // attack2 (pistol on foot)
-        static const int attack2Xs[4] = { 0, 0, 0, 0 };
-        static const int attack2Ys[4] = { 0, 0, 0, 0 };
-        static const int attack2Ws[4] = { 0, 0, 0, 0 };
-        static const int attack2Hs[4] = { 0, 0, 0, 0 };
+        static const int attack2Xs[4] = { 10, 62, 111, 158 };
+        static const int attack2Ys[4] = { 202, 202, 202, 202 };
+        static const int attack2Ws[4] = { 47, 44, 42, 45 };
+        static const int attack2Hs[4] = { 44, 44, 44, 44 };
 
         // hurt animation
-        static const int hurtXs[2] = { 0, 0 };
-        static const int hurtYs[2] = { 0, 0 };
-        static const int hurtWs[2] = { 0, 0 };
-        static const int hurtHs[2] = { 0, 0 };
+        static const int hurtXs[2] = { 10, 64 };
+        static const int hurtYs[2] = { 460, 460 };
+        static const int hurtWs[2] = { 36, 36 };
+        static const int hurtHs[2] = { 21, 21 };
 
         // die animation
-        static const int dieXs[4] = { 0, 0, 0, 0 };
-        static const int dieYs[4] = { 0, 0, 0, 0 };
-        static const int dieWs[4] = { 0, 0, 0, 0 };
-        static const int dieHs[4] = { 0, 0, 0, 0 };
+        static const int dieXs[4] = { 10, 10, 10, 10 };
+        static const int dieYs[4] = { 831, 879, 926, 953 };
+        static const int dieWs[4] = { 48, 51, 50, 52 };
+        static const int dieHs[4] = { 43, 37, 22, 63 };
 
         anims[PHASE1].load("Sprites/Martian.png", phase1Xs, phase1Ys, phase1Ws, phase1Hs, 4, 0.10f);
         anims[PHASE2].load("Sprites/Martian.png", phase2Xs, phase2Ys, phase2Ws, phase2Hs, 6, 0.10f);

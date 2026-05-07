@@ -100,38 +100,56 @@ int main() {
                                 survivalRebels[i] = nullptr;
                             }
                             int ei = 0;
-                            // 4 Rebel Soldiers
-                            for (int i = 0; i < 4; i++) {
+                            // 2 Rebel Soldiers
+                            for (int i = 0; i < 2; i++) {
                                 survivalRebels[ei] = new RebelSoldier();
                                 survivalRebels[ei]->setPosition(300.f + i * 350.f, 200.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
                             }
-                            // 3 Grenade Soldiers
-                            for (int i = 0; i < 3; i++) {
+                            // 2 Grenade Soldiers
+                            for (int i = 0; i < 2; i++) {
                                 survivalRebels[ei] = new GrenadeSoldier();
                                 survivalRebels[ei]->setPosition(500.f + i * 400.f, 200.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
                             }
-                            // 3 Bazooka Soldiers
-                            for (int i = 0; i < 3; i++) {
-                                survivalRebels[ei] = new BazookaSoldier();
-                                survivalRebels[ei]->setPosition(600.f + i * 400.f, 200.f);
-                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                                survivalRebels[ei]->setGroundY((float)(screen_y - 48));
-                                ei++;
-                            }
-                            // 2 Shielded Soldiers
+                            // 1 Bazooka Soldier
+                            survivalRebels[ei] = new BazookaSoldier();
+                            survivalRebels[ei]->setPosition(600.f, 200.f);
+                            survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                            survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                            ei++;
+                            // 1 Shielded Soldier
+                            survivalRebels[ei] = new ShieldedSoldier();
+                            survivalRebels[ei]->setPosition(800.f, 200.f);
+                            survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                            survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                            ei++;
+                            // 2 Mummy Warriors
                             for (int i = 0; i < 2; i++) {
-                                survivalRebels[ei] = new ShieldedSoldier();
-                                survivalRebels[ei]->setPosition(800.f + i * 500.f, 200.f);
+                                survivalRebels[ei] = new MummyWarrior();
+                                survivalRebels[ei]->setPosition(1000.f + i * 400.f, 200.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
                             }
+                            // 2 Zombies
+                            for (int i = 0; i < 2; i++) {
+                                survivalRebels[ei] = new Zombie();
+                                survivalRebels[ei]->setPosition(1200.f + i * 400.f, 200.f);
+                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                                ei++;
+                            }
+                            // 1 Martian
+                            survivalRebels[ei] = new Martian();
+                            survivalRebels[ei]->setPosition(1400.f, 200.f);
+                            survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                            survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                                ei++;
                             survivalRebelCount = ei;
                             cout << "Entered Survival Mode" << endl;
                         }
