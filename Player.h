@@ -110,8 +110,8 @@ public:
         weaponSlots[0] = nullptr;
         weaponSlots[1] = nullptr;
         activeWeaponIndex = 0;
-        moveAcceleration = 0.6f;
-        gravity = 3.0f;
+        moveAcceleration = 0.4f;
+        gravity = 2.0f;
         jumpPower = -22.0f;
         friction = 0.80f;
         airFriction = 0.95f;

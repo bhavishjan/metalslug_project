@@ -383,6 +383,10 @@ public:
 class RebelSoldier : public InfantryEnemy {
 private:
     float patrolRange;
+    bool isShooting;
+    int bulletsFired;
+    float shootingTimer;
+    float bulletDelay;
 
 public:
     RebelSoldier() {
@@ -409,6 +413,11 @@ public:
         isPatrolling = true;
         isTargetingPlayer = false;
         largestPlayer = nullptr;
+
+        isShooting = false;
+        bulletsFired = 0;
+        shootingTimer = 0.0f;
+        bulletDelay = 0.3f;
 
         grudgeMultiplier = 1.0f;
 
@@ -447,10 +456,38 @@ public:
 
     // uses parent InfantryEnemy attack no need to override
     void attack() override {
-        InfantryEnemy::attack();
+        if (isShooting) return; // already shooting
+
+        // start shooting sequence
+        isShooting = true;
+        bulletsFired = 0;
+        shootingTimer = 0.0f;
+        currentAnim = STAND; // shift to stand animation
+    }
+
+    void move(float dt) override {
+        if (isShooting) return; // stop moving while shooting
+        InfantryEnemy::move(dt);
     }
 
     void update(float dt) override {
+        if (isShooting) {
+            shootingTimer += dt;
+
+            // shoot bullets with delay
+            if (bulletsFired < 3 && shootingTimer >= bulletDelay) {
+                InfantryEnemy::attack(); // fire one bullet
+                bulletsFired++;
+                shootingTimer = 0.0f;
+            }
+
+            // end shooting sequence after 3 bullets
+            if (bulletsFired >= 3) {
+                isShooting = false;
+                bulletsFired = 0;
+            }
+        }
+
         InfantryEnemy::update(dt);
     }
 
