@@ -369,6 +369,7 @@ int main() {
                     if (!survivalRebels[i]) continue;
                     survivalRebels[i]->setPlayer(characters.getActivePlayer());
                     survivalRebels[i]->update(dt); // sets velocityX/Y only, no position change
+                    survivalRebels[i]->applyGravity(dt); // accumulate velocityY externally
 
                     float ex  = survivalRebels[i]->getX();
                     float ey  = survivalRebels[i]->getY();
