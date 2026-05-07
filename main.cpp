@@ -371,21 +371,10 @@ int main() {
 
                     // 1. block collision on x — use same method as player
                     if (currentLevel->checkCollision(newX, enemy_y, enemy_w, enemy_h)) {
-                        // hit a wall
-                        if (survivalRebels[i]->getIsTargetingPlayer()) {
-                            // chasing player: jump to pass the wall
-                            if (survivalRebels[i]->getIsGrounded()) {
-                                survivalRebels[i]->setVelocityY(-500.0f); // jump
-                                survivalRebels[i]->setGrounded(false);
-                            }
-                            // continue moving
-                        }
-                        else {
-                            // patrolling: flip direction
-                            enemy_vx = -enemy_vx;
-                            survivalRebels[i]->setVelocityX(enemy_vx);
-                            newX = enemy_x; // stay put this frame
-                        }
+                        // hit a wall - always flip direction
+                        enemy_vx = -enemy_vx;
+                        survivalRebels[i]->setVelocityX(enemy_vx);
+                        newX = enemy_x; // stay put this frame
                     }
 
                     // 2. player boundary on x — revert if would overlap player
