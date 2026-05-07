@@ -960,7 +960,20 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        if (!isAlive && currentAnim != DIE) return;
+        Animation& a = anims[currentAnim];
+        IntRect r = a.currentRect();
+        if (r.width == 0 || r.height == 0) return;
+        sprite.setTexture(a.getTexture(), true);
+        sprite.setTextureRect(r);
+        float sc = 2.0f;
+        float scX = facingRight ? sc : -sc;
+        sprite.setOrigin(r.width / 2.0f, (float)r.height);
+        sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
+        sprite.setScale(scX, sc);
+        window.draw(sprite);
+    }
 };
 
 
@@ -1045,7 +1058,9 @@ public:
             checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        AerialEnemy::render(window, camX, camY);
+    }
 };
 
 
@@ -1100,7 +1115,20 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        if (!isAlive && currentAnim != DIE) return;
+        Animation& a = anims[currentAnim];
+        IntRect r = a.currentRect();
+        if (r.width == 0 || r.height == 0) return;
+        sprite.setTexture(a.getTexture(), true);
+        sprite.setTextureRect(r);
+        float sc = 2.0f;
+        float scX = facingRight ? sc : -sc;
+        sprite.setOrigin(r.width / 2.0f, (float)r.height);
+        sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
+        sprite.setScale(scX, sc);
+        window.draw(sprite);
+    }
 };
 
 
@@ -1231,7 +1259,7 @@ public:
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
-        InfantryEnemy::render(window, camX, camY);
+        UndeadEnemy::render(window, camX, camY);
     }
 };
 
@@ -1327,7 +1355,9 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        UndeadEnemy::render(window, camX, camY);
+    }
 };
 
 
@@ -1381,7 +1411,20 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        if (!isAlive && currentAnim != DIE) return;
+        Animation& a = anims[currentAnim];
+        IntRect r = a.currentRect();
+        if (r.width == 0 || r.height == 0) return;
+        sprite.setTexture(a.getTexture(), true);
+        sprite.setTextureRect(r);
+        float sc = 2.0f;
+        float scX = facingRight ? sc : -sc;
+        sprite.setOrigin(r.width / 2.0f, (float)r.height);
+        sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
+        sprite.setScale(scX, sc);
+        window.draw(sprite);
+    }
 };
 
 
@@ -1543,7 +1586,9 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        AlienEnemy::render(window, camX, camY);
+    }
 };
 
 
@@ -1702,6 +1747,8 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override;
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        AlienEnemy::render(window, camX, camY);
+    }
 };
 void Enemy::spawnLoot() {}
