@@ -37,10 +37,10 @@ int main() {
     // CAMPAIGN MODE VARIABLES
     CampaignGame* campaignGame = nullptr;
 
-    // Campaign enemies
-    static const int MAX_CAMPAIGN_REBELS = 5;
-    RebelSoldier* campaignRebels[MAX_CAMPAIGN_REBELS] = {};
-    int campaignRebelCount = 0;
+    // Survival mode enemies
+    static const int MAX_REBELS = 5;
+    RebelSoldier* survivalRebels[MAX_REBELS] = {};
+    int survivalRebelCount = 0;
 
     // PLAYER SETUP
 
@@ -105,6 +105,15 @@ int main() {
                             onGround = false;
                             cameraX = cameraY = 0;
                             Delay.restart();
+                            // Spawn rebel soldiers in survival mode
+                            for (int i = 0; i < MAX_REBELS; i++) {
+                                delete survivalRebels[i];
+                                survivalRebels[i] = new RebelSoldier();
+                                survivalRebels[i]->setPosition(400.f + i * 300.f, 100.f);
+                                survivalRebels[i]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[i]->setGroundY((float)(screen_y - 48));
+                            }
+                            survivalRebelCount = MAX_REBELS;
                             cout << "Entered Survival Mode" << endl;
                         }
                         else if (modeSelection == 1) {
@@ -117,15 +126,6 @@ int main() {
                             onGround = false;
                             cameraX = cameraY = 0;
                             Delay.restart();
-                            // Spawn rebel soldiers across the level
-                            for (int i = 0; i < MAX_CAMPAIGN_REBELS; i++) {
-                                delete campaignRebels[i];
-                                campaignRebels[i] = new RebelSoldier();
-                                campaignRebels[i]->setPosition(400.f + i * 200.f, 100.f);
-                                campaignRebels[i]->setPlayer(characters.getActivePlayer());
-                                campaignRebels[i]->setGroundY((float)(screen_y - 48));
-                            }
-                            campaignRebelCount = MAX_CAMPAIGN_REBELS;
                             cout << "Entered Campaign Mode" << endl;
                         }
                     }
@@ -141,11 +141,11 @@ int main() {
                 survivalGame = nullptr;
                 delete campaignGame;
                 campaignGame = nullptr;
-                for (int i = 0; i < MAX_CAMPAIGN_REBELS; i++) {
-                    delete campaignRebels[i];
-                    campaignRebels[i] = nullptr;
+                for (int i = 0; i < MAX_REBELS; i++) {
+                    delete survivalRebels[i];
+                    survivalRebels[i] = nullptr;
                 }
-                campaignRebelCount = 0;
+                survivalRebelCount = 0;
                 cameraX = cameraY = 0;
                 menu.setMenuState(0);
                 menu.resetSelection();
@@ -316,12 +316,33 @@ int main() {
                     Delay.restart();
                 }
 
+                // Update survival enemies + resolve against level blocks
+                for (int i = 0; i < survivalRebelCount; i++) {
+                    if (survivalRebels[i]) {
+                        survivalRebels[i]->setPlayer(characters.getActivePlayer());
+                        survivalRebels[i]->update(dt);
+                        float ex  = survivalRebels[i]->getX();
+                        float ey  = survivalRebels[i]->getY();
+                        float ew  = 32.f, eh = 48.f;
+                        float evx = 0.f,  evy = 0.f;
+                        bool  eGnd = false;
+                        currentLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, eGnd);
+                        survivalRebels[i]->setPosition(ex, ey);
+                        if (ey + eh > (float)screen_y)
+                            survivalRebels[i]->setPosition(ex, (float)(screen_y - eh));
+                    }
+                }
+
                 // Update
                 survivalGame->update(dt, &characters);
 
                 // Render
                 window.clear(Color(135, 206, 235));
                 survivalGame->render(window);
+                for (int i = 0; i < survivalRebelCount; i++) {
+                    if (survivalRebels[i])
+                        survivalRebels[i]->render(window, cameraX, cameraY);
+                }
                 characters.getActivePlayer()->render(window, cameraX, cameraY);
                 window.display();
             }
@@ -407,34 +428,12 @@ int main() {
                     Delay.restart();
                 }
 
-                // Update enemies and resolve them against campaign terrain
-                for (int i = 0; i < campaignRebelCount; i++) {
-                    if (campaignRebels[i]) {
-                        campaignRebels[i]->setPlayer(characters.getActivePlayer());
-                        campaignRebels[i]->update(dt);
-                        // resolve against campaign blocks
-                        float ex = campaignRebels[i]->getX();
-                        float ey = campaignRebels[i]->getY();
-                        float ew = 32.f, eh = 48.f;
-                        float evx = 0.f, evy = 0.f;
-                        bool eGround = false;
-                        campaignLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, eGround);
-                        campaignRebels[i]->setPosition(ex, ey);
-                        // fallback: screen bottom
-                        if (ey + eh > (float)screen_y) campaignRebels[i]->setPosition(ex, (float)(screen_y - eh));
-                    }
-                }
-
                 // Update
                 campaignGame->update(dt, &characters);
 
                 // Render
                 window.clear(Color(135, 206, 235));
                 campaignGame->render(window);
-                for (int i = 0; i < campaignRebelCount; i++) {
-                    if (campaignRebels[i])
-                        campaignRebels[i]->render(window, cameraX, cameraY);
-                }
                 characters.getActivePlayer()->render(window, cameraX, cameraY);
                 window.display();
             }
@@ -446,6 +445,6 @@ int main() {
 
     delete survivalGame;
     delete campaignGame;
-    for (int i = 0; i < MAX_CAMPAIGN_REBELS; i++) delete campaignRebels[i];
+    for (int i = 0; i < MAX_REBELS; i++) delete survivalRebels[i];
     return 0;
 }

@@ -158,19 +158,44 @@ public:
         }
     }
 
-    // when collide push enemy back slightly
+    // separate enemy from player using minimum overlap axis
     void checkPlayerCollision(Player* player) {
         if (!player || !isAlive) return;
 
         float px = player->getPlayerX();
         float py = player->getPlayerY();
-        float PLAYER_W = 32.f;
-        float PLAYER_H = 48.f;
+        float pw = player->getWidth();
+        float ph = player->getHeight();
 
-        if (rectsOverlap(x, y, width, height, px, py, PLAYER_W, PLAYER_H)) {
-            // push enemy away from player
-            if (x < px) velocityX = -80.f;
-            else         velocityX = 80.f;
+        if (!rectsOverlap(x, y, width, height, px, py, pw, ph)) return;
+
+        float overlapLeft   = (x + width) - px;
+        float overlapRight  = (px + pw)   - x;
+        float overlapTop    = (y + height) - py;
+        float overlapBottom = (py + ph)    - y;
+
+        float minX;
+        if (overlapLeft < overlapRight) minX = overlapLeft;
+        else minX = overlapRight;
+        float minY;
+        if (overlapTop < overlapBottom) minY = overlapTop;
+        else minY = overlapBottom;
+
+        if (minX < minY) {
+            // horizontal separation — push enemy sideways
+            if (overlapLeft < overlapRight)
+                x -= overlapLeft;
+            else
+                x += overlapRight;
+            velocityX = 0.f;
+        }
+        else {
+            // vertical separation — push enemy up/down
+            if (overlapTop < overlapBottom)
+                y -= overlapTop;
+            else
+                y += overlapBottom;
+            velocityY = 0.f;
         }
     }
 
@@ -266,10 +291,12 @@ public:
 
     void attack() override {
         // check player exist
-        if (largestPlayer == nullptr) return;
+        if (largestPlayer == nullptr) 
+            return;
 
         // can pistol fire
-        if (!pistol.canFire()) return;
+        if (!pistol.canFire()) 
+            return;
 
         // distance check
         float dx = largestPlayer->getPlayerX() - x;
@@ -305,7 +332,8 @@ public:
             attack();
 
         pistol.update(dt);
-        if (fireTimer > 0.f) fireTimer -= dt;
+        if (fireTimer > 0.f)  
+            fireTimer -= dt;
         applyGravity(dt);
         checkGrounded();
         checkPlayerCollision(largestPlayer);
@@ -347,11 +375,11 @@ public:
         sprite.setTexture(a.getTexture(), true);
         sprite.setTextureRect(r);
 
-        // anchor sprite by its bottom center, flip horizontally when facing left
+        // sprite sheet faces LEFT by default, so flip when facing right
         float sc = 2.0f;
         float scX;
-        if (facingRight) scX = sc;
-        else scX = -sc;
+        if (facingRight) scX = -sc;
+        else scX = sc;
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
         sprite.setScale(scX, sc);
@@ -411,10 +439,10 @@ public:
         static const int standHs[1] = { 38 };
 
         // shoot animation (10 frame rifle fire - row 8, y≈330)
-        static const int shootXs[10] = {   3,  44,  87, 131, 174, 216, 257, 298, 339, 380 };
-        static const int shootYs[10] = { 330, 330, 330, 330, 330, 330, 330, 330, 330, 330 };
-        static const int shootWs[10] = {  38,  40,  41,  40,  39,  38,  38,  38,  38,  38 };
-        static const int shootHs[10] = {  40,  40,  40,  40,  40,  40,  40,  40,  40,  40 };
+        static const int shootXs[10] = {   3,  50, 101, 151, 196, 284, 257, 330, 380, 429 };
+        static const int shootYs[10] = { 298, 298, 298, 298, 289, 292, 298, 298, 298, 298 };
+        static const int shootWs[10] = {  44,  48,  47,  42,  41,  43,  38,  47,  46,  40 };
+        static const int shootHs[10] = {  38,  38,  38,  40,  47,  44,  38,  38,  38,  38 };
 
         // die animation (4 frame collapse - row 20)
         static const int dieXs[4] = {   3,  44,  86, 129 };
