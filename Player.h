@@ -145,6 +145,8 @@ public:
     float getMaxFallSpeed() const { return maxFallSpeed; }
     void setGravity(float g) { gravity = g; }
     void setJumpPower(float jp) { jumpPower = jp; }
+    bool getIsGrounded() const { return isGrounded; }
+    void setIsGrounded(bool grounded) { isGrounded = grounded; }
 
     virtual void flipToLeft() = 0;
     virtual void flipToRight() = 0;

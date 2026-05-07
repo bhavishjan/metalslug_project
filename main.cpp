@@ -91,7 +91,7 @@ int main() {
                             survivalGame->start();
                             characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
                             characters.getActivePlayer()->setVelocity(0, 0);
-                            characters.getActivePlayer()->isGrounded = false;
+                            characters.getActivePlayer()->setIsGrounded(false);
                             cameraX = cameraY = 0;
                             Delay.restart();
                             // Spawn all infantry enemy types in survival mode
@@ -142,7 +142,7 @@ int main() {
                             campaignGame->start();
                             characters.getActivePlayer()->setPlayerPosition(200, 50);
                             characters.getActivePlayer()->setVelocity(0, 0);
-                            characters.getActivePlayer()->isGrounded = false;
+                            characters.getActivePlayer()->setIsGrounded(false);
                             cameraX = cameraY = 0;
                             Delay.restart();
                             cout << "Entered Campaign Mode" << endl;
@@ -218,7 +218,7 @@ int main() {
             characters.getActivePlayer()->moveRight();
         }
         else {
-            if (characters.getActivePlayer()->isGrounded) characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * characters.getActivePlayer()->getFriction());
+            if (characters.getActivePlayer()->getIsGrounded()) characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * characters.getActivePlayer()->getFriction());
             else          characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * characters.getActivePlayer()->getAirFriction());
         }
 
@@ -230,9 +230,9 @@ int main() {
 
         // JUMP
         if (Keyboard::isKeyPressed(Keyboard::Up)) {
-            if (characters.getActivePlayer()->isGrounded) {
+            if (characters.getActivePlayer()->getIsGrounded()) {
                 characters.getActivePlayer()->setVelocityY(characters.getActivePlayer()->getJumpPower());
-                characters.getActivePlayer()->isGrounded = false;
+                characters.getActivePlayer()->setIsGrounded(false);
                 jumpHeld = true;
             }
         }
@@ -278,7 +278,7 @@ int main() {
                 }
 
                 // Enemy wall — stop player if walking into any enemy (only when moving horizontally)
-                if (pVelocityX != 0 && characters.getActivePlayer()->isGrounded) {
+                if (pVelocityX != 0 && characters.getActivePlayer()->getIsGrounded()) {
                     float pW = (float)characters.getActivePlayer()->getWidth();
                     float pH = (float)characters.getActivePlayer()->getHeight();
                     for (int i = 0; i < survivalRebelCount; i++) {
@@ -300,7 +300,7 @@ int main() {
                 // Check vertical collision
                 if (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
                     if (pVelocityY > 0) {
-                        characters.getActivePlayer()->isGrounded = true;
+                        characters.getActivePlayer()->setIsGrounded(true);
                         pVelocityY = 0;
                         while (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
                             pY -= 1;
@@ -315,7 +315,7 @@ int main() {
                 }
                 else {
                     if (pVelocityY >= 0) {
-                        characters.getActivePlayer()->isGrounded = false;
+                        characters.getActivePlayer()->setIsGrounded(false);
                     }
                 }
                 
@@ -501,7 +501,7 @@ int main() {
                 // Check vertical collision with blocks
                 if (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
                     if (pVelocityY > 0) {
-                        characters.getActivePlayer()->isGrounded = true;
+                        characters.getActivePlayer()->setIsGrounded(true);
                         pVelocityY = 0;
                         while (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
                             pY -= 1;
@@ -515,14 +515,14 @@ int main() {
                     }
                 }
                 else {
-                    if (pVelocityY >= 0) characters.getActivePlayer()->isGrounded = false;
+                    if (pVelocityY >= 0) characters.getActivePlayer()->setIsGrounded(false);
                 }
 
                 // Screen bottom boundary (fallback)
                 if (pY + characters.getActivePlayer()->getHeight() > screen_y) {
                     pY = screen_y - characters.getActivePlayer()->getHeight();
                     pVelocityY = 0;
-                    characters.getActivePlayer()->isGrounded = true;
+                    characters.getActivePlayer()->setIsGrounded(true);
                 }
 
                 // Left bound
