@@ -1213,11 +1213,11 @@ public:
         static const int dieWs[4] = { 48, 51, 50, 52 };
         static const int dieHs[4] = { 43, 37, 22, 63 };
 
-        anims[WALK].load("Sprites/Mummy Warrior.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
-        anims[ATTACK].load("Sprites/Mummy Warrior.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
-        anims[SHOOT].load("Sprites/Mummy Warrior.png", shootXs, shootYs, shootWs, shootHs, 1, 0.18f);
-        anims[HURT].load("Sprites/Mummy Warrior.png", hurtXs, hurtYs, hurtWs, hurtHs, 3, 0.12f);
-        anims[DIE].load("Sprites/Mummy Warrior.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
+        anims[WALK].load("Sprites/Mummy.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
+        anims[ATTACK].load("Sprites/Mummy.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
+        anims[SHOOT].load("Sprites/Mummy.png", shootXs, shootYs, shootWs, shootHs, 1, 0.18f);
+        anims[HURT].load("Sprites/Mummy.png", hurtXs, hurtYs, hurtWs, hurtHs, 3, 0.12f);
+        anims[DIE].load("Sprites/Mummy.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void move(float dt) override {
@@ -1341,11 +1341,11 @@ public:
         static const int dieWs[4] = { 48, 51, 50, 52 };
         static const int dieHs[4] = { 43, 37, 22, 63 };
 
-        anims[WALK].load("Sprites/Zombie.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
-        anims[ATTACK].load("Sprites/Zombie.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
-        anims[SHOOT].load("Sprites/Zombie.png", shootXs, shootYs, shootWs, shootHs, 4, 0.10f);
-        anims[HURT].load("Sprites/Zombie.png", hurtXs, hurtYs, hurtWs, hurtHs, 2, 0.12f);
-        anims[DIE].load("Sprites/Zombie.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
+        anims[WALK].load("Sprites/Enemies/Zombies 1.png", walkXs, walkYs, walkWs, walkHs, 6, 0.12f);
+        anims[ATTACK].load("Sprites/Enemies/Zombies 1.png", attackXs, attackYs, attackWs, attackHs, 4, 0.10f);
+        anims[SHOOT].load("Sprites/Enemies/Zombies 1.png", shootXs, shootYs, shootWs, shootHs, 4, 0.10f);
+        anims[HURT].load("Sprites/Enemies/Zombies 1.png", hurtXs, hurtYs, hurtWs, hurtHs, 2, 0.12f);
+        anims[DIE].load("Sprites/Enemies/Zombies 1.png", dieXs, dieYs, dieWs, dieHs, 4, 0.12f);
     }
 
     void move(float dt) override {

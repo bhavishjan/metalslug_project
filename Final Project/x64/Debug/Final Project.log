@@ -92,5 +92,4 @@ E:\Semester 2\OOP\OOP Final Project\main.cpp(513,108): warning C4244: 'argument'
 E:\Semester 2\OOP\OOP Final Project\main.cpp(519,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(519,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(530,35): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-main.obj : error LNK2001: unresolved external symbol "public: virtual void __cdecl AlienEnemy::attack(void)" (?attack@AlienEnemy@@UEAAXXZ)
-E:\Semester 2\OOP\OOP Final Project\x64\Debug\Final Project.exe : fatal error LNK1120: 1 unresolved externals
+  Final Project.vcxproj -> E:\Semester 2\OOP\OOP Final Project\x64\Debug\Final Project.exe
