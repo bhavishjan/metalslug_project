@@ -48,7 +48,7 @@ int main() {
     float friction = 0.80f;
     float airFriction = 0.95f;
     float jumpPower = -22.0f;
-    float gravity = 1.0f;
+    float gravity = 50.0f;
     float maxFallSpeed = 25.0f;
 
     bool onGround = false;
