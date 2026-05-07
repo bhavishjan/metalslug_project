@@ -185,16 +185,18 @@ int main() {
 
 		// PLAYER INPUT (dono modes ke liye same)
 		if (Keyboard::isKeyPressed(Keyboard::Left)) {
-			characters.getActivePlayer()->moveLeft();
             if (characters.getActivePlayer()->isFacingRight()) {
-               characters.getActivePlayer()->flipToLeft();
+                characters.getActivePlayer()->setVelocityX(0);
+                characters.getActivePlayer()->flipToLeft();
             }
+			characters.getActivePlayer()->moveLeft();
 		}
 		else if (Keyboard::isKeyPressed(Keyboard::Right)) {
-			characters.getActivePlayer()->moveRight();
             if (!characters.getActivePlayer()->isFacingRight()) {
+                characters.getActivePlayer()->setVelocityX(0);
                 characters.getActivePlayer()->flipToRight();
             }
+			characters.getActivePlayer()->moveRight();
         }
         else {
             if (onGround) characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * friction);
@@ -316,20 +318,66 @@ int main() {
                     Delay.restart();
                 }
 
-                // Update survival enemies + resolve against level blocks
+                // Update survival enemies
                 for (int i = 0; i < survivalRebelCount; i++) {
-                    if (survivalRebels[i]) {
-                        survivalRebels[i]->setPlayer(characters.getActivePlayer());
-                        survivalRebels[i]->update(dt);
-                        float ex  = survivalRebels[i]->getX();
-                        float ey  = survivalRebels[i]->getY();
-                        float ew  = 32.f, eh = 48.f;
-                        float evx = 0.f,  evy = 0.f;
-                        bool  eGnd = false;
-                        currentLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, eGnd);
-                        survivalRebels[i]->setPosition(ex, ey);
-                        if (ey + eh > (float)screen_y)
-                            survivalRebels[i]->setPosition(ex, (float)(screen_y - eh));
+                    if (!survivalRebels[i]) continue;
+                    survivalRebels[i]->setPlayer(characters.getActivePlayer());
+                    survivalRebels[i]->update(dt);
+
+                    // apply vertical movement externally (gravity was only accumulated)
+                    float ex  = survivalRebels[i]->getX();
+                    float ey  = survivalRebels[i]->getY();
+                    float evy = survivalRebels[i]->getVelocityY();
+                    float ew  = 32.f, eh = 48.f;
+
+                    // horizontal block resolve
+                    float evx = 0.f;
+                    bool  eGnd = false;
+                    currentLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, eGnd);
+
+                    // move y then vertical resolve
+                    ey += evy * dt;
+                    float evx2 = 0.f, evy2 = evy;
+                    bool  eGnd2 = false;
+                    currentLevel->resolveCollisions(ex, ey, ew, eh, evx2, evy2, eGnd2);
+
+                    // screen bottom fallback
+                    if (ey + eh > (float)screen_y) {
+                        ey = (float)(screen_y - eh);
+                        evy2 = 0.f;
+                        eGnd2 = true;
+                    }
+
+                    survivalRebels[i]->setPosition(ex, ey);
+                    survivalRebels[i]->setVelocityY(evy2);
+                    survivalRebels[i]->setGrounded(eGnd2);
+                }
+
+                // enemy-enemy separation pass
+                for (int i = 0; i < survivalRebelCount; i++) {
+                    if (!survivalRebels[i]) continue;
+                    for (int j = i + 1; j < survivalRebelCount; j++) {
+                        if (!survivalRebels[j]) continue;
+                        float ax = survivalRebels[i]->getX(), ay = survivalRebels[i]->getY();
+                        float bx = survivalRebels[j]->getX(), by = survivalRebels[j]->getY();
+                        float ew = 32.f, eh = 48.f;
+                        // check overlap
+                        if (ax < bx + ew && ax + ew > bx && ay < by + eh && ay + eh > by) {
+                            float olL = (ax + ew) - bx;
+                            float olR = (bx + ew) - ax;
+                            float push;
+                            if (olL < olR) push = olL;
+                            else push = olR;
+                            float half = push / 2.f;
+                            if (olL < olR) {
+                                survivalRebels[i]->setPosition(ax - half, ay);
+                                survivalRebels[j]->setPosition(bx + half, by);
+                            }
+                            else {
+                                survivalRebels[i]->setPosition(ax + half, ay);
+                                survivalRebels[j]->setPosition(bx - half, by);
+                            }
+                        }
                     }
                 }
 

@@ -143,7 +143,6 @@ public:
     void applyGravity(float deltaTime) {
         if (isGrounded == false) {
             velocityY += gravityConstant * deltaTime;
-            y += velocityY * deltaTime;
         }
     }
 
@@ -247,6 +246,10 @@ public:
     void setPlayer(Player* p) { largestPlayer = p; }
     void setX(float nx) { x = nx; }
     void setGroundY(float gy) { groundY = gy; }
+    float getVelocityY() const { return velocityY; }
+    void  setVelocityY(float vy) { velocityY = vy; }
+    float getVelocityX() const { return velocityX; }
+    void  setGrounded(bool g) { isGrounded = g; if (g) velocityY = 0.f; }
 };
 
 

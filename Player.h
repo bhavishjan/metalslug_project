@@ -500,8 +500,8 @@ public:
         dualFireDuration = 10.0f;
         scale_x = 2.0f;
         scale_y = 2.0f;
-        width = 29.0f;
-        height = 37.0f;
+        width = 32.0f;
+        height = 49.0f;
 
         //head
         static const int walkHeadXs[12] = {  10,   47,   82,  115,  147,  181,  216,  254,  291,  328,  364,  400 };
