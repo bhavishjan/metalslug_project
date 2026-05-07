@@ -51,8 +51,7 @@ protected:
     Player* largestPlayer;
 
     float gravityConstant = 80.0f;
-    float groundY = 852.f;  // default floor (screen_y - height)
-
+    float groundY = screen_y - height;  // default floor (screen_y - height)
 public:
     Enemy() : x(0), y(0), width(32), height(48),
         velocityX(0), velocityY(0),
@@ -224,8 +223,11 @@ public:
     float getHP()       const { return hp; }
     float getMaxHP()    const { return (float)maxHp; }
     bool  isDead()      const { return !isAlive; }
-    virtual float getWidth() const { return width; }
-    virtual float getHeight() const { return height; }
+    float getWidth() const { return width; }
+    float getHeight() const { return height; }
+	bool getIsTargetingPlayer() const { return isTargetingPlayer; }
+	bool getIsGrounded() const { return isGrounded; }
+
 
     void setPosition(float nx, float ny) { x = nx; y = ny; }
     void setPlayer(Player* p) { largestPlayer = p; }

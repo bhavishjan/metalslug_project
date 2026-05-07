@@ -12,8 +12,8 @@
 using namespace sf;
 using namespace std;
 
-int screen_x = 1600;
-int screen_y = 900;
+const int screen_x = 1600;
+const int screen_y = 900;
 
 int main() {
     RenderWindow window(VideoMode(screen_x, screen_y), "Metal Slug", Style::Close);
@@ -385,9 +385,9 @@ int main() {
                     // 1. block collision on x — use same method as player
                     if (currentLevel->checkCollision(newX, enemy_y, enemy_w, enemy_h)) {
                         // hit a wall
-                        if (survivalRebels[i]->isTargetingPlayer) {
+                        if (survivalRebels[i]->getIsTargetingPlayer()) {
                             // chasing player: jump to pass the wall
-                            if (survivalRebels[i]->isGrounded()) {
+                            if (survivalRebels[i]->getIsGrounded()) {
                                 survivalRebels[i]->setVelocityY(-300.0f); // jump
                                 survivalRebels[i]->setGrounded(false);
                             }

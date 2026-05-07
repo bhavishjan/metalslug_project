@@ -20,31 +20,127 @@ E:\Semester 2\OOP\OOP Final Project\Player.h(485,16): warning C4244: 'return': c
 E:\Semester 2\OOP\OOP Final Project\Weapon.h(454,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(556,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(228,7): error C2365: 'Enemy::isTargetingPlayer': redefinition; previous definition was 'data member'
+  (compiling source file 'main.cpp')
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(50,11):
+      see declaration of 'Enemy::isTargetingPlayer'
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(228,35): error C2059: syntax error: 'return'
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(720,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(228,59): error C2238: unexpected token(s) preceding ';'
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(981,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,2): error C2628: 'Enemy' followed by 'bool' is illegal (did you forget a ';'?)
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1081,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,7): error C2270: 'isGrounded': modifiers not allowed on nonmember functions
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1136,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,7): error C2259: 'Enemy': cannot instantiate abstract class
+  (compiling source file 'main.cpp')
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,7):
+      due to following members:
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,7):
+      'void Enemy::attack(void)': is abstract
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(71,18):
+      see declaration of 'Enemy::attack'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,7):
+      'void Enemy::update(float)': is abstract
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(72,18):
+      see declaration of 'Enemy::update'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,7):
+      'void Enemy::render(sf::RenderWindow &,float,float)': is abstract
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(73,18):
+      see declaration of 'Enemy::render'
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,28): error C2440: 'return': cannot convert from 'Enemy (__cdecl *)(void)' to 'Enemy'
+  (compiling source file 'main.cpp')
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,28):
+      'Enemy::Enemy': no overloaded function could convert all the argument types
+          E:\Semester 2\OOP\OOP Final Project\Enemy.h(228,61):
+          could be 'Enemy::Enemy(const Enemy &)'
+              E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,28):
+              'Enemy::Enemy(const Enemy &)': cannot convert argument 1 from 'Enemy (__cdecl *)(void)' to 'const Enemy &'
+                  E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,35):
+                  Reason: cannot convert from 'Enemy (__cdecl *)(void)' to 'const Enemy'
+                  E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,35):
+                  Conversion requires a second user-defined-conversion operator or constructor
+          E:\Semester 2\OOP\OOP Final Project\Enemy.h(229,28):
+          while trying to match the argument list '(Enemy (__cdecl *)(void))'
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(232,44): error C2065: 'x': undeclared identifier
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1264,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(232,52): error C2065: 'y': undeclared identifier
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1373,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(233,33): error C2065: 'largestPlayer': undeclared identifier
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1429,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(234,27): error C2065: 'x': undeclared identifier
   (compiling source file 'main.cpp')
   
-E:\Semester 2\OOP\OOP Final Project\Enemy.h(1598,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(235,33): error C2065: 'groundY': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(236,11): error C2270: 'getVelocityY': modifiers not allowed on nonmember functions
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(236,41): error C2065: 'velocityY': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(237,36): error C2065: 'velocityY': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(238,11): error C2270: 'getVelocityX': modifiers not allowed on nonmember functions
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(238,41): error C2065: 'velocityX': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(239,36): error C2065: 'velocityX': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(240,33): error C2659: '=': function as left operand
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(240,56): error C2065: 'velocityY': undeclared identifier
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(241,1): error C2059: syntax error: '}'
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(241,1): error C2143: syntax error: missing ';' before '}'
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(558,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(722,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(983,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1083,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1138,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1266,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1375,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1431,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+E:\Semester 2\OOP\OOP Final Project\Enemy.h(1600,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
 E:\Semester 2\OOP\OOP Final Project\Menu.h(91,79): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
@@ -71,6 +167,70 @@ E:\Semester 2\OOP\OOP Final Project\Menu.h(346,62): warning C4244: 'argument': c
 E:\Semester 2\OOP\OOP Final Project\Menu.h(346,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
+E:\Semester 2\OOP\OOP Final Project\main.cpp(15,11): error C2374: 'screen_x': redefinition; multiple initialization
+      E:\Semester 2\OOP\OOP Final Project\Block.h(6,11):
+      see declaration of 'screen_x'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(15,11): error C2086: 'const int screen_x': redefinition
+      E:\Semester 2\OOP\OOP Final Project\Block.h(6,11):
+      see declaration of 'screen_x'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(16,11): error C2374: 'screen_y': redefinition; multiple initialization
+      E:\Semester 2\OOP\OOP Final Project\Block.h(7,11):
+      see declaration of 'screen_y'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(16,11): error C2086: 'const int screen_y': redefinition
+      E:\Semester 2\OOP\OOP Final Project\Block.h(7,11):
+      see declaration of 'screen_y'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(117,53): error C2039: 'setPosition': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(118,53): error C2039: 'setPlayer': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(119,53): error C2039: 'setGroundY': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(125,53): error C2039: 'setPosition': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(126,53): error C2039: 'setPlayer': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(127,53): error C2039: 'setGroundY': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(133,53): error C2039: 'setPosition': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(134,53): error C2039: 'setPlayer': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(135,53): error C2039: 'setGroundY': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(141,53): error C2039: 'setPosition': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(142,53): error C2039: 'setPlayer': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(143,53): error C2039: 'setGroundY': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
 E:\Semester 2\OOP\OOP Final Project\main.cpp(280,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(280,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(282,147): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
@@ -81,15 +241,64 @@ E:\Semester 2\OOP\OOP Final Project\main.cpp(318,150): warning C4244: 'argument'
 E:\Semester 2\OOP\OOP Final Project\main.cpp(318,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(324,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
 E:\Semester 2\OOP\OOP Final Project\main.cpp(324,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(496,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(496,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(498,148): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(498,105): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(511,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(511,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(515,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(515,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(521,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(521,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Semester 2\OOP\OOP Final Project\main.cpp(532,35): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  Final Project.vcxproj -> E:\Semester 2\OOP\OOP Final Project\x64\Debug\Final Project.exe
+E:\Semester 2\OOP\OOP Final Project\main.cpp(371,40): error C2039: 'setPlayer': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(377,57): error C2039: 'getVelocityX': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(378,57): error C2039: 'getVelocityY': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(388,46): error C2248: 'Enemy::isTargetingPlayer': cannot access protected member declared in class 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(50,11):
+      see declaration of 'Enemy::isTargetingPlayer'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(388,46): error C2064: term does not evaluate to a function taking 0 arguments
+E:\Semester 2\OOP\OOP Final Project\main.cpp(390,50): error C2248: 'Enemy::isGrounded': cannot access protected member declared in class 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(32,11):
+      see declaration of 'Enemy::isGrounded'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(390,50): error C2064: term does not evaluate to a function taking 0 arguments
+E:\Semester 2\OOP\OOP Final Project\main.cpp(391,52): error C2039: 'setVelocityY': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(392,52): error C2039: 'setGrounded': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(399,48): error C2039: 'setVelocityX': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(469,40): error C2039: 'setVelocityY': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(470,40): error C2039: 'setGrounded': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(471,40): error C2039: 'setPosition': is not a member of 'Enemy'
+      E:\Semester 2\OOP\OOP Final Project\Enemy.h(21,7):
+      see declaration of 'Enemy'
+  
+E:\Semester 2\OOP\OOP Final Project\main.cpp(507,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(507,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(509,148): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(509,105): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(522,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(522,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(526,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(526,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(532,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(532,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+E:\Semester 2\OOP\OOP Final Project\main.cpp(543,35): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
