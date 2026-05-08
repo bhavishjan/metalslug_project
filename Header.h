@@ -1,16 +1,14 @@
 #pragma once
 
-#include <iostream>
-#include "Block.h"
-#include "Player.h"
-
-using namespace std;
+#include "block.h"
+#include "block.h"
 using namespace sf;
+using namespace std;
 
 class Level {
 protected:
-
-    const char* name;
+  
+    string name;
     int    levelNumber;
 
     //siz
@@ -18,12 +16,12 @@ protected:
     int   biomeHeight;
     float blockSize;
 
-    //bioems
+   //bioems
     PlainsBiome* plains;
     AerialBiome* aerial;
     AquaticBiome* aquatic;
 
-
+   
     // Boundaries
 
     float levelStart;
@@ -35,15 +33,15 @@ protected:
     float playerSpawnX;
     float playerSpawnY;
     // State
-
+ 
     bool isComplete;
     bool isLoaded;
 
 public:
-
+  
     // Constructor
-
-
+   
+  
 
 
     float getPlayerSpawnX() { return playerSpawnX; }
@@ -55,7 +53,7 @@ public:
 
 
 
-    Level(const char* name, int levelNumber, int biomeWidth, int biomeHeight) {
+    Level(string name, int levelNumber, int biomeWidth, int biomeHeight) {
         this->name = name;
         this->levelNumber = levelNumber;
         this->biomeWidth = biomeWidth;
@@ -80,7 +78,7 @@ public:
         levelEnd = aquaticEnd;
     }
 
-
+ 
     virtual ~Level() {
         delete plains;
         delete aerial;
@@ -90,14 +88,14 @@ public:
         aquatic = nullptr;
     }
 
-
+   
     virtual void generateBiomes() = 0;
     virtual void spawnEnemies() = 0;
     virtual bool checkLevelComplete() = 0;
 
     // Common Functions
 
-    virtual void loadTextures(const char* solidPath, const char* waterPath) {
+    virtual void loadTextures(string solidPath, string waterPath) {
         if (plains)  plains->loadTextures(solidPath, waterPath);
         if (aerial)  aerial->loadTextures(solidPath, waterPath);
         if (aquatic) aquatic->loadTextures(solidPath, waterPath);
@@ -115,7 +113,7 @@ public:
         if (aquatic) aquatic->render(window, camX, camY);
     }
 
-    virtual void resolveCollisions(float& px, float& py, float pw, float ph, float& velX, float& velY, bool& onGround) {
+    virtual void resolveCollisions(float& px, float& py,float pw, float ph,float& velX, float& velY,bool& onGround) {
         if (plains)  plains->resolveCollisions(px, py, pw, ph, velX, velY, onGround);
         if (aerial)  aerial->resolveCollisions(px, py, pw, ph, velX, velY, onGround);
         if (aquatic) aquatic->resolveCollisions(px, py, pw, ph, velX, velY, onGround);
@@ -134,7 +132,11 @@ public:
     }
 
 
-    const char* getName() { return name; }
+
+   
+
+  
+    string getName() { return name; }
     int    getLevelNum() { return levelNumber; }
     float  getLevelEnd() { return levelEnd; }
     float  getLevelStart() { return levelStart; }
@@ -143,6 +145,15 @@ public:
     float  getAquaticEnd() { return aquaticEnd; }
     bool   getIsComplete() { return isComplete; }
     bool   getIsLoaded() { return isLoaded; }
+
+
+
+    bool checkWaterAt(float px, float py, float pw, float ph) {
+        if (plains && plains->checkWaterCollision(px, py, pw, ph))  return true;
+        if (aerial && aerial->checkWaterCollision(px, py, pw, ph))  return true;
+        if (aquatic && aquatic->checkWaterCollision(px, py, pw, ph)) return true;
+        return false;
+    }
 };
 
 
@@ -151,11 +162,11 @@ public:
 
 class SurvivalLevel : public Level {
 protected:
-    //enemie tracking
+   //enemie tracking
     int totalEnemies;
     int enemiesKilled;
 
-
+   
     int infantryBatchCount;
     int aerialBatchCount;
     int undeadBatchCount;
@@ -163,18 +174,18 @@ protected:
     int flyingTaraBatchCount;
     int powPrisonerCount;
 
-
+ 
     bool hasHorizontalScroll;
     bool hasVerticalScroll;
 
 
 
-
+   
     float scoreMultiplier;
 
 public:
-
-    SurvivalLevel(const char* name, int levelNumber, int biomeWidth, int biomeHeight)
+ 
+    SurvivalLevel(string name, int levelNumber, int biomeWidth, int biomeHeight)
         : Level(name, levelNumber, biomeWidth, biomeHeight)
     {
         // Enemy counts
@@ -193,18 +204,18 @@ public:
         hasHorizontalScroll = true;
         hasVerticalScroll = true;
 
-
+       
 
         // Default multiplier
         scoreMultiplier = 1.0f;
     }
 
     virtual ~SurvivalLevel() {}
-
+   
     virtual void generateBiomes() = 0;
     virtual void spawnEnemies() = 0;
 
-
+   
     bool checkLevelComplete() override {
         if (enemiesKilled >= totalEnemies && totalEnemies > 0) {
             isComplete = true;
@@ -214,13 +225,13 @@ public:
     void playerReachedEnd() {
         isComplete = true;
     }
-
+  
     void enemyKilled() {
         enemiesKilled++;
         checkLevelComplete();
     }
 
-
+   
     float getScoreMultiplier() { return scoreMultiplier; }
     int   getEnemiesKilled() { return enemiesKilled; }
     int   getTotalEnemies() { return totalEnemies; }
@@ -251,7 +262,7 @@ private:
 
     // Aquatic specific
     int zombieBatchCountAquatic;  // 2 batches in aquatic 
-    int enemySubCount;
+    int enemySubCount;           
 
     // Flying Tara  2 batches poore level mein
     int flyingTaraCount;
@@ -260,11 +271,11 @@ private:
     int powCount;
 
 public:
-
-
-    Level1() : SurvivalLevel("Level 1", 1, 83, 14)
+    
+  
+    Level1() : SurvivalLevel("Level 1", 1, 83, 15)
     {
-        //for level 1
+      //for level 1
         rebelBatchCount = 2;
         shieldedBatchCount = 2;
         bazookaBatchCount = 2;
@@ -289,7 +300,7 @@ public:
             paratrooperBatchCount * 2 + // paratroopers
             martianBatchCount * 1 +   // martians
             mummyBatchCount * 1 +   // mummies
-            zombieBatchCountAquatic * 4 + flyingTaraCount * 2 +
+            zombieBatchCountAquatic * 4+ flyingTaraCount * 2 + 
             enemySubCount * 1;// zombies batch = 3 to 5
 
         // Level 1 score multiplier   normal
@@ -302,7 +313,7 @@ public:
 
     ~Level1() {}
 
-
+   
     void generateBiomes() override {
         // Plains biome
         plains = new PlainsBiome(levelStart, plainsEnd);
@@ -314,7 +325,7 @@ public:
         aquatic = new AquaticBiome(aerialEnd, aquaticEnd);
 
         // Textures load k
-        loadTextures("Sprites/blocks/grass.png",
+        loadTextures("Sprites/blocks/stone.png",
             "Sprites/blocks/water.png");
 
         // Terrain generate 
@@ -325,29 +336,29 @@ public:
         isLoaded = true;
     }
 
-
+    
     void spawnEnemies() override {
-
+        
     }
 
-
+   
     void update(float dt) override {
         //base class called
         Level::update(dt);
 
         // Level 1 specific update
-
+       
         checkLevelComplete();
     }
 
-
+  
     void render(RenderWindow& window, float camX, float camY) override {
-
+        
         Level::render(window, camX, camY);
 
     }
 
-
+  
     int getRebelBatchCount() { return rebelBatchCount; }
     int getMummyBatchCount() { return mummyBatchCount; }
     int getZombieCount() { return zombieBatchCountAquatic; }
@@ -411,7 +422,7 @@ public:
             paratrooperBatchCount * 2 +
             martianBatchCount * 1 +
             mummyBatchCount * 1 +
-            zombieBatchCountAquatic * 4 + flyingTaraCount * 2 +
+            zombieBatchCountAquatic * 4 + flyingTaraCount * 2 + 
             enemySubCount * 1;
 
         scoreMultiplier = 1.5f;
@@ -423,20 +434,20 @@ public:
     ~Level2() {}
 
     void generateBiomes() override {
-        //IN LEVEL 2 FIRST AERIAL THEN AQUATIC THEN PLAINS
+       //IN LEVEL 2 FIRST AERIAL THEN AQUATIC THEN PLAINS
         aerial = new AerialBiome(levelStart, plainsEnd);
-
+          
         aquatic = new AquaticBiome(plainsEnd, aerialEnd);
 
         plains = new PlainsBiome(aerialEnd, aquaticEnd);
-        loadTextures("Sprites/blocks/grass.png",
+        loadTextures("Sprites/blocks/stone.png",
             "Sprites/blocks/water.png");
 
         // Level 2 HAS MORE HILLS
         aerial->generateTerrain(biomeWidth, biomeHeight);
         aquatic->generateTerrain(biomeWidth, biomeHeight);
         plains->generateTerrain(biomeWidth, biomeHeight);
-
+        
 
         isLoaded = true;
     }
@@ -452,7 +463,7 @@ public:
         if (aerial)  aerial->render(window, camX, camY);
         if (aquatic) aquatic->render(window, camX, camY);
         if (plains)  plains->render(window, camX, camY);
-
+    
     }
 
     int getBradleyCount() { return bradleyCount; }
@@ -499,7 +510,7 @@ private:
 public:
     Level3() : SurvivalLevel("Level 3", 3, 83, 14)
     {
-
+        
         rebelBatchCount = 3;
         shieldedBatchCount = 3;
         bazookaBatchCount = 3;
@@ -527,7 +538,7 @@ public:
             paratrooperBatchCount * 2 +
             martianBatchCount * 1 +
             mummyBatchCount * 1 + flyingTaraCount * 2 +
-            zombieBatchCountAquatic * 4 + enemySubCount * 1 +
+            zombieBatchCountAquatic * 4  +  enemySubCount * 1 + 
             bradleyCount * 1;
 
         scoreMultiplier = 2.0f;
@@ -544,18 +555,18 @@ public:
 
         aerial = new AerialBiome(plainsEnd, aerialEnd);
         plains = new PlainsBiome(aerialEnd, aquaticEnd);
-        loadTextures("Sprites/blocks/grass.png",
+        loadTextures("Sprites/blocks/stone.png",
             "Sprites/blocks/water.png");
         aquatic->generateTerrain(biomeWidth, biomeHeight);
         aerial->generateTerrain(biomeWidth, biomeHeight);
         plains->generateTerrain(biomeWidth, biomeHeight);
-
-
+       
+       
         isLoaded = true;
     }
 
     void spawnEnemies() override {
-
+     
     }
 
     void update(float dt) override {
@@ -656,962 +667,5 @@ public:
     // Blended biome
     void activateBlendedBiome();
 };
-class Vehicle {
-protected:
-    char* name;
-    float x;
-    float y;
-    float width;
-    float height;
-    int hp;
-    int maxHp;
-    float speed;
-    float maxSpeed;
-    bool isActive;
-    bool isDestroyed;
-    int vehicleType;
-    int ownerType;
-    float velocityX;
-    float velocityY;
-    char* soundEffect;
-    bool isMuffled;
-    Player* pilot;
-    bool hasPilot;
-    float gravity;
-    bool isAffectedByGravity;
-    int biomeType;
-    float collisionBox;
 
-public:
-    Vehicle() {
-        name = new char[50];
-        x = 0;
-        y = 0;
-        width = 100;
-        height = 80;
-        hp = 100;
-        maxHp = 100;
-        speed = 3.0f;
-        maxSpeed = 5.0f;
-        isActive = false;
-        isDestroyed = false;
-        vehicleType = 0;
-        ownerType = 0;
-        velocityX = 0;
-        velocityY = 0;
-        soundEffect = new char[50];
-        isMuffled = false;
-        pilot = nullptr;
-        hasPilot = false;
-        gravity = 0.5f;
-        isAffectedByGravity = true;
-        biomeType = 0;
-        collisionBox = 100;
-    }
 
-    ~Vehicle() {
-        delete[] name;
-        delete[] soundEffect;
-    }
-
-    void move() {
-        x += velocityX;
-        y += velocityY;
-
-        if (isAffectedByGravity) {
-            velocityY += gravity;
-        }
-    }
-
-    void takeDamage(int damage) {
-        if (!isDestroyed) {
-            hp -= damage;
-            if (hp <= 0) {
-                hp = 0;
-                destroy();
-            }
-        }
-    }
-
-    void destroy() {
-        isDestroyed = true;
-        isActive = false;
-        if (hasPilot) {
-            ejectPilot();
-        }
-    }
-
-    bool isAlive() {
-        return !isDestroyed && hp > 0;
-    }
-
-    int getHp() {
-        return hp;
-    }
-
-    float getSpeed() {
-        return speed;
-    }
-
-    void mountPilot(Player* player) {
-        pilot = player;
-        hasPilot = true;
-    }
-
-    void ejectPilot() {
-        pilot = nullptr;
-        hasPilot = false;
-    }
-
-    bool hasPilotInside() {
-        return hasPilot;
-    }
-
-    void applySoundEffect() {
-        if (!isMuffled) {
-            cout << "Playing sound: " << soundEffect << endl;
-        }
-    }
-
-    void checkCollision() {
-        // Basic collision detection
-    }
-
-    int getBiomeType() {
-        return biomeType;
-    }
-};
-
-class PlayerVehicle : public Vehicle {
-protected:
-    int durability;
-    int maxDurability;
-    float injuryTimer;
-    float injuryStateDuration;
-    float criticalStateDuration;
-    int damageState;
-    bool isMounted;
-    float fireRate;
-    float fireTimer;
-    int ammo;
-    int maxAmmo;
-    float screenRedHue;
-    bool isImmuneToExplosions;
-    float immunityTimer;
-    float immunityDuration;
-
-public:
-    PlayerVehicle() : Vehicle() {
-        durability = 100;
-        maxDurability = 100;
-        injuryTimer = 0;
-        injuryStateDuration = 1.0f;
-        criticalStateDuration = 1.0f;
-        damageState = 0;
-        isMounted = false;
-        fireRate = 0.2f;
-        fireTimer = 0;
-        ammo = 100;
-        maxAmmo = 100;
-        screenRedHue = 0;
-        isImmuneToExplosions = false;
-        immunityTimer = 0;
-        immunityDuration = 3.0f;
-    }
-
-    ~PlayerVehicle() {
-    }
-
-    bool canFire() {
-        return fireTimer <= 0 && ammo > 0 && !isDestroyed;
-    }
-
-    void reload() {
-        ammo = maxAmmo;
-    }
-
-    void takeDamage(int damage) {
-        if (isImmuneToExplosions) {
-            return;
-        }
-
-        durability -= damage;
-        hp -= damage;
-
-        if (durability <= 0) {
-            durability = 0;
-            destroy();
-        }
-
-        updateDamageState();
-    }
-
-    int getDamageState() {
-        return damageState;
-    }
-
-    void updateDamageState() {
-        float healthPercent = (float)hp / maxHp;
-
-        if (healthPercent > 0.6f) {
-            damageState = 0;
-            screenRedHue = 0;
-        }
-        else if (healthPercent > 0.3f) {
-            damageState = 1;
-            screenRedHue = 0.3f;
-            injuryTimer = injuryStateDuration;
-        }
-        else {
-            damageState = 2;
-            screenRedHue = 0.6f;
-            injuryTimer = criticalStateDuration;
-        }
-    }
-
-    void renderDamageHue() {
-        if (screenRedHue > 0) {
-            cout << "Red hue: " << screenRedHue << endl;
-        }
-    }
-
-    void activateImmunity() {
-        isImmuneToExplosions = true;
-        immunityTimer = immunityDuration;
-    }
-
-    void deactivateImmunity() {
-        isImmuneToExplosions = false;
-        immunityTimer = 0;
-    }
-
-    bool isImmune() {
-        return isImmuneToExplosions;
-    }
-};
-
-class EnemyVehicle : public Vehicle {
-protected:
-    float detectionRange;
-    float attackRange;
-    float attackTimer;
-    float attackRate;
-    float targetX;
-    float targetY;
-    bool isAggressive;
-    int scoreValue;
-    bool isGrudgeful;
-    float powerMultiplier;
-    int spawnBatchSize;
-    int currentBatch;
-    float grudgeTimer;
-    bool hasBeenPassed;
-
-public:
-    EnemyVehicle() : Vehicle() {
-        detectionRange = 300.0f;
-        attackRange = 200.0f;
-        attackTimer = 0;
-        attackRate = 1.0f;
-        targetX = 0;
-        targetY = 0;
-        isAggressive = true;
-        scoreValue = 500;
-        isGrudgeful = false;
-        powerMultiplier = 1.0f;
-        spawnBatchSize = 1;
-        currentBatch = 0;
-        grudgeTimer = 0;
-        hasBeenPassed = false;
-    }
-
-    ~EnemyVehicle() {
-    }
-
-    void detectPlayer() {
-        // player detection logic
-    }
-
-    void moveTowardsPlayer() {
-        if (targetX > x)
-            velocityX = speed;
-        else
-            velocityX = -speed;
-    }
-
-    void spawnProjectile() {
-        cout << "Enemy vehicle fires projectile" << endl;
-    }
-
-    int getScoreValue() {
-        return scoreValue;
-    }
-
-    void setGrudgeful() {
-        isGrudgeful = true;
-        grudgeTimer = 10.0f;
-    }
-
-    void applyPowerBoost() {
-        powerMultiplier = 1.5f;
-        speed *= powerMultiplier;
-    }
-
-    void onPlayerPassed() {
-        hasBeenPassed = true;
-        setGrudgeful();
-    }
-
-    void returnWithBoost() {
-        applyPowerBoost();
-        velocityX = -velocityX;
-    }
-};
-class MetalSlug : public PlayerVehicle {
-private:
-    bool canTilt;
-    float tiltAngle;
-    float maxTiltAngle;
-    bool canTraverseBlock;
-    int maxBlockTraversal;
-    float bulletFireRate;
-    int bulletDamage;
-    int cannonAmmo;
-    int maxCannonAmmo;
-    float cannonBlastRadius;
-    int cannonDamage;
-    bool isGrounded;
-    float warningTimer;
-    float warningDuration;
-    bool isWarning;
-    bool hasShield;
-    int shieldHp;
-
-public:
-MetalSlug() : PlayerVehicle() {
-    canTilt = true;
-    tiltAngle = 0;
-    maxTiltAngle = 45.0f;
-    canTraverseBlock = true;
-    maxBlockTraversal = 2;
-    bulletFireRate = 0.1f;
-    bulletDamage = 10;
-    cannonAmmo = 10;
-    maxCannonAmmo = 10;
-    cannonBlastRadius = 50.0f;
-    cannonDamage = 50;
-    isGrounded = true;
-    warningTimer = 0;
-    warningDuration = 2.0f;
-    isWarning = false;
-    hasShield = false;
-    shieldHp = 0;
-    width = 120;
-    height = 90;
-    maxHp = 150;
-    hp = 150;
-}
-
-void fire() {
-    if (canFire()) {
-        cout << "Metal Slug fires bullet" << endl;
-        ammo--;
-        fireTimer = bulletFireRate;
-    }
-}
-
-void fireCannon() {
-    if (cannonAmmo > 0) {
-        cout << "Metal Slug fires cannon" << endl;
-        cannonAmmo--;
-    }
-}
-
-void tilt() {
-    if (canTilt && tiltAngle < maxTiltAngle) {
-        tiltAngle += 5.0f;
-    }
-}
-
-void jump() {
-    if (isGrounded) {
-        velocityY = -10.0f;
-        isGrounded = false;
-    }
-}
-
-void crouch() {
-    height = 60;
-}
-
-void throwGrenade() {
-    cout << "Metal Slug throws grenade" << endl;
-}
-
-void update() {
-    move();
-
-    if (fireTimer > 0) {
-        fireTimer -= 0.016f;
-    }
-
-    if (warningTimer > 0) {
-        warningTimer -= 0.016f;
-        if (warningTimer <= 0) {
-            isWarning = false;
-        }
-    }
-
-    if (y >= 700) {
-        y = 700;
-        velocityY = 0;
-        isGrounded = true;
-    }
-}
-
-void render() {
-    cout << "Rendering Metal Slug at (" << x << ", " << y << ")" << endl;
-}
-
-void suicideAttack() {
-    triggerWarning();
-    cout << "Metal Slug performs suicide attack!" << endl;
-}
-
-void triggerWarning() {
-    isWarning = true;
-    warningTimer = warningDuration;
-}
-
-void eject() {
-    ejectPilot();
-    cout << "Pilot ejected from Metal Slug" << endl;
-}
-};
-
-class SlugFlyer : public PlayerVehicle {
-private:
-    int missileAmmo;
-    int maxMissileAmmo;
-    int missileDamage;
-    float altitude;
-    float maxAltitude;
-    float minAltitude;
-    float bulletFireRate;
-    int bulletAmmo;
-    int bulletDamage;
-    bool isFlying;
-    bool hoverCapability;
-
-public:
-SlugFlyer() : PlayerVehicle() {
-    missileAmmo = 20;
-    maxMissileAmmo = 20;
-    missileDamage = 30;
-    altitude = 200.0f;
-    maxAltitude = 500.0f;
-    minAltitude = 100.0f;
-    bulletFireRate = 0.15f;
-    bulletAmmo = 200;
-    bulletDamage = 8;
-    isFlying = true;
-    hoverCapability = true;
-    isAffectedByGravity = false;
-    width = 140;
-    height = 80;
-}
-
-void fire() {
-    if (canFire()) {
-        cout << "Slug Flyer fires bullets" << endl;
-        bulletAmmo--;
-        fireTimer = bulletFireRate;
-    }
-}
-
-void fireMissile() {
-    if (missileAmmo > 0) {
-        cout << "Slug Flyer fires missile" << endl;
-        missileAmmo--;
-    }
-}
-
-void ascend() {
-    if (altitude < maxAltitude) {
-        altitude += 5.0f;
-        y -= 5.0f;
-    }
-}
-
-void descend() {
-    if (altitude > minAltitude) {
-        altitude -= 5.0f;
-        y += 5.0f;
-    }
-}
-
-void hover() {
-    velocityY = 0;
-    velocityX = 0;
-}
-
-void update() {
-    if (!hoverCapability) {
-        move();
-    }
-
-    if (fireTimer > 0) {
-        fireTimer -= 0.016f;
-    }
-}
-
-void render() {
-    cout << "Rendering Slug Flyer at (" << x << ", " << y << ") altitude: " << altitude << endl;
-}
-};
-
-class SlugMariner : public PlayerVehicle {
-private:
-    int horizontalMissileAmmo;
-    int verticalMissileAmmo;
-    int reverseMissileAmmo;
-    int maxMissileAmmoEach;
-    bool isSubmerged;
-    float depth;
-    float maxDepth;
-    float underwaterVisibility;
-    float surfaceLevel;
-
-public:
-SlugMariner() : PlayerVehicle() {
-    horizontalMissileAmmo = 10;
-    verticalMissileAmmo = 10;
-    reverseMissileAmmo = 10;
-    maxMissileAmmoEach = 10;
-    isSubmerged = false;
-    depth = 0;
-    maxDepth = 300.0f;
-    underwaterVisibility = 200.0f;
-    surfaceLevel = 400.0f;
-    width = 130;
-    height = 70;
-}
-
-void fire() {
-    fireHorizontalMissile();
-}
-
-void fireHorizontalMissile() {
-    if (horizontalMissileAmmo > 0) {
-        cout << "Slug Mariner fires horizontal missile" << endl;
-        horizontalMissileAmmo--;
-    }
-}
-
-void fireVerticalMissile() {
-    if (verticalMissileAmmo > 0) {
-        cout << "Slug Mariner fires vertical missile" << endl;
-        verticalMissileAmmo--;
-    }
-}
-
-void fireReverseMissile() {
-    if (reverseMissileAmmo > 0) {
-        cout << "Slug Mariner fires reverse missile" << endl;
-        reverseMissileAmmo--;
-    }
-}
-
-void dive() {
-    if (depth < maxDepth) {
-        depth += 10.0f;
-        y += 10.0f;
-        isSubmerged = true;
-    }
-}
-
-void surface() {
-    if (depth > 0) {
-        depth -= 10.0f;
-        y -= 10.0f;
-        if (depth <= 0) {
-            isSubmerged = false;
-        }
-    }
-}
-
-void update() {
-    move();
-
-    if (fireTimer > 0) {
-        fireTimer -= 0.016f;
-    }
-}
-
-void render() {
-    cout << "Rendering Slug Mariner at (" << x << ", " << y << ") depth: " << depth << endl;
-}
-};
-
-class AmphibiousSlug : public PlayerVehicle {
-private:
-    int currentMode;
-    bool isInWater;
-    bool isGrounded;
-    bool isFlying;
-    MetalSlug* slugRef;
-    SlugFlyer* flyerRef;
-    SlugMariner* marinerRef;
-    float transitionTimer;
-    bool isTransitioning;
-
-public:
-AmphibiousSlug() : PlayerVehicle() {
-    currentMode = 0;
-    isInWater = false;
-    isGrounded = true;
-    isFlying = false;
-    slugRef = new MetalSlug();
-    flyerRef = new SlugFlyer();
-    marinerRef = new SlugMariner();
-    transitionTimer = 0;
-    isTransitioning = false;
-}
-
-void fire() {
-    if (currentMode == 0) {
-        slugRef->fire();
-    }
-    else if (currentMode == 1) {
-        flyerRef->fire();
-    }
-    else if (currentMode == 2) {
-        marinerRef->fire();
-    }
-}
-
-void detectTerrainMode() {
-    if (isInWater) {
-        switchToMariner();
-    }
-    else if (isFlying) {
-        switchToFlyer();
-    }
-    else if (isGrounded) {
-        switchToSlug();
-    }
-}
-
-void switchToMariner() {
-    if (currentMode != 2) {
-        currentMode = 2;
-        isTransitioning = true;
-        transitionTimer = 1.0f;
-    }
-}
-
-void switchToFlyer() {
-    if (currentMode != 1) {
-        currentMode = 1;
-        isTransitioning = true;
-        transitionTimer = 1.0f;
-    }
-}
-
-void switchToSlug() {
-    if (currentMode != 0) {
-        currentMode = 0;
-        isTransitioning = true;
-        transitionTimer = 1.0f;
-    }
-}
-
-int getCurrentMode() {
-    return currentMode;
-}
-
-void onWaterContact() {
-    isInWater = true;
-    isGrounded = false;
-    isFlying = false;
-}
-
-void onGroundContact() {
-    isGrounded = true;
-    isInWater = false;
-    isFlying = false;
-}
-
-void onAirborne() {
-    isFlying = true;
-    isGrounded = false;
-    isInWater = false;
-}
-
-void update() {
-    detectTerrainMode();
-
-    if (isTransitioning) {
-        transitionTimer -= 0.016f;
-        if (transitionTimer <= 0) {
-            isTransitioning = false;
-        }
-    }
-
-    if (currentMode == 0) {
-        slugRef->update();
-    }
-    else if (currentMode == 1) {
-        flyerRef->update();
-    }
-    else if (currentMode == 2) {
-        marinerRef->update();
-    }
-}
-
-void render() {
-    if (currentMode == 0) {
-        slugRef->render();
-    }
-    else if (currentMode == 1) {
-        flyerRef->render();
-    }
-    else if (currentMode == 2) {
-        marinerRef->render();
-    }
-}
-};
-
-class FlyingTara : public EnemyVehicle {
-private:
-    float hoverHeight;
-    int grenadeDamage;
-    float grenadeBlastRadius;
-    float grenadeTimer;
-    float grenadeRate;
-    bool isOnTopOfPlayer;
-    float horizontalSpeed;
-    int spawnCount;
-    int patrolDirection;
-
-public:
-FlyingTara() : EnemyVehicle() {
-    hoverHeight = 150.0f;
-    grenadeDamage = 25;
-    grenadeBlastRadius = 40.0f;
-    grenadeTimer = 0;
-    grenadeRate = 2.0f;
-    isOnTopOfPlayer = false;
-    horizontalSpeed = 2.0f;
-    spawnCount = 1;
-    patrolDirection = 1;
-    scoreValue = 300;
-    width = 100;
-    height = 60;
-    isAffectedByGravity = false;
-}
-
-void attack() {
-    if (isOnTopOfPlayer) {
-        dropGrenade();
-    }
-}
-
-void dropGrenade() {
-    if (grenadeTimer <= 0) {
-        cout << "Flying Tara drops grenade" << endl;
-        grenadeTimer = grenadeRate;
-    }
-}
-
-void hover() {
-    y = hoverHeight;
-    velocityY = 0;
-}
-
-void checkIfOnTopOfPlayer() {
-    // player detection logic
-    isOnTopOfPlayer = false;
-}
-
-void patrol() {
-    velocityX = horizontalSpeed * patrolDirection;
-
-    if (x > 1500) {
-        patrolDirection = -1;
-    }
-    else if (x < 100) {
-        patrolDirection = 1;
-    }
-}
-
-void update() {
-    hover();
-    patrol();
-    checkIfOnTopOfPlayer();
-    move();
-
-    if (grenadeTimer > 0) {
-        grenadeTimer -= 0.016f;
-    }
-
-    if (attackTimer > 0) {
-        attackTimer -= 0.016f;
-    }
-    else {
-        attack();
-        attackTimer = attackRate;
-    }
-}
-
-void render() {
-    cout << "Rendering Flying Tara at (" << x << ", " << y << ")" << endl;
-}
-};
-
-class M15ABradley : public EnemyVehicle {
-private:
-    float missileBlastRadius;
-    int missileDamage;
-    float missileTimer;
-    float missileRate;
-    bool isStationary;
-    bool canMoveHorizontally;
-    bool isOnFlatTerrain;
-    float missileArcAngle;
-    float missileArcHeight;
-    float approachSpeed;
-
-public:
-M15ABradley() : EnemyVehicle() {
-    missileBlastRadius = 60.0f;
-    missileDamage = 40;
-    missileTimer = 0;
-    missileRate = 3.0f;
-    isStationary = false;
-    canMoveHorizontally = true;
-    isOnFlatTerrain = false;
-    missileArcAngle = 45.0f;
-    missileArcHeight = 100.0f;
-    approachSpeed = 2.0f;
-    scoreValue = 600;
-    width = 150;
-    height = 100;
-}
-
-void attack() {
-    fireMissile();
-}
-
-void fireMissile() {
-    if (missileTimer <= 0) {
-        cout << "M-15A Bradley fires missile" << endl;
-        missileTimer = missileRate;
-    }
-}
-
-void moveHorizontally() {
-    if (canMoveHorizontally && !isStationary) {
-        velocityX = approachSpeed;
-    }
-}
-
-void checkFlatTerrain() {
-    // terrain detection logic
-    isOnFlatTerrain = true;
-}
-
-void update() {
-    checkFlatTerrain();
-
-    if (isOnFlatTerrain) {
-        moveHorizontally();
-    }
-
-    move();
-
-    if (missileTimer > 0) {
-        missileTimer -= 0.016f;
-    }
-    else {
-        attack();
-    }
-}
-
-void render() {
-    cout << "Rendering M-15A Bradley at (" << x << ", " << y << ")" << endl;
-}
-};
-
-class EnemySub : public EnemyVehicle {
-private:
-    int rocketDamage;
-    float rocketBlastRadius;
-    float rocketTimer;
-    float rocketRate;
-    bool isSubmerged;
-    float depth;
-    float maxDepth;
-    int spawnBiome;
-    float rocketArcAngle;
-
-public:
-    EnemySub() : EnemyVehicle() {
-        rocketDamage = 35;
-        rocketBlastRadius = 50.0f;
-        rocketTimer = 0;
-        rocketRate = 4.0f;
-        isSubmerged = true;
-        depth = 200.0f;
-        maxDepth = 400.0f;
-        spawnBiome = 2;
-        rocketArcAngle = 60.0f;
-        scoreValue = 700;
-        width = 160;
-        height = 70;
-    }
-
-    void attack() {
-        fireRocket();
-    }
-
-    void fireRocket() {
-        if (rocketTimer <= 0) {
-            cout << "Enemy Sub fires rocket" << endl;
-            rocketTimer = rocketRate;
-        }
-    }
-
-    void dive() {
-        if (depth < maxDepth) {
-            depth += 10.0f;
-            y += 10.0f;
-            isSubmerged = true;
-        }
-    }
-
-    void surface() {
-        if (depth > 0) {
-            depth -= 10.0f;
-            y -= 10.0f;
-            if (depth <= 0) {
-                isSubmerged = false;
-            }
-        }
-    }
-
-    void update() {
-        move();
-
-        if (rocketTimer > 0) {
-            rocketTimer -= 0.016f;
-        }
-        else {
-            attack();
-        }
-    }
-
-    void render() {
-        cout << "Rendering Enemy Sub at (" << x << ", " << y << ") depth: " << depth << endl;
-    }
-};
