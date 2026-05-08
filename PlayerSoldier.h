@@ -1,20 +1,21 @@
 #pragma once
-#include "Header.h"
+#include "Level.h"
 #include "Block.h"
 #include "Animation.h"
 #include <SFML/Graphics.hpp>
-#include "entity.h"
+#include "Entity.h"
 class Weapon;
 class Vehicle;
 class Pistol;
 class Knife;
+class PlayerSoldier;
 
 class TransformationState {
 public:
     virtual ~TransformationState() {}
     virtual void        update(float dt) = 0;
-    virtual void        applyEffects(class PlayerSoldier* s) = 0;
-    virtual void        removeEffects(class PlayerSoldier* s) = 0;
+    virtual void        applyEffects(PlayerSoldier* s) = 0;
+    virtual void        removeEffects(PlayerSoldier* s) = 0;
     virtual const char* getName()  const = 0;
     virtual bool        isExpired()const = 0;
 };
@@ -53,7 +54,6 @@ public:
     const char* getName()  const               override { return "Mummy"; }
     bool        isExpired()const               override { return timer <= 0.0f; }
 };
-
 
 class PlayerSoldier : public Soldier {
 protected:
@@ -96,17 +96,6 @@ protected:
 
     TransformationState* transformState;
 
-    void changeTransformState(TransformationState* newState) {
-        if (transformState) {
-            transformState->removeEffects(this);
-            delete transformState;
-        }
-        transformState = newState;
-        if (transformState) {
-            transformState->applyEffects(this);
-        }
-    }
-
 public:
     PlayerSoldier() : Soldier() {
         player_x = 100.0f; player_y = 500.0f;
@@ -134,15 +123,11 @@ public:
         meleeCooldown = 0.5f;
         meleeTimer = 0.0f;
         inVehicle = false;
-        isAlive = true;
-        isImmortal = false;
-        isFat = false;
-        isInWater = false;
-        score = 0;
-        saturation = 100;
+        isAlive = isImmortal = isFat = isInWater = false;
+        score = saturation = 0;
         specialPowerActive = false;
         specialPowerTimer = 0.0f;
-        specialPowerDuration = 10.0f;
+        specialPowerDuration = 0.0f;
         moveAcceleration = 0.6f;
         currentAnim = STAND;
         name = "PlayerSoldier";
@@ -169,6 +154,17 @@ public:
 
     const char* getTransformStateName() const {
         return transformState ? transformState->getName() : "None";
+    }
+
+    void changeTransformState(TransformationState* newState) {
+        if (transformState) {
+            transformState->removeEffects(this);
+            delete transformState;
+        }
+        transformState = newState;
+        if (transformState) {
+            transformState->applyEffects(this);
+        }
     }
 
     void move(float dt) override {
@@ -366,25 +362,33 @@ public:
     virtual void render(RenderWindow& window, float camX = 0, float camY = 0) {
         currentAnim = (velocityX > 0.1f || velocityX < -0.1f) ? WALK : STAND;
         Animation& a = anims[currentAnim];
+        
         if (a.hasLegs()) {
             IntRect lr = a.currentLegsRect();
-            sprite.setTexture(a.getLegsTexture());
-            sprite.setTextureRect(lr);
-            sprite.setOrigin(lr.width / 2.0f, (float)lr.height);
-            sprite.setPosition(player_x + width / 2.0f - camX,
-                player_y + height - camY + a.getLegsOffsetY() * scale_y);
-            sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
+            if (lr.width > 0 && lr.height > 0) {
+                sprite.setTexture(a.getLegsTexture(), true);
+                sprite.setTextureRect(lr);
+                sprite.setOrigin(lr.width / 2.0f, (float)lr.height);
+                sprite.setPosition(player_x + width / 2.0f - camX,
+                    player_y + height - camY + a.getLegsOffsetY());
+                float scX = facingRight ? -2.0f : 2.0f;
+                sprite.setScale(scX, 2.0f);
+                window.draw(sprite);
+            }
+        }
+        
+        IntRect r = a.currentRect();
+        if (r.width > 0 && r.height > 0) {
+            sprite.setTexture(a.getTexture(), true);
+            sprite.setTextureRect(r);
+            sprite.setOrigin(r.width / 2.0f, (float)r.height);
+            float hx = player_x + width / 2.0f - camX
+                + (facingRight ? a.getHeadOffsetX() : -a.getHeadOffsetX());
+            sprite.setPosition(hx, player_y + height - camY - a.getHeadOffsetY());
+            float scX = facingRight ? -2.0f : 2.0f;
+            sprite.setScale(scX, 2.0f);
             window.draw(sprite);
         }
-        IntRect r = a.currentRect();
-        sprite.setTexture(a.getTexture());
-        sprite.setTextureRect(r);
-        sprite.setOrigin(r.width / 2.0f, (float)r.height);
-        float hx = player_x + width / 2.0f - camX
-            + (facingRight ? a.getHeadOffsetX() : -a.getHeadOffsetX()) * scale_x;
-        sprite.setPosition(hx, player_y + height - camY - a.getHeadOffsetY() * scale_y);
-        sprite.setScale(facingRight ? scale_x : -scale_x, scale_y);
-        window.draw(sprite);
     }
 
     virtual float getFireRate() { return 0.2f; }
@@ -405,6 +409,12 @@ public:
     int   getLives()     const { return lives; }
     int   getWidth()     const { return (int)width; }
     int   getHeight()    const { return (int)height; }
+    float getFriction()  const { return 0.85f; }
+    float getAirFriction() const { return 0.95f; }
+    float getJumpPower() const { return 400.0f; }
+    float getGravity()   const { return 2000.0f; }
+    float getMaxFallSpeed() const { return 800.0f; }
+    bool  getIsGrounded() const { return isGrounded; }
 
     void setPlayerX(float x) { player_x = x; }
     void setPlayerY(float y) { player_y = y; }
@@ -412,18 +422,8 @@ public:
     void setVelocityX(float vx) { velocityX = vx; }
     void setVelocityY(float vy) { velocityY = vy; }
     void setVelocity(float vx, float vy) { velocityX = vx; velocityY = vy; }
+	void setGrounded(bool grounded) { isGrounded = grounded; }
 };
-
-
-inline void UndeadState::applyEffects(PlayerSoldier* s) {
-    s->setVelocity(s->getVelocityX() * 0.7f, s->getVelocityY());
-}
-
-inline void MummyState::applyEffects(PlayerSoldier* s) {
-    s->setVelocity(s->getVelocityX() * 0.5f, s->getVelocityY());
-    s->pickupWeapon(nullptr);
-}
-
 
 class Marco : public PlayerSoldier {
 private:
@@ -444,6 +444,8 @@ public:
         static const int walkHeadYs[12] = { 477,477,477,477,477,477,477,477,477,477,477,477 };
         static const int walkHeadWs[12] = { 32,30,28,27,29,30,32,32,32,31,31,31 };
         static const int walkHeadHs[12] = { 29,29,29,29,29,29,29,29,29,29,29,29 };
+
+
         static const int walkLegsXs[12] = { 10,36,69,105,129,149,170,196,227,263,288,308 };
         static const int walkLegsYs[12] = { 511,511,511,511,511,511,511,511,511,511,511,511 };
         static const int walkLegsWs[12] = { 21,28,31,19,15,16,21,26,31,20,15,16 };
@@ -981,12 +983,21 @@ public:
         }
     }
 
-    void render(RenderWindow& window, float camX = 0, float camY = 0) {
+    void render(RenderWindow& window) {
         if (characters[activeIndex]) {
-            characters[activeIndex]->render(window, camX, camY);
+            characters[activeIndex]->render(window, 0, 0);
         }
         if (fusionCompanion) {
             fusionCompanion->render(window);
         }
     }
 };
+
+void UndeadState::applyEffects(PlayerSoldier* s) {
+    s->setVelocity(s->getVelocityX() * 0.7f, s->getVelocityY());
+}
+
+void MummyState::applyEffects(PlayerSoldier* s) {
+    s->setVelocity(s->getVelocityX() * 0.5f, s->getVelocityY());
+    s->pickupWeapon(nullptr);
+}

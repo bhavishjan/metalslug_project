@@ -51,7 +51,7 @@ private:
     RectangleShape modeTitleBar;
 
 public:
-    Menu(int sx, int sy) : screen_x(sx), screen_y(sy), menuState(0), selectionIndex(0),
+    Menu() : screen_x(1600), screen_y(900), menuState(0), selectionIndex(0),
                           animationTime(0), pulse(0), blink(0) {
         menuFont.loadFromFile("arial.ttf");
         loadBackgrounds();
@@ -264,7 +264,6 @@ public:
     void resetSelection() { selectionIndex = 0; }
 
     void renderStartScreen(RenderWindow& window) {
-        window.clear();
         window.draw(startBgSprite);
 
         // Pulsing "PRESS ENTER" text
@@ -278,11 +277,9 @@ public:
         window.draw(pressEnterText);
 
         window.draw(instructionText);
-        window.display();
     }
 
     void renderCharacterSelection(RenderWindow& window) {
-        window.clear();
         window.draw(characterBgSprite);
 
         window.draw(charPanel);
@@ -319,11 +316,9 @@ public:
         // Minimal instruction in corner
         instructionText.setPosition(screen_x - 200, screen_y - 35);
         window.draw(instructionText);
-        window.display();
     }
 
     void renderModeSelection(RenderWindow& window) {
-        window.clear();
         window.draw(modeBgSprite);
 
         window.draw(modePanel);
@@ -357,6 +352,5 @@ public:
 
         instructionText.setPosition(screen_x - 200, screen_y - 35);
         window.draw(instructionText);
-        window.display();
     }
 };

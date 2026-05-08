@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "Level.h"
+#include "Biome.h"
 #include "PlayerSoldier.h"
 #include "Weapon.h"
 #include "Enemy.h"
@@ -49,34 +50,17 @@ private:
     float cameraX;
     float cameraY;
 
- state
-    int menuPhase;
-    bool playerSelected;
-    bool charClockStarted;
-    Clock charSelectClock;
-
- UI elements
-    Font font;
-    RectangleShape modeBg, titleBar, survivalBtn, campaignBtn, modeKey1, modeKey2;
-    RectangleShape charBg, charTitleBar, charBtns[4], charKeys[4];
-    Text titleText, survivalText, campaignText, charTitleText, charTexts[4];
-    const char* charNames[4];
-    float charBtnY[4];
-
 public:
     Game() 
         : screenX(1600), screenY(900),
           gameMode(0),
           selectedCharacter(0),
-          menu(screenX, screenY),
+          menu(),
           survivalGame(nullptr),
           campaignGame(nullptr),
           jumpHeld(false),
-          cameraX(0), cameraY(0),
-          menuPhase(0),
-          playerSelected(false),
-          charClockStarted(false) {
-        
+          cameraX(0), cameraY(0) {
+
 
         for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) {
             survivalRebels[i] = nullptr;
@@ -87,105 +71,10 @@ public:
         window.create(VideoMode(screenX, screenY), "Metal Slug", Style::Close);
         window.setVerticalSyncEnabled(true);
         window.setFramerateLimit(60);
-
-
-        initializeMenuUI();
     }
 
     ~Game() {
         cleanup();
-    }
-
-    void initializeMenuUI() {
-        // Load font
-        font.loadFromFile("arial.TTF");
-
-
-        modeBg.setSize(Vector2f((float)screenX, (float)screenY));
-        modeBg.setFillColor(Color(20, 20, 20));
-
-        titleBar.setSize(Vector2f(600, 90));
-        titleBar.setFillColor(Color::Red);
-        titleBar.setPosition(500, 150);
-
-        survivalBtn.setSize(Vector2f(500, 70));
-        survivalBtn.setFillColor(Color::Green);
-        survivalBtn.setPosition(550, 350);
-        survivalBtn.setOutlineThickness(3);
-        survivalBtn.setOutlineColor(Color::White);
-
-        campaignBtn.setSize(Vector2f(500, 70));
-        campaignBtn.setFillColor(Color::Green);
-        campaignBtn.setPosition(550, 460);
-        campaignBtn.setOutlineThickness(3);
-        campaignBtn.setOutlineColor(Color::White);
-
-        modeKey1.setSize(Vector2f(40, 40));
-        modeKey1.setFillColor(Color::Red);
-        modeKey1.setPosition(570, 365);
-
-        modeKey2.setSize(Vector2f(40, 40));
-        modeKey2.setFillColor(Color::Red);
-        modeKey2.setPosition(570, 475);
-
-        titleText.setFont(font);
-        titleText.setString("SELECT MODE:");
-        titleText.setCharacterSize(50);
-        titleText.setFillColor(Color::White);
-        titleText.setPosition(600, 165);
-
-        survivalText.setFont(font);
-        survivalText.setString("1 - SURVIVAL MODE");
-        survivalText.setCharacterSize(30);
-        survivalText.setFillColor(Color::White);
-        survivalText.setPosition(630, 370);
-
-        campaignText.setFont(font);
-        campaignText.setString("2 - CAMPAIGN MODE");
-        campaignText.setCharacterSize(30);
-        campaignText.setFillColor(Color::White);
-        campaignText.setPosition(630, 480);
-
-
-        charBg.setSize(Vector2f((float)screenX, (float)screenY));
-        charBg.setFillColor(Color(20, 20, 20));
-
-        charTitleBar.setSize(Vector2f(700, 90));
-        charTitleBar.setFillColor(Color::Red);
-        charTitleBar.setPosition(450, 150);
-
-        charNames[0] = "1 - Marco Rossi";
-        charNames[1] = "2 - Tarma Roving";
-        charNames[2] = "3 - Eri Kasamoto";
-        charNames[3] = "4 - Fiolina Germi";
-        charBtnY[0] = 350;
-        charBtnY[1] = 460;
-        charBtnY[2] = 570;
-        charBtnY[3] = 680;
-
-        for (int i = 0; i < 4; i++) {
-            charBtns[i].setSize(Vector2f(500, 70));
-            charBtns[i].setFillColor(Color::Green);
-            charBtns[i].setPosition(550, charBtnY[i]);
-            charBtns[i].setOutlineThickness(3);
-            charBtns[i].setOutlineColor(Color::White);
-
-            charKeys[i].setSize(Vector2f(40, 40));
-            charKeys[i].setFillColor(Color::Red);
-            charKeys[i].setPosition(570, charBtnY[i] + 15);
-
-            charTexts[i].setFont(font);
-            charTexts[i].setString(charNames[i]);
-            charTexts[i].setCharacterSize(30);
-            charTexts[i].setFillColor(Color::White);
-            charTexts[i].setPosition(630, charBtnY[i] + 15);
-        }
-
-        charTitleText.setFont(font);
-        charTitleText.setString("CHOOSE CHARACTER");
-        charTitleText.setCharacterSize(50);
-        charTitleText.setFillColor(Color::White);
-        charTitleText.setPosition(540, 165);
     }
 
     void run() {
@@ -207,7 +96,6 @@ public:
                 window.close();
             }
 
-         INPUT
             if (gameMode == 0 && ev.type == Event::KeyPressed) {
                 if (ev.key.code == Keyboard::Up) {
                     menu.moveSelectionUp();
@@ -220,14 +108,12 @@ public:
                     if (menuState == 0) {
                         menu.setMenuState(1);
                     }
-                    }
-            else if (menuState == 1) {
+                    else if (menuState == 1) {
                         selectedCharacter = menu.getSelectionIndex();
                         characters.switchCharacterToIndex(selectedCharacter);
                         menu.setMenuState(2);
                     }
-                    }
-            else if (menuState == 2) {
+                    else if (menuState == 2) {
                         int modeSelection = menu.getSelectionIndex();
                         if (modeSelection == 0) {
                             gameMode = 1;
@@ -236,7 +122,7 @@ public:
                             survivalGame->start();
                             characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
                             characters.getActivePlayer()->setVelocity(0, 0);
-                            characters.getActivePlayer()->setIsGrounded(false);
+                            characters.getActivePlayer()->setGrounded(false);
                             cameraX = cameraY = 0;
                             Delay.restart();
                             
@@ -291,7 +177,6 @@ public:
                             ei++;
                             survivalRebelCount = ei;
                         }
-                        }
                         else if (modeSelection == 1) {
                             gameMode = 2;
                             campaignGame = new CampaignGame(screenX, screenY);
@@ -299,7 +184,7 @@ public:
                             campaignGame->start();
                             characters.getActivePlayer()->setPlayerPosition(200, 50);
                             characters.getActivePlayer()->setVelocity(0, 0);
-                            characters.getActivePlayer()->setIsGrounded(false);
+                            characters.getActivePlayer()->setGrounded(false);
                             cameraX = cameraY = 0;
                             Delay.restart();
                         }
@@ -331,8 +216,7 @@ public:
                     menu.setMenuState(1);
                     menu.resetSelection();
                 }
-                }
-            else if (menuState == 1) {
+                else if (menuState == 1) {
                     menu.setMenuState(0);
                     menu.resetSelection();
                 }
@@ -344,13 +228,13 @@ public:
     }
 
     void update(float dt) {
-     RENDER
         if (gameMode == 0) {
             menu.updateAnimation(dt);
             return;
         }
 
-     MOVEMENT
+        characters.getActivePlayer()->update(dt);
+
         if (Keyboard::isKeyPressed(Keyboard::Left)) {
             if (characters.getActivePlayer()->isFacingRight()) {
                 characters.getActivePlayer()->setVelocityX(0);
@@ -366,10 +250,12 @@ public:
             characters.getActivePlayer()->moveRight();
         }
         else {
-            if (characters.getActivePlayer()->getIsGrounded()) 
+            if (characters.getActivePlayer()->getIsGrounded()) {
                 characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * characters.getActivePlayer()->getFriction());
-            else          
+            }
+            else {
                 characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * characters.getActivePlayer()->getAirFriction());
+            }
         }
 
         float velCap;
@@ -390,7 +276,7 @@ public:
         if (Keyboard::isKeyPressed(Keyboard::Up)) {
             if (characters.getActivePlayer()->getIsGrounded()) {
                 characters.getActivePlayer()->setVelocityY(characters.getActivePlayer()->getJumpPower());
-                characters.getActivePlayer()->setIsGrounded(false);
+                characters.getActivePlayer()->setGrounded(false);
                 jumpHeld = true;
             }
         }
@@ -408,7 +294,6 @@ public:
             characters.getActivePlayer()->setVelocityY(characters.getActivePlayer()->getMaxFallSpeed());
         }
 
-     UPDATE
         if (gameMode == 1 && survivalGame) {
             Level* currentLevel = survivalGame->getCurrentLevel();
             if (currentLevel) {
@@ -462,7 +347,7 @@ public:
 
                 if (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
                     if (pVelocityY > 0) {
-                        characters.getActivePlayer()->setIsGrounded(true);
+                        characters.getActivePlayer()->setGrounded(true);
                         pVelocityY = 0;
                         while (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
                             pY -= 1;
@@ -477,7 +362,7 @@ public:
                 }
                 else {
                     if (pVelocityY >= 0) {
-                        characters.getActivePlayer()->setIsGrounded(false);
+                        characters.getActivePlayer()->setGrounded(false);
                     }
                 }
 
@@ -539,7 +424,6 @@ public:
 
                     float newX = enemy_x + enemy_vx * dt;
 
-             proactively
                     float lookAhead = 30.0f;
                     if (enemy_vx != 0 && survivalRebels[i]->getIsGrounded()) {
                         float checkX = enemy_x + (enemy_vx > 0 ? lookAhead : -lookAhead);
@@ -570,7 +454,6 @@ public:
                         }
                     }
 
-                 boundary
                     float px = characters.getActivePlayer()->getPlayerX();
                     float py = characters.getActivePlayer()->getPlayerY();
                     float pw = (float)characters.getActivePlayer()->getWidth();
@@ -658,7 +541,7 @@ public:
             }
         }
 
-     UPDATE
+     
         else if (gameMode == 2 && campaignGame) {
             CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
             if (campaignLevel) {
@@ -686,7 +569,7 @@ public:
 
                 if (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
                     if (pVelocityY > 0) {
-                        characters.getActivePlayer()->setIsGrounded(true);
+                        characters.getActivePlayer()->setGrounded(true);
                         pVelocityY = 0;
                         while (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
                             pY -= 1;
@@ -701,14 +584,14 @@ public:
                 }
                 else {
                     if (pVelocityY >= 0) {
-                        characters.getActivePlayer()->setIsGrounded(false);
+                        characters.getActivePlayer()->setGrounded(false);
                     }
                 }
 
                 if (pY + characters.getActivePlayer()->getHeight() > screenY) {
                     pY = screenY - characters.getActivePlayer()->getHeight();
                     pVelocityY = 0;
-                    characters.getActivePlayer()->setIsGrounded(true);
+                    characters.getActivePlayer()->setGrounded(true);
                 }
 
                 if (pX < 0) {
@@ -741,25 +624,15 @@ public:
     }
 
     void render() {
-     RENDER
+        window.clear(Color(135, 206, 235));
+        
         if (gameMode == 0) {
             int menuState = menu.getMenuState();
             if (menuState == 0) {
-                window.clear(Color(20, 20, 20));
-                window.draw(modeBg);
-                window.draw(titleBar);
-                window.draw(survivalBtn);
-                window.draw(campaignBtn);
-                window.draw(modeKey1);
-                window.draw(modeKey2);
-                window.draw(titleText);
-                window.draw(survivalText);
-                window.draw(campaignText);
-            }
+                menu.renderStartScreen(window);
             }
             else if (menuState == 1) {
                 menu.renderCharacterSelection(window);
-            }
             }
             else if (menuState == 2) {
                 menu.renderModeSelection(window);
@@ -768,9 +641,7 @@ public:
             return;
         }
 
-     RENDER
         if (gameMode == 1 && survivalGame) {
-            window.clear(Color(135, 206, 235));
             survivalGame->render(window);
             for (int i = 0; i < survivalRebelCount; i++) {
                 if (survivalRebels[i])
@@ -780,9 +651,7 @@ public:
             window.display();
         }
 
-     RENDER
         else if (gameMode == 2 && campaignGame) {
-            window.clear(Color(135, 206, 235));
             campaignGame->render(window);
             characters.getActivePlayer()->render(window, cameraX, cameraY);
             window.display();

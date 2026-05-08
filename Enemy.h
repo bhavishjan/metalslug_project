@@ -1,4 +1,5 @@
 #pragma once
+#include "Entity.h"
 #include "PlayerSoldier.h"
 #include <cmath>
 #include "Weapon.h"
@@ -17,20 +18,12 @@ static bool rectsOverlap(float ax, float ay, float aw, float ah,
 
 
 // Abstract base class for all enemies
-class Enemy {
+class Enemy : public Soldier {
 protected:
     const char* name;
-    float x, y;
-    float width, height;
-    float velocityX, velocityY;
-    float hp;
-    int   maxHp;
     float speed;
-    int   damage;
-    bool  isAlive;
     bool  isGrounded;
     bool  isCrouched;
-    bool  facingRight;
     float spawnX, spawnY;
     int   scoreValue;
     bool  isShielded;
@@ -50,17 +43,20 @@ protected:
     PlayerSoldier* largestPlayer;
 
     float gravityConstant = 200.0f;
-    float groundY = 1600 - height;
+    float groundY;
 public:
-    Enemy() : x(0), y(0), width(32), height(48),
-        velocityX(0), velocityY(0),
-        hp(1), maxHp(1), speed(80.f), damage(1),
-        isAlive(true), isGrounded(false), isCrouched(false),
-        facingRight(true), spawnX(0), spawnY(0),
+    Enemy() : Soldier(), speed(80.f),
+        isGrounded(false), isCrouched(false),
+        spawnX(0), spawnY(0),
         scoreValue(0), isShielded(false), aggressionLevel(1.f),
         hasGrudge(false), grudgeMultiplier(1.f), isEnhanced(false),
         detectionRange(300.f), attackRange(250.f), currentBiome(0),
         isPatrolling(true), isTargetingPlayer(false), largestPlayer(nullptr) {
+        x = 0;
+        y = 0;
+        width = 32;
+        height = 48;
+        groundY = 1600 - height;
     }
 
     // Virtual destructor
@@ -128,6 +124,13 @@ public:
         
             velocityX = -speed;
             facingRight = false;
+        }
+        
+        // Add bounds to prevent enemies from passing left side
+        if (x < 0) {
+            x = 0;
+            velocityX = speed;
+            facingRight = true;
         }
     }
 
@@ -275,17 +278,10 @@ public:
     }
 
     // getters and setters
-    bool  getIsAlive()  const { return isAlive; }
-    float getX()        const { return x; }
-    float getY()        const { return y; }
-    float getHP()       const { return hp; }
-    float getMaxHP()    const { return (float)maxHp; }
-    bool  isDead()      const { return !isAlive; }
     float getWidth() const { return width; }
     float getHeight() const { return height; }
 	bool getIsTargetingPlayer() const { return isTargetingPlayer; }
 	bool getIsGrounded() const { return isGrounded; }
-
 
     void setPosition(float nx, float ny) { x = nx; y = ny; }
     void setPlayer(PlayerSoldier* p) { largestPlayer = p; }

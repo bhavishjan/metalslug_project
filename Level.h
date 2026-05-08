@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Block.h"
+#include "Biome.h"
+
 using namespace sf;
 using namespace std;
 
@@ -92,15 +94,15 @@ public:
 
     // Common Functions
 
-    virtual void loadTextures(string solidPath, string waterPath) {
+    virtual void loadTextures(string solidPath, string waterPath, string grassPath, string dirtPath) {
         if (plains) {
-            plains->loadTextures(solidPath, waterPath);
+            plains->loadTextures(solidPath, waterPath, grassPath, dirtPath);
         }
         if (aerial) {
-            aerial->loadTextures(solidPath, waterPath);
+            aerial->loadTextures(solidPath, waterPath, grassPath, dirtPath);
         }
         if (aquatic) {
-            aquatic->loadTextures(solidPath, waterPath);
+            aquatic->loadTextures(solidPath, waterPath, grassPath, dirtPath);
         }
     }
 
@@ -334,8 +336,8 @@ public:
         scoreMultiplier = 1.0f;
 
         // player will spawn at start of plains biome
-        playerSpawnX = 200;
-        playerSpawnY = 100;
+        playerSpawnX = 400;
+        playerSpawnY = 500;
     }
 
     ~Level1() {}
@@ -353,7 +355,9 @@ public:
 
         // Textures load k
         loadTextures("Sprites/blocks/stone.png",
-            "Sprites/blocks/water.png");
+            "Sprites/blocks/water.png",
+            "Sprites/blocks/grass.png",
+            "Sprites/blocks/dirt.png");
 
         // Terrain generate 
         plains->generateTerrain(biomeWidth, biomeHeight);
@@ -454,8 +458,8 @@ public:
 
         scoreMultiplier = 1.5f;
 
-        playerSpawnX = 200;
-        playerSpawnY = 100;
+        playerSpawnX = 400;
+        playerSpawnY = 500;
     }
 
     ~Level2() {}
@@ -468,7 +472,9 @@ public:
 
         plains = new PlainsBiome(aerialEnd, aquaticEnd);
         loadTextures("Sprites/blocks/stone.png",
-            "Sprites/blocks/water.png");
+            "Sprites/blocks/water.png",
+            "Sprites/blocks/grass.png",
+            "Sprites/blocks/dirt.png");
 
         // Level 2 HAS MORE HILLS
         aerial->generateTerrain(biomeWidth, biomeHeight);
@@ -575,8 +581,8 @@ public:
 
         scoreMultiplier = 2.0f;
 
-        playerSpawnX = 200;
-        playerSpawnY = 100;
+        playerSpawnX = 400;
+        playerSpawnY = 500;
     }
 
     ~Level3() {}
@@ -588,7 +594,9 @@ public:
         aerial = new AerialBiome(plainsEnd, aerialEnd);
         plains = new PlainsBiome(aerialEnd, aquaticEnd);
         loadTextures("Sprites/blocks/stone.png",
-            "Sprites/blocks/water.png");
+            "Sprites/blocks/water.png",
+            "Sprites/blocks/grass.png",
+            "Sprites/blocks/dirt.png");
         aquatic->generateTerrain(biomeWidth, biomeHeight);
         aerial->generateTerrain(biomeWidth, biomeHeight);
         plains->generateTerrain(biomeWidth, biomeHeight);

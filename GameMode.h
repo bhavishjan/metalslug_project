@@ -1,14 +1,15 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Header.h"
+#include "Level.h"
+#include "Biome.h"
 using namespace std;
 using namespace sf;
 
 // Forward declarations
 class ScoreManager;
 class SoundManager;
-class CharacterManager;
 class Camera;
+class CharacterManager;
 
 
 class GameMode {
@@ -99,7 +100,9 @@ public:
         cameraY = 0;
         screenX = sx;
         screenY = sy;
-        for (int i = 0; i < 4; i++) levels[i] = nullptr;
+        for (int i = 0; i < 4; i++) {
+            levels[i] = nullptr;
+        }
     }
 
     virtual ~SurvivalMode() {
@@ -232,7 +235,9 @@ public:
     void render(RenderWindow& window) override {
         backgroundSprite.setPosition(0, 0);
         window.draw(backgroundSprite);
-        if (currentLevel) currentLevel->render(window, cameraX, cameraY);
+        if (currentLevel) {
+            currentLevel->render(window, cameraX, cameraY);
+        }
     }
 };
 
@@ -280,8 +285,12 @@ public:
         screenX = sx;
         screenY = sy;
 
-        for (int i = 0; i < 8; i++) enemiesKilledPerType[i] = 0;
-        for (int i = 0; i < 3; i++) vehiclesDestroyedPerType[i] = 0;
+        for (int i = 0; i < 8; i++) {
+            enemiesKilledPerType[i] = 0;
+        }
+        for (int i = 0; i < 3; i++) {
+            vehiclesDestroyedPerType[i] = 0;
+        }
 
         if (backgroundTexture.loadFromFile("Sprites/background.png")) {
             backgroundSprite.setTexture(backgroundTexture);

@@ -30,7 +30,9 @@ public:
 
     void load(const char* path, const int* xs, const int* ys,
               const int* widths, const int* heights, int count, float seconds) {
-        texture.loadFromFile(path);
+        if (!texture.loadFromFile(path)) {
+            return;
+        }
 
         frameTime = seconds;
 
@@ -47,7 +49,9 @@ public:
 
     void loadLegs(const char* path, const int* xs, const int* ys,
                    const int* widths, const int* heights, int count, float seconds, int offsetY) {
-        legsTexture.loadFromFile(path);
+        if (!legsTexture.loadFromFile(path)) {
+            return;
+        }
 
         legsFrameTime = seconds;
 

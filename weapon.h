@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -27,7 +26,7 @@ const int VEHICLE = 3;
 
 class Weapon {
 protected:
-    char  name[32];
+    const char* name;
     int   damage;
     bool  isActive;
     int   weaponType;
@@ -40,7 +39,6 @@ protected:
 
 public:
     Weapon() {
-        name[0] = '\0';
         damage = 0;
         isActive = false;
         weaponType = NONE;
@@ -170,7 +168,7 @@ private:
 
 public:
     Pistol() : Firearm() {
-        strncpy(name, "Pistol", 31);
+        name = "Pistol";
         weaponType = PISTOL;
         isDefault = true;
         damage = 3;
@@ -233,7 +231,7 @@ private:
 
 public:
     Knife() : Firearm() {
-        strncpy(name, "Knife", 31);
+        name = "Knife";
         weaponType = KNIFE;
         meleeRange = BLOCK_SIZE;
         meleeDamage = 2;
@@ -287,7 +285,7 @@ private:
 
 public:
     HeavyMachineGun() : Firearm() {
-        strncpy(name, "HMG", 31);
+        name = "HMG";
         weaponType = HMG;
         isHeldDown = false;
         spinUpTimer = 0;
@@ -348,7 +346,7 @@ private:
 
 public:
     RocketLauncher() : Firearm() {
-        strncpy(name, "Rocket Launcher", 31);
+        name = "Rocket Launcher";
         weaponType = ROCKETLAUNCHER;
         reloadTimer = 0;
         reloadDuration = 2.0f;
@@ -413,7 +411,7 @@ private:
 
 public:
     FlameShot() : Firearm() {
-        strncpy(name, "Flame Shot", 31);
+        name = "Flame Shot";
         weaponType = FLAMESHOT;
         streamLength = 5.0f * BLOCK_SIZE;
         damagePerSecond = 2;
@@ -485,7 +483,7 @@ private:
 
 public:
     LaserGun() : Firearm() {
-        strncpy(name, "Laser Gun", 31);
+        name = "Laser Gun";
         weaponType = LASERGUN;
         beamActive = false;
         beamLength = 1200.0f;
@@ -697,7 +695,7 @@ private:
 
 public:
     HandGrenade() : Grenade() {
-        strncpy(name, "Hand Grenade", 31);
+        name = "Hand Grenade";
         weaponType = HANDGRENADE;
         bounceCount = 0;
         maxBounce = 3;
@@ -782,7 +780,7 @@ private:
 
 public:
     FireBombGrenade() : Grenade() {
-        strncpy(name, "Fire Bomb Grenade", 31);
+        name = "Fire Bomb Grenade";
         weaponType = FIREBOMBGRENADE;
         firePool = nullptr;
         firePoolDuration = 10.0f;

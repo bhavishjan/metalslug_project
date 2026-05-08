@@ -23,18 +23,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="Biome.h" />
     <ClInclude Include="Block.h" />
-    <ClInclude Include="collectibilies.h" />
-    <ClInclude Include="Collectibles.h" />
-    <ClInclude Include="echo.h" />
+    <ClInclude Include="Collectibilies.h" />
+    <ClInclude Include="Echo.h" />
     <ClInclude Include="Enemy.h" />
-    <ClInclude Include="entity.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameMode.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="Menu.h" />
-    <ClInclude Include="player.h" />
+    <ClInclude Include="PerlinNoise.h" />
     <ClInclude Include="PlayerSoldier.h" />
     <ClInclude Include="Weapon.h" />
   </ItemGroup>
