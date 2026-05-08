@@ -154,7 +154,8 @@ public:
     virtual void render(RenderWindow& window, float camX = 0, float camY = 0) {
         if (velocityX > 1.0f || velocityX < -1.0f) {
             currentAnim = WALK;
-        } else {
+        }
+        else {
             currentAnim = STAND;
         }
 
@@ -524,26 +525,26 @@ public:
         height = 49.0f;
 
         //head
-        static const int walkHeadXs[12] = {  10,   47,   82,  115,  147,  181,  216,  254,  291,  328,  364,  400 };
+        static const int walkHeadXs[12] = { 10,   47,   82,  115,  147,  181,  216,  254,  291,  328,  364,  400 };
         static const int walkHeadYs[12] = { 477,  477,  477,  477,  477,  477,  477,  477,  477,  477,  477,  477 };
-        static const int walkHeadWs[12] = {  32,   30,   28,   27,   29,   30,   32,   32,   32,   31,   31,   31 };
-        static const int walkHeadHs[12] = {  29,   29,   29,   29,   29,   29,   29,   29,   29,   29,   29,   29 };
+        static const int walkHeadWs[12] = { 32,   30,   28,   27,   29,   30,   32,   32,   32,   31,   31,   31 };
+        static const int walkHeadHs[12] = { 29,   29,   29,   29,   29,   29,   29,   29,   29,   29,   29,   29 };
 
         //legs
-        static const int walkLegsXs[12] = {  10,   36,   69,  105,  129,  149,  170,  196,  227,  263,  288,  308 };
+        static const int walkLegsXs[12] = { 10,   36,   69,  105,  129,  149,  170,  196,  227,  263,  288,  308 };
         static const int walkLegsYs[12] = { 511,  511,  511,  511,  511,  511,  511,  511,  511,  511,  511,  511 };
-        static const int walkLegsWs[12] = {  21,   28,   31,   19,   15,   16,   21,   26,   31,   20,   15,   16 };
-        static const int walkLegsHs[12] = {  20,   20,   20,   20,   20,   20,   20,   20,   20,   20,   20,   20 };
+        static const int walkLegsWs[12] = { 21,   28,   31,   19,   15,   16,   21,   26,   31,   20,   15,   16 };
+        static const int walkLegsHs[12] = { 20,   20,   20,   20,   20,   20,   20,   20,   20,   20,   20,   20 };
 
         anims[WALK].load("Sprites/Marco Rossi 1.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 12, 0.08f);
         anims[WALK].loadLegs("Sprites/Marco Rossi 1.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 12, 0.08f, 0);
         anims[WALK].setHeadOffset(13);
         anims[WALK].setHeadOffsetX(6);
 
-        static const int standHeadXs[] = { 10};
-        static const int standHeadYs[] = { 693};
-        static const int standHeadWs[] = { 29};
-        static const int standHeadHs[] = { 37};
+        static const int standHeadXs[] = { 10 };
+        static const int standHeadYs[] = { 693 };
+        static const int standHeadWs[] = { 29 };
+        static const int standHeadHs[] = { 37 };
 
         anims[STAND].load("Sprites/Marco Rossi 1.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 1, 0.18f);
         //there is also another part of the spritesheer named "Marco Rossi 2.png" that has other animations, we will use it later on.
@@ -626,25 +627,25 @@ public:
         width = 29.0f;
         height = 37.0f;
 
-        static const int walkHeadXs[12] = {   6,   48,   87,  124,  159,  197,  237,  278,  318,  358,  397,  435 };
+        static const int walkHeadXs[12] = { 6,   48,   87,  124,  159,  197,  237,  278,  318,  358,  397,  435 };
         static const int walkHeadYs[12] = { 582,  581,  581,  581,  581,  581,  582,  581,  581,  582,  582,  582 };
-        static const int walkHeadWs[12] = {  32,   30,   28,   27,   29,   30,   32,   32,   32,   31,   31,   31 };
-        static const int walkHeadHs[12] = {  28,   29,   28,   27,   28,   28,   29,   29,   28,   27,   28,   28 };
+        static const int walkHeadWs[12] = { 32,   30,   28,   27,   29,   30,   32,   32,   32,   31,   31,   31 };
+        static const int walkHeadHs[12] = { 28,   29,   28,   27,   28,   28,   29,   29,   28,   27,   28,   28 };
 
-        static const int walkLegsXs[12] = {  10,   46,   84,  126,  163,  200,  238,  274,  316,  359,  400,  436 };
+        static const int walkLegsXs[12] = { 10,   46,   84,  126,  163,  200,  238,  274,  316,  359,  400,  436 };
         static const int walkLegsYs[12] = { 618,  618,  618,  618,  618,  618,  618,  618,  618,  618,  618,  618 };
-        static const int walkLegsWs[12] = {  21,   28,   31,   19,   15,   16,   21,   26,   31,   20,   15,   18 };
-        static const int walkLegsHs[12] = {  20,   20,   16,   20,   20,   20,   20,   20,   16,   20,   20,   20 };
+        static const int walkLegsWs[12] = { 21,   28,   31,   19,   15,   16,   21,   26,   31,   20,   15,   18 };
+        static const int walkLegsHs[12] = { 20,   20,   16,   20,   20,   20,   20,   20,   16,   20,   20,   20 };
 
         anims[WALK].load("Sprites/Tarma Roving.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 12, 0.08f);
         anims[WALK].loadLegs("Sprites/Tarma Roving.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 12, 0.08f, 0);
         anims[WALK].setHeadOffset(11);
         anims[WALK].setHeadOffsetX(4);
 
-        static const int standHeadXs[] = { 8};
-        static const int standHeadYs[] = { 644};
-        static const int standHeadWs[] = { 29};
-        static const int standHeadHs[] = { 37};
+        static const int standHeadXs[] = { 8 };
+        static const int standHeadYs[] = { 644 };
+        static const int standHeadWs[] = { 29 };
+        static const int standHeadHs[] = { 37 };
 
         anims[STAND].load("Sprites/Tarma Roving.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 1, 0.18f);
     }
@@ -729,15 +730,15 @@ public:
         width = 30.0f;
         height = 36.0f;
 
-        static const int walkHeadXs[12] = {  26,   61,   96,  130,  164,  200,  236,  271,  306,  343,  379,  413 };
+        static const int walkHeadXs[12] = { 26,   61,   96,  130,  164,  200,  236,  271,  306,  343,  379,  413 };
         static const int walkHeadYs[12] = { 537,  538,  539,  539,  539,  539,  540,  540,  540,  540,  540,  540 };
-        static const int walkHeadWs[12] = {  32,   32,   31,   31,   31,   31,   31,   31,   32,   32,   30,   30 };
-        static const int walkHeadHs[12] = {  28,   28,   28,   28,   28,   28,   28,   28,   28,   28,   29,   29 };
+        static const int walkHeadWs[12] = { 32,   32,   31,   31,   31,   31,   31,   31,   32,   32,   30,   30 };
+        static const int walkHeadHs[12] = { 28,   28,   28,   28,   28,   28,   28,   28,   28,   28,   29,   29 };
 
         static const int walkLegsXs[12] = { 127, 155,   178,  203,  232,  265,  297,  326,  349,  373,  400,  431 };
         static const int walkLegsYs[12] = { 573, 572,   572,  572,  572,  573,  572,  572,  573,  573,  574,  574 };
-        static const int walkLegsWs[12] = {  24,   18,   20,   22,   25,   27,   25,   17,   18,   21,   26,   30 };
-        static const int walkLegsHs[12] = {  25,   26,   26,   26,   25,   23,   26,   26,   25,   25,   23,   25 };
+        static const int walkLegsWs[12] = { 24,   18,   20,   22,   25,   27,   25,   17,   18,   21,   26,   30 };
+        static const int walkLegsHs[12] = { 25,   26,   26,   26,   25,   23,   26,   26,   25,   25,   23,   25 };
 
         anims[WALK].load("Sprites/Eri Kasamoto.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 12, 0.08f);
         anims[WALK].loadLegs("Sprites/Eri Kasamoto.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 12, 0.08f, 0);
@@ -831,15 +832,15 @@ public:
         width = 26.0f;
         height = 38.0f;
 
-        static const int walkHeadXs[12] = {  10,   42,   74,  106,  138,  170,  203,  236,  269,  303,  336,  367 };
+        static const int walkHeadXs[12] = { 10,   42,   74,  106,  138,  170,  203,  236,  269,  303,  336,  367 };
         static const int walkHeadYs[12] = { 506,  507,  508,  507,  506,  506,  507,  508,  508,  509,  507,  507 };
-        static const int walkHeadWs[12] = {  27,   27,   27,   27,   27,   28,   28,   28,   29,   28,   26,   27 };
-        static const int walkHeadHs[12] = {  26,   26,   26,   26,   26,   26,   26,   26,   26,   26,   27,   27 };
+        static const int walkHeadWs[12] = { 27,   27,   27,   27,   27,   28,   28,   28,   29,   28,   26,   27 };
+        static const int walkHeadHs[12] = { 26,   26,   26,   26,   26,   26,   26,   26,   26,   26,   27,   27 };
 
-        static const int walkLegsXs[12] = {  10,   37,   67,   99,  129,  151,  174,  200,  231,  266,  295,  318 };
+        static const int walkLegsXs[12] = { 10,   37,   67,   99,  129,  151,  174,  200,  231,  266,  295,  318 };
         static const int walkLegsYs[12] = { 540,  540,  541,  540,  540,  541,  541,  541,  541,  541,  540,  540 };
-        static const int walkLegsWs[12] = {  22,   25,   27,   25,   17,   18,   21,   26,   30,  24,   18,   20 };
-        static const int walkLegsHs[12] = {  26,   25,   23,   26,   26,   25,   25,   23,   25,   25,   26,   26 };
+        static const int walkLegsWs[12] = { 22,   25,   27,   25,   17,   18,   21,   26,   30,  24,   18,   20 };
+        static const int walkLegsHs[12] = { 26,   25,   23,   26,   26,   25,   25,   23,   25,   25,   26,   26 };
 
         anims[WALK].load("Sprites/Fiolina Germi 1.png", walkHeadXs, walkHeadYs, walkHeadWs, walkHeadHs, 12, 0.08f);
         anims[WALK].loadLegs("Sprites/Fiolina Germi 1.png", walkLegsXs, walkLegsYs, walkLegsWs, walkLegsHs, 12, 0.08f, 0);
@@ -852,7 +853,7 @@ public:
         static const int standHeadHs[] = { 34 };
 
         anims[STAND].load("Sprites/Fiolina Germi 1.png", standHeadXs, standHeadYs, standHeadWs, standHeadHs, 1, 0.18f);
-		//there is also another part of the spritesheer named "Fiolina Germi 2.png" that has other animations, we will use it later on.
+        //there is also another part of the spritesheer named "Fiolina Germi 2.png" that has other animations, we will use it later on.
     }
 
     void flipToLeft() override {

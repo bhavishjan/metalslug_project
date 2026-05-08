@@ -5,16 +5,16 @@ C:\Users\A\source\repos\metalslug_project\Player.h(76,22): warning C4244: '=': c
 C:\Users\A\source\repos\metalslug_project\Player.h(77,23): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\A\source\repos\metalslug_project\Player.h(191,53): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\Player.h(192,53): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\A\source\repos\metalslug_project\Player.h(192,25): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\Player.h(193,25): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\A\source\repos\metalslug_project\Player.h(502,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
+C:\Users\A\source\repos\metalslug_project\Player.h(503,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\A\source\repos\metalslug_project\Player.h(505,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
+C:\Users\A\source\repos\metalslug_project\Player.h(506,16): warning C4244: 'return': conversion from 'const float' to 'int', possible loss of data
   (compiling source file 'main.cpp')
   
 C:\Users\A\source\repos\metalslug_project\Weapon.h(571,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
@@ -71,25 +71,25 @@ C:\Users\A\source\repos\metalslug_project\Menu.h(346,62): warning C4244: 'argume
 C:\Users\A\source\repos\metalslug_project\Menu.h(346,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\A\source\repos\metalslug_project\main.cpp(287,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(287,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(289,147): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(289,104): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(322,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(322,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(326,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(326,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(332,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(332,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(543,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(543,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(545,148): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(545,105): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(558,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(558,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(562,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(562,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(568,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(568,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\A\source\repos\metalslug_project\main.cpp(579,35): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(319,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(319,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(321,147): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(321,104): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(354,139): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(354,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(358,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(358,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(364,150): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(364,107): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(608,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(608,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(610,148): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(610,105): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(623,140): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(623,97): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(627,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(627,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(633,151): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(633,108): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\A\source\repos\metalslug_project\main.cpp(644,35): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   Final Project.vcxproj -> C:\Users\A\source\repos\metalslug_project\x64\Debug\Final Project.exe
