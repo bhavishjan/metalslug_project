@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <cmath>
 #include <SFML/Graphics.hpp>
@@ -42,6 +43,13 @@ int main() {
     // PLAYER SETUP
 
     bool jumpHeld = false;
+    bool fireHeld = false;
+    float playerFireCooldown = 0.f;
+    const float playerFireInterval = 0.18f;
+    const float playerBulletSpeed = 700.f;
+    const float playerBulletRange = 900.f;
+    const int playerBulletDamage = 3;
+    BulletManager bulletManager;
 
 
     // CHARACTER MANAGER
@@ -86,6 +94,7 @@ int main() {
                         int modeSelection = menu.getSelectionIndex();
                         if (modeSelection == 0) {
                             gameMode = 1;
+                            bulletManager = BulletManager(); // reset all projectiles on mode start
                             survivalGame = new SurvivalGame(screen_x, screen_y);
                             survivalGame->setCharManager(&characters);
                             survivalGame->start();
@@ -105,6 +114,7 @@ int main() {
                                 survivalRebels[ei] = new RebelSoldier();
                                 survivalRebels[ei]->setPosition(300.f + i * 350.f, 200.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setBulletManager(&bulletManager);
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
                             }
@@ -113,6 +123,7 @@ int main() {
                                 survivalRebels[ei] = new GrenadeSoldier();
                                 survivalRebels[ei]->setPosition(500.f + i * 400.f, 200.f);
                                 survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setBulletManager(&bulletManager);
                                 survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                                 ei++;
                             }
@@ -120,41 +131,48 @@ int main() {
                             survivalRebels[ei] = new BazookaSoldier();
                             survivalRebels[ei]->setPosition(600.f, 200.f);
                             survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                            survivalRebels[ei]->setBulletManager(&bulletManager);
                             survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                             ei++;
                             // 1 Shielded Soldier
                             survivalRebels[ei] = new ShieldedSoldier();
                             survivalRebels[ei]->setPosition(800.f, 200.f);
                             survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                            survivalRebels[ei]->setBulletManager(&bulletManager);
                             survivalRebels[ei]->setGroundY((float)(screen_y - 48));
                             ei++;
                             ////// 2 Mummy Warriors
-                            //for (int i = 0; i < 2; i++) {
-                            //    survivalRebels[ei] = new MummyWarrior();
-                            //    survivalRebels[ei]->setPosition(1000.f + i * 400.f, 200.f);
-                            //    survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                            //    survivalRebels[ei]->setGroundY((float)(screen_y - 48));
-                            //    ei++;
-                            //}
+                            for (int i = 0; i < 2; i++) {
+                                survivalRebels[ei] = new MummyWarrior();
+                                survivalRebels[ei]->setPosition(1000.f + i * 400.f, 200.f);
+                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setBulletManager(&bulletManager);
+                                survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                                ei++;
+                            }
                             ////// 2 Zombies
-                            //for (int i = 0; i < 2; i++) {
-                            //    survivalRebels[ei] = new Zombie();
-                            //    survivalRebels[ei]->setPosition(1200.f + i * 400.f, 200.f);
-                            //    survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                            //    survivalRebels[ei]->setGroundY((float)(screen_y - 48));
-                            //    ei++;
-                            //}
+                            for (int i = 0; i < 2; i++) {
+                                survivalRebels[ei] = new Zombie();
+                                survivalRebels[ei]->setPosition(1200.f + i * 400.f, 200.f);
+                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                                survivalRebels[ei]->setBulletManager(&bulletManager);
+                                survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                                ei++;
+                            }
+
                             ////// 1 Martian
-                            //survivalRebels[ei] = new Martian();
-                            //survivalRebels[ei]->setPosition(1400.f, 200.f);
-                            //survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                            //survivalRebels[ei]->setGroundY((float)(screen_y - 48));
-                            //ei++;
+                            survivalRebels[ei] = new Martian();
+                            survivalRebels[ei]->setPosition(1400.f, 200.f);
+                            survivalRebels[ei]->setPlayer(characters.getActivePlayer());
+                            survivalRebels[ei]->setBulletManager(&bulletManager);
+                            survivalRebels[ei]->setGroundY((float)(screen_y - 48));
+                            ei++;
                             survivalRebelCount = ei;
                             cout << "Entered Survival Mode" << endl;
                         }
                         else if (modeSelection == 1) {
                             gameMode = 2;
+                            bulletManager = BulletManager(); // reset all projectiles on mode start
                             campaignGame = new CampaignGame(screen_x, screen_y);
                             campaignGame->setCharManager(&characters);
                             campaignGame->start();
@@ -182,6 +200,7 @@ int main() {
                     delete survivalRebels[i];
                     survivalRebels[i] = nullptr;
                 }
+                bulletManager = BulletManager(); // clear leftover bullets when returning to menu
                 survivalRebelCount = 0;
                 cameraX = cameraY = 0;
                 menu.setMenuState(0);
@@ -266,6 +285,21 @@ int main() {
         if (characters.getActivePlayer()->getVelocityY() > characters.getActivePlayer()->getMaxFallSpeed())
             characters.getActivePlayer()->setVelocityY(characters.getActivePlayer()->getMaxFallSpeed());
 
+        // Player shooting (X key)
+        if (playerFireCooldown > 0.f) playerFireCooldown -= dt;
+        fireHeld = Keyboard::isKeyPressed(Keyboard::X);
+        if (fireHeld && playerFireCooldown <= 0.f) {
+            float px = characters.getActivePlayer()->getPlayerX();
+            float py = characters.getActivePlayer()->getPlayerY();
+            float pw = (float)characters.getActivePlayer()->getWidth();
+            float ph = (float)characters.getActivePlayer()->getHeight();
+            float angle = characters.getActivePlayer()->isFacingRight() ? 0.f : 3.14159f;
+
+            bulletManager.spawnBullet(px + pw * 0.5f, py + ph * 0.45f, angle,
+                playerBulletDamage, PLAYER, playerBulletSpeed, playerBulletRange);
+            playerFireCooldown = playerFireInterval;
+        }
+
         // SURVIVAL MODE
         if (gameMode == 1 && survivalGame) {
             Level* currentLevel = survivalGame->getCurrentLevel();
@@ -301,6 +335,7 @@ int main() {
                     float pH = (float)characters.getActivePlayer()->getHeight();
                     for (int i = 0; i < survivalRebelCount; i++) {
                         if (!survivalRebels[i]) continue;
+                        if (!survivalRebels[i]->getIsAlive()) continue;
                         float ex2 = survivalRebels[i]->getX(), ey2 = survivalRebels[i]->getY();
                         float ew2 = survivalRebels[i]->getWidth(), eh2 = survivalRebels[i]->getHeight();
                         if (pX < ex2 + ew2 && pX + pW > ex2 &&
@@ -373,7 +408,10 @@ int main() {
                 // Update survival enemies — full external movement pipeline
                 for (int i = 0; i < survivalRebelCount; i++) {
                     if (!survivalRebels[i]) continue;
+                    if (!survivalRebels[i]->getIsAlive()) continue;
+
                     survivalRebels[i]->setPlayer(characters.getActivePlayer());
+                    survivalRebels[i]->setBulletManager(&bulletManager);
                     survivalRebels[i]->update(dt); // sets velocityX/Y only, no position change
 
                     float enemy_x = survivalRebels[i]->getX();
@@ -383,11 +421,11 @@ int main() {
                     const float enemy_w = survivalRebels[i]->getWidth();
                     const float enemy_h = survivalRebels[i]->getHeight();
 
-                    // Apply gravity only if not jumping this frame
+                    // Apply gravity only if not grounded
                     survivalRebels[i]->applyGravity(dt);
                     enemy_vy = survivalRebels[i]->getVelocityY();
 
-                    // horizontal
+                    // --- HORIZONTAL ---
                     float newX = enemy_x + enemy_vx * dt;
 
                     // Check for upcoming wall and jump proactively if grounded
@@ -401,72 +439,91 @@ int main() {
                         }
                     }
 
-                    // Step-up mechanism: only when moving horizontally AND blocked at current height
-                    float stepHeight = 20.0f;
+                    // Step-up mechanism
+                    float stepHeightE = 20.0f;
                     if (enemy_vx != 0 &&
                         currentLevel->checkCollision(newX, enemy_y, enemy_w, enemy_h)) {
-                        float tempY = enemy_y - stepHeight;
+                        float tempY = enemy_y - stepHeightE;
                         if (!currentLevel->checkCollision(newX, tempY, enemy_w, enemy_h)) {
-                            // Small obstacle — step up over it
+                            // Small obstacle — step up
                             enemy_y = tempY;
                         }
                         else if (survivalRebels[i]->getIsGrounded()) {
-                            // Wall and grounded — jump over it
-                            enemy_vy = -400.0f; // jump velocity (increased)
+                            // Wall and grounded — jump
+                            enemy_vy = -400.0f;
                             survivalRebels[i]->setVelocityY(enemy_vy);
                             survivalRebels[i]->setGrounded(false);
-                            // Keep moving forward (don't revert newX)
                         }
                         else {
-                            // Wall — flip direction
+                            // Wall in air — flip direction
                             enemy_vx = -enemy_vx;
                             survivalRebels[i]->setVelocityX(enemy_vx);
-                            newX = enemy_x; // stay put this frame
+                            newX = enemy_x;
                         }
                     }
 
-                    // 2. player boundary on x — revert if would overlap player
+                    // 1. Player boundary on x
                     float px = characters.getActivePlayer()->getPlayerX();
                     float py = characters.getActivePlayer()->getPlayerY();
                     float pw = (float)characters.getActivePlayer()->getWidth();
                     float ph = (float)characters.getActivePlayer()->getHeight();
                     if (newX < px + pw && newX + enemy_w > px &&
-                        enemy_y        < py + ph && enemy_y + enemy_h > py) {
-                        newX = enemy_x; // revert — enemy stops at player edge
+                        enemy_y < py + ph && enemy_y + enemy_h > py) {
+                        newX = enemy_x; // stop at player edge
                     }
 
-                    // 3. enemy-enemy boundary on x — revert against all j < i
-                    for (int j = 0; j < i; j++) {
+                    // 2. Enemy-enemy collision — push apart properly
+                    for (int j = 0; j < survivalRebelCount; j++) {
+                        if (j == i) continue;
                         if (!survivalRebels[j]) continue;
-                        float bx2 = survivalRebels[j]->getX();
-                        float by2 = survivalRebels[j]->getY();
-                        float bw2 = survivalRebels[j]->getWidth();
-                        float bh2 = survivalRebels[j]->getHeight();
-                        if (newX < bx2 + bw2 && newX + enemy_w > bx2 &&
-                            enemy_y        < by2 + bh2 && enemy_y + enemy_h > by2) {
-                            newX = enemy_x; // revert — enemy stops at neighbour edge
+                        if (!survivalRebels[j]->getIsAlive()) continue;
+
+                        float bx = survivalRebels[j]->getX();
+                        float by = survivalRebels[j]->getY();
+                        float bw = survivalRebels[j]->getWidth();
+                        float bh = survivalRebels[j]->getHeight();
+
+                        // vertical overlap check — sirf tab push karo jab same height pe hon
+                        bool vertOverlap = (enemy_y < by + bh && enemy_y + enemy_h > by);
+                        if (!vertOverlap) continue;
+
+                        // horizontal overlap check
+                        bool horzOverlap = (newX < bx + bw && newX + enemy_w > bx);
+                        if (!horzOverlap) continue;
+
+                        // push enemy i away from enemy j
+                        float iCenter = newX + enemy_w / 2.f;
+                        float jCenter = bx + bw / 2.f;
+
+                        if (iCenter < jCenter) {
+                            // enemy i is left — push left
+                            newX = bx - enemy_w;
                         }
+                        else {
+                            // enemy i is right — push right
+                            newX = bx + bw;
+                        }
+                        enemy_vx = 0.f;
+                        survivalRebels[i]->setVelocityX(0.f);
                     }
 
                     enemy_x = newX;
+
                     // --- VERTICAL ---
                     enemy_y += enemy_vy * dt;
 
-                    // Use same collision method as player
                     if (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
                         if (enemy_vy > 0) {
-                            // Falling down - landed on ground
+                            // Landed on ground
                             enemy_vy = 0;
                             survivalRebels[i]->setGrounded(true);
-                            // Move up until no collision
                             while (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
                                 enemy_y -= 1;
                             }
                         }
                         else {
-                            // Moving up - hit ceiling
+                            // Hit ceiling
                             enemy_vy = 0;
-                            // Move down until no collision
                             while (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
                                 enemy_y += 1;
                             }
@@ -478,14 +535,40 @@ int main() {
                         }
                     }
 
-                    // Debug output for first enemy only
-                    // if (i == 0) {
-                    //     cout << "Enemy 0: pos(" << enemy_x << "," << enemy_y << ") vel(" << enemy_vx << "," << enemy_vy << ") grounded=" << onGround << " size(" << enemy_w << "," << enemy_h << ")" << endl;
-                    // }
-
                     survivalRebels[i]->setVelocityY(enemy_vy);
                     survivalRebels[i]->setGrounded(survivalRebels[i]->getIsGrounded());
                     survivalRebels[i]->setPosition(enemy_x, enemy_y);
+                }
+
+                // Projectile simulation and collisions
+                bulletManager.update(dt);
+
+                int playerDamageFromProjectiles = 0;
+                bulletManager.checkPlayerCollisions(
+                    characters.getActivePlayer()->getPlayerX(),
+                    characters.getActivePlayer()->getPlayerY(),
+                    (float)characters.getActivePlayer()->getWidth(),
+                    (float)characters.getActivePlayer()->getHeight(),
+                    playerDamageFromProjectiles
+                );
+                if (playerDamageFromProjectiles > 0) {
+                    characters.getActivePlayer()->takeDamage(playerDamageFromProjectiles);
+                }
+
+                for (int i = 0; i < survivalRebelCount; i++) {
+                    if (!survivalRebels[i] || !survivalRebels[i]->getIsAlive()) continue;
+                    int dmg = 0;
+                    float hitX = 0.f, hitY = 0.f;
+                    while (bulletManager.popPlayerBulletHit(
+                        survivalRebels[i]->getX(),
+                        survivalRebels[i]->getY(),
+                        survivalRebels[i]->getWidth(),
+                        survivalRebels[i]->getHeight(),
+                        dmg, hitX, hitY))
+                    {
+                        survivalRebels[i]->takeDamage(dmg, hitX, hitY, false);
+                        if (!survivalRebels[i]->getIsAlive()) break;
+                    }
                 }
 
                 // Update
@@ -498,6 +581,7 @@ int main() {
                     if (survivalRebels[i])
                         survivalRebels[i]->render(window, cameraX, cameraY);
                 }
+                bulletManager.render(window, cameraX, cameraY);
                 characters.getActivePlayer()->render(window, cameraX, cameraY);
                 window.display();
             }
@@ -585,10 +669,24 @@ int main() {
 
                 // Update
                 campaignGame->update(dt, &characters);
+                bulletManager.update(dt);
+
+                int playerDamageFromProjectiles = 0;
+                bulletManager.checkPlayerCollisions(
+                    characters.getActivePlayer()->getPlayerX(),
+                    characters.getActivePlayer()->getPlayerY(),
+                    (float)characters.getActivePlayer()->getWidth(),
+                    (float)characters.getActivePlayer()->getHeight(),
+                    playerDamageFromProjectiles
+                );
+                if (playerDamageFromProjectiles > 0) {
+                    characters.getActivePlayer()->takeDamage(playerDamageFromProjectiles);
+                }
 
                 // Render
                 window.clear(Color(135, 206, 235));
                 campaignGame->render(window);
+                bulletManager.render(window, cameraX, cameraY);
                 characters.getActivePlayer()->render(window, cameraX, cameraY);
                 window.display();
             }
