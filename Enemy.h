@@ -51,8 +51,12 @@ protected:
     bool  isTargetingPlayer;
     Player* largestPlayer;
 
+    // all enemies share one bullet manager, assigned from main
+    BulletManager* bulletMgr;
+
     float gravityConstant = 200.0f;
     float groundY = 1600 - height;  // default floor (screen_y - height)
+
 public:
     Enemy() : x(0), y(0), width(32), height(48),
         velocityX(0), velocityY(0),
@@ -62,7 +66,8 @@ public:
         scoreValue(0), isShielded(false), aggressionLevel(1.f),
         hasGrudge(false), grudgeMultiplier(1.f), isEnhanced(false),
         detectionRange(300.f), attackRange(250.f), currentBiome(0),
-        isPatrolling(true), isTargetingPlayer(false), largestPlayer(nullptr) {
+        isPatrolling(true), isTargetingPlayer(false), largestPlayer(nullptr),
+        bulletMgr(nullptr) {
     }
 
     // virtual destructor so child destructors get called properly
@@ -136,7 +141,12 @@ public:
         }
         else {
             // inside range so keep moving in current direction
-            velocityX = speed;
+            if (facingRight) {
+                velocityX = speed;
+            }
+            else {
+                velocityX = -speed;
+            }
         }
     }
 
@@ -168,8 +178,8 @@ public:
 
         if (!rectsOverlap(x, y, width, height, px, py, pw, ph)) return;
 
-        float overlapLeft  = (x + width) - px;
-        float overlapRight = (px + pw)   - x;
+        float overlapLeft = (x + width) - px;
+        float overlapRight = (px + pw) - x;
 
         // stop enemy at player boundary — neither pushed
         if (overlapLeft < overlapRight) {
@@ -186,6 +196,30 @@ public:
         int roll = rand() % 100;
         if (roll < 20)  // 20 percent chance of food drop
             spawnLoot();
+    }
+
+    void checkEnemyCollision(Enemy* other) {
+        if (!other || other == this) return;
+        if (!isAlive || !other->getIsAlive()) return;
+
+        if (!rectsOverlap(x, y, width, height,
+            other->getX(), other->getY(),
+            other->getWidth(), other->getHeight())) return;
+
+        float myCenter = x + width / 2.f;
+        float hisCenter = other->getX() + other->getWidth() / 2.f;
+
+        if (myCenter < hisCenter) {
+            // main left hun, mujhe left push karo
+            float overlap = (x + width) - other->getX();
+            x -= overlap / 2.f;
+        }
+        else {
+            // main right hun, mujhe right push karo
+            float overlap = (other->getX() + other->getWidth()) - x;
+            x += overlap / 2.f;
+        }
+        velocityX = 0.f;
     }
 
     void spawnLoot();
@@ -224,11 +258,10 @@ public:
     float getHP()       const { return hp; }
     float getMaxHP()    const { return (float)maxHp; }
     bool  isDead()      const { return !isAlive; }
-    float getWidth() const { return width; }
-    float getHeight() const { return height; }
-	bool getIsTargetingPlayer() const { return isTargetingPlayer; }
-	bool getIsGrounded() const { return isGrounded; }
-
+    float getWidth()    const { return width; }
+    float getHeight()   const { return height; }
+    bool  getIsTargetingPlayer() const { return isTargetingPlayer; }
+    bool  getIsGrounded()        const { return isGrounded; }
 
     void setPosition(float nx, float ny) { x = nx; y = ny; }
     void setPlayer(Player* p) { largestPlayer = p; }
@@ -239,6 +272,7 @@ public:
     float getVelocityX() const { return velocityX; }
     void  setVelocityX(float vx) { velocityX = vx; }
     void  setGrounded(bool g) { isGrounded = g; if (g) velocityY = 0.f; }
+    void  setBulletManager(BulletManager* bm) { bulletMgr = bm; }
 };
 
 
@@ -246,10 +280,10 @@ public:
 // has pistol and basic movement
 class InfantryEnemy : public Enemy {
 protected:
-    static const int WALK  = 0;
+    static const int WALK = 0;
     static const int STAND = 1;
     static const int SHOOT = 2;
-    static const int DIE   = 3;
+    static const int DIE = 3;
 
     float   fireRate;
     float   fireTimer;
@@ -283,11 +317,11 @@ public:
 
     void attack() override {
         // check player exist
-        if (largestPlayer == nullptr) 
+        if (largestPlayer == nullptr)
             return;
 
         // can pistol fire
-        if (!pistol.canFire()) 
+        if (!pistol.canFire())
             return;
 
         // distance check
@@ -307,6 +341,11 @@ public:
 
         // facing direction update
         facingRight = (dx > 0);
+
+        // spawn the actual bullet through the manager
+        if (bulletMgr)
+            bulletMgr->spawnBullet(x + width / 2, y + height / 2,
+                angle, bulletDamage, ENEMY);
     }
 
     void update(float dt) override {
@@ -324,7 +363,7 @@ public:
             attack();
 
         pistol.update(dt);
-        if (fireTimer > 0.f)  
+        if (fireTimer > 0.f)
             fireTimer -= dt;
 
         updateAnimState(dt);
@@ -425,28 +464,28 @@ public:
         height = 48.0f;
 
         // walk animation (12 frame running cycle - row 1)
-        static const int walkXs[12] = {   3,  40,  80, 125, 170, 210, 248, 285, 326, 369, 410, 450 };
-        static const int walkYs[12] = {  44,  44,  45,  46,  45,  44,  44,  44,  45,  46,  45,  44 };
-        static const int walkWs[12] = {  34,  37,  42,  42,  37,  35,  34,  38,  40,  38,  37,  35 };
-        static const int walkHs[12] = {  37,  37,  31,  33,  35,  37,  37,  36,  30,  32,  35,  37 };
+        static const int walkXs[12] = { 3,  40,  80, 125, 170, 210, 248, 285, 326, 369, 410, 450 };
+        static const int walkYs[12] = { 44,  44,  45,  46,  45,  44,  44,  44,  45,  46,  45,  44 };
+        static const int walkWs[12] = { 34,  37,  42,  42,  37,  35,  34,  38,  40,  38,  37,  35 };
+        static const int walkHs[12] = { 37,  37,  31,  33,  35,  37,  37,  36,  30,  32,  35,  37 };
 
         // stand animation (1 frame idle - row 0)
-        static const int standXs[1] = {  3 };
-        static const int standYs[1] = {  3 };
+        static const int standXs[1] = { 3 };
+        static const int standYs[1] = { 3 };
         static const int standWs[1] = { 40 };
         static const int standHs[1] = { 38 };
 
         // shoot animation (10 frame rifle fire - row 8, y≈330)
-        static const int shootXs[10] = {   3,  50, 101, 151, 196, 284, 257, 330, 380, 429 };
+        static const int shootXs[10] = { 3,  50, 101, 151, 196, 284, 257, 330, 380, 429 };
         static const int shootYs[10] = { 298, 298, 298, 298, 289, 292, 298, 298, 298, 298 };
-        static const int shootWs[10] = {  44,  48,  47,  42,  41,  43,  38,  47,  46,  40 };
-        static const int shootHs[10] = {  38,  38,  38,  40,  47,  44,  38,  38,  38,  38 };
+        static const int shootWs[10] = { 44,  48,  47,  42,  41,  43,  38,  47,  46,  40 };
+        static const int shootHs[10] = { 38,  38,  38,  40,  47,  44,  38,  38,  38,  38 };
 
         // die animation (4 frame collapse - row 20)
-        static const int dieXs[4] = {   3,  44,  86, 129 };
+        static const int dieXs[4] = { 3,  44,  86, 129 };
         static const int dieYs[4] = { 784, 785, 786, 786 };
-        static const int dieWs[4] = {  38,  39,  40,  40 };
-        static const int dieHs[4] = {  33,  32,  31,  31 };
+        static const int dieWs[4] = { 38,  39,  40,  40 };
+        static const int dieHs[4] = { 33,  32,  31,  31 };
 
         anims[WALK].load("Sprites/Enemies/Rebel Soldier.png", walkXs, walkYs, walkWs, walkHs, 12, 0.07f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
@@ -524,29 +563,29 @@ public:
         width = 25.f;
         height = 35.f;
 
-        // walk animation 
-        static const int walkXs[7] = {  2,  25,  51,  81, 110, 153, 203 };
+        // walk animation
+        static const int walkXs[7] = { 2,  25,  51,  81, 110, 153, 203 };
         static const int walkYs[7] = { 35,  25,  19,  17,  20,  24,  25 };
         static const int walkWs[7] = { 18,  21,  26,  25,  36,  46,  46 };
         static const int walkHs[7] = { 17,  27,  33,  35,  32,  28,  27 };
 
         // stand animation - first frame of walk row
-        static const int standXs[1] = {  203 };
-        static const int standYs[1] = {  25 };
-        static const int standWs[1] = {  46 };
-        static const int standHs[1] = {  27 };
+        static const int standXs[1] = { 203 };
+        static const int standYs[1] = { 25 };
+        static const int standWs[1] = { 46 };
+        static const int standHs[1] = { 27 };
 
-        // throw grenade animation 
-        static const int throwXs[5] = {  2,  45,  90, 125, 157 };
+        // throw grenade animation
+        static const int throwXs[5] = { 2,  45,  90, 125, 157 };
         static const int throwYs[5] = { 54,  74,  67,  66,  70 };
         static const int throwWs[5] = { 42,  39,  30,  26,  37 };
         static const int throwHs[5] = { 47,  27,  34,  35,  31 };
 
         // die animation - row Y=162 (6 frames)
-        static const int dieXs[6] = {   2,  68, 103, 130, 155, 180 };
+        static const int dieXs[6] = { 2,  68, 103, 130, 155, 180 };
         static const int dieYs[6] = { 162, 165, 167, 167, 167, 167 };
-        static const int dieWs[6] = {  65,  30,  23,  20,  20,  21 };
-        static const int dieHs[6] = {  49,  46,  28,  30,  32,  30 };
+        static const int dieWs[6] = { 65,  30,  23,  20,  20,  21 };
+        static const int dieHs[6] = { 49,  46,  28,  30,  32,  30 };
 
         anims[WALK].load("Sprites/Enemies/Rebel Soldier (RPG-2).png", walkXs, walkYs, walkWs, walkHs, 7, 0.08f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier (RPG-2).png", standXs, standYs, standWs, standHs, 1, 0.18f);
@@ -595,8 +634,9 @@ public:
         float velX = dx / flightTime;
         float velY = (dy - 0.5 * gravity * flightTime * flightTime) / flightTime;
 
-        HandGrenade& g = grenades[activeGrenades];
-        g.launch(atan2(velY, velX), sqrt(velX * velX + velY * velY));
+        // send to bullet manager instead of local array
+        if (bulletMgr)
+            bulletMgr->spawnGrenade(x, y, velX, velY);
 
         activeGrenades++;
         grenadeCount--;
@@ -619,6 +659,7 @@ public:
             attack();
 
         pistol.update(dt);
+        updateAnimState(dt);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -629,36 +670,6 @@ public:
 
 // rocket class used by bazooka soldier and bosses
 // gravity affects it after firing
-class Rocket {
-private:
-    float x, y;
-    float velX, velY;
-    bool  active;
-
-public:
-    Rocket() {
-        x = y = 0;
-        velX = velY = 0;
-        active = false;
-    }
-
-    void setPosition(float px, float py) { x = px; y = py; }
-    void setVelocity(float vx, float vy) { velX = vx; velY = vy; }
-    void setActive(bool state) { active = state; }
-
-    bool  isActive() const { return active; }
-    float getX()     const { return x; }
-    float getY()     const { return y; }
-
-    void update(float dt) {
-        if (!active) return;
-        velY += 980 * dt;  // gravity pulls rocket down
-        x += velX * dt;
-        y += velY * dt;
-    }
-
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f);
-};
 
 
 // slow moving fires rockets in steep arc
@@ -690,31 +701,31 @@ public:
         rocketReloadTimer = 0;
         activeRockets = 0;
 
-        // walk animation 
-        static const int walkXs[11] = {   3,  47,  91, 134, 178, 221, 265,  309,  350,  390, 429};
-        static const int walkYs[11] = {  55,  54,  53,  54,  56,  55,  54,   53,   52,   51,  53 };
-        static const int walkWs[11] = {  41,  41,  40,  41,  40,  41,  41,   38,   37,   36,  37 };
-        static const int walkHs[11] = {  39,  40,  40,  39,  38,  39,  40,   41,   41,   42,  41 };
+        // walk animation
+        static const int walkXs[11] = { 3,  47,  91, 134, 178, 221, 265, 309, 350, 390, 429 };
+        static const int walkYs[11] = { 55,  54,  53,  54,  56,  55,  54,  53,  52,  51,  53 };
+        static const int walkWs[11] = { 41,  41,  40,  41,  40,  41,  41,  38,  37,  36,  37 };
+        static const int walkHs[11] = { 39,  40,  40,  39,  38,  39,  40,  41,  41,  42,  41 };
 
-        // stand animation 
-        static const int standXs[1] = {   3 };
-        static const int standYs[1] = {   3 };
-        static const int standWs[1] = {  36 };
-        static const int standHs[1] = {  45 };
+        // stand animation
+        static const int standXs[1] = { 3 };
+        static const int standYs[1] = { 3 };
+        static const int standWs[1] = { 36 };
+        static const int standHs[1] = { 45 };
 
         // fire rocket animation - row Y=241 H=44 (3 frames)
-        static const int fireXs[3] = {   3,  45,  89 };
+        static const int fireXs[3] = { 3,  45,  89 };
         static const int fireYs[3] = { 241, 243, 245 };
-        static const int fireWs[3] = {  39,  41,  41 };
-        static const int fireHs[3] = {  44,  42,  40 };
+        static const int fireWs[3] = { 39,  41,  41 };
+        static const int fireHs[3] = { 44,  42,  40 };
 
         // die animation - row Y=395 H=51 (9 frames)
-        static const int dieXs[9] = {   3,  52,  99, 147, 191, 235, 279, 318, 361 };
+        static const int dieXs[9] = { 3,  52,  99, 147, 191, 235, 279, 318, 361 };
         static const int dieYs[9] = { 404, 407, 401, 403, 398, 398, 398, 395, 399 };
-        static const int dieWs[9] = {  46,  44,  45,  41,  41,  41,  36,  38,  31 };
-        static const int dieHs[9] = {  42,  39,  45,  43,  48,  48,  48,  51,  47 };
+        static const int dieWs[9] = { 46,  44,  45,  41,  41,  41,  36,  38,  31 };
+        static const int dieHs[9] = { 42,  39,  45,  43,  48,  48,  48,  51,  47 };
 
-        anims[WALK].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", walkXs, walkYs, walkWs, walkHs, 6, 0.08f);
+        anims[WALK].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", walkXs, walkYs, walkWs, walkHs, 11, 0.08f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", standXs, standYs, standWs, standHs, 1, 0.18f);
         anims[SHOOT].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", fireXs, fireYs, fireWs, fireHs, 3, 0.14f);
         anims[DIE].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", dieXs, dieYs, dieWs, dieHs, 9, 0.12f);
@@ -759,10 +770,9 @@ public:
         float velX = dx / flightTime;
         float velY = (dy - 0.5 * gravity * flightTime * flightTime) / flightTime;
 
-        // rocket spawn at soldier position
-        rockets[activeRockets].setPosition(x, y);
-        rockets[activeRockets].setVelocity(velX, velY);
-        rockets[activeRockets].setActive(true);
+        // send to bullet manager instead of local array
+        if (bulletMgr)
+            bulletMgr->spawnRocket(x, y, velX, velY);
 
         rocketReloadTimer = rocketReloadDuration;
         activeRockets++;
@@ -823,7 +833,7 @@ public:
         detectionRange = 300.f;
         attackRange = 250.f;
 
-        width = 55.f; 
+        width = 55.f;
         height = 48.f;
 
         // walk animation -
@@ -833,22 +843,22 @@ public:
         static const int walkHs[12] = { 40,  41,  40,  39,  38,  39,  40,  41,  40,  39,  38,  39 };
 
         // stand animation -
-        static const int standXs[6] = {  3, 38, 73, 107, 143, 177 };
-        static const int standYs[6] = {  5,  5,  5,   5,   5,   5 };
+        static const int standXs[6] = { 3, 38, 73, 107, 143, 177 };
+        static const int standYs[6] = { 5,  5,  5,   5,   5,   5 };
         static const int standWs[6] = { 32, 32, 31,  32,  31,  32 };
         static const int standHs[6] = { 38, 38, 38,  39,  38,  38 };
 
-        // shoot animation 
-        static const int shootXs[9] = {   3,  39,  82, 126, 167, 218, 274, 326, 369 };
+        // shoot animation
+        static const int shootXs[9] = { 3,  39,  82, 126, 167, 218, 274, 326, 369 };
         static const int shootYs[9] = { 389, 388, 379, 379, 385, 389, 389, 387, 393 };
-        static const int shootWs[9] = {  33,  40,  41,  38,  48,  53,  49,  40,  55 };
-        static const int shootHs[9] = {  38,  39,  48,  48,  42,  38,  38,  40,  34 };
+        static const int shootWs[9] = { 33,  40,  41,  38,  48,  53,  49,  40,  55 };
+        static const int shootHs[9] = { 38,  39,  48,  48,  42,  38,  38,  40,  34 };
 
         // die animation - row Y=481 H=44 (9 frames)
-        static const int dieXs[9] = {   3,  37,  72, 115, 162, 209, 257, 305, 353 };
+        static const int dieXs[9] = { 3,  37,  72, 115, 162, 209, 257, 305, 353 };
         static const int dieYs[9] = { 481, 482, 482, 482, 483, 484, 485, 484, 483 };
-        static const int dieWs[9] = {  31,  32,  38,  44,  44,  45,  45,  45,  44 };
-        static const int dieHs[9] = {  39,  40,  40,  41,  41,  40,  40,  40,  41 };
+        static const int dieWs[9] = { 31,  32,  38,  44,  44,  45,  45,  45,  44 };
+        static const int dieHs[9] = { 39,  40,  40,  41,  41,  40,  40,  40,  41 };
 
         anims[WALK].load("Sprites/Enemies/Rebel Soldier (Shield).png", walkXs, walkYs, walkWs, walkHs, 12, 0.08f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier (Shield).png", standXs, standYs, standWs, standHs, 6, 0.18f);
@@ -934,10 +944,10 @@ public:
 // gravity is ignored for these
 class AerialEnemy : public Enemy {
 protected:
-    static const int FLY     = 0;
+    static const int FLY = 0;
     static const int DESCEND = 1;
-    static const int ATTACK  = 2;
-    static const int DIE     = 3;
+    static const int ATTACK = 2;
+    static const int DIE = 3;
 
     float   flyHeight;
     bool    isDescending;
@@ -960,7 +970,6 @@ public:
         width = 32.f;
         height = 32.f;
         isGrounded = true;  // aerial enemies ignore gravity
-
     }
 
     virtual ~AerialEnemy() {}
@@ -992,7 +1001,7 @@ public:
         y += velocityY * dt;
     }
 
-    void attack()  override;
+    virtual void attack() = 0; // pure virtual
 
     void update(float dt) override {
         if (!isAlive || !largestPlayer) return;
@@ -1109,11 +1118,11 @@ public:
 // immune to bullets only fire and explosions kill them
 class UndeadEnemy : public Enemy {
 protected:
-    static const int WALK   = 0;
+    static const int WALK = 0;
     static const int ATTACK = 1;
-    static const int SHOOT  = 2;
-    static const int HURT   = 3;
-    static const int DIE    = 4;
+    static const int SHOOT = 2;
+    static const int HURT = 3;
+    static const int DIE = 4;
 
     bool transformOnContact;
     bool onlyDeadFromFire;
@@ -1124,11 +1133,12 @@ protected:
     bool isCrumbled;
 
 public:
-    UndeadEnemy() : transformOnContact(true), onlyDeadFromFire(true), currentAnim(WALK), isCrumbled(false)
+    UndeadEnemy() : transformOnContact(true), onlyDeadFromFire(true),
+        currentAnim(WALK), isCrumbled(false)
     {
-        speed = 40.f;   // undead are slow
+        speed = 40.f;          // undead are slow
         detectionRange = 500.f;  // but sense player from far away
-        attackRange = 30.f;   // melee only
+        attackRange = 30.f;      // melee only
         hp = maxHp = 5;
     }
 
@@ -1200,12 +1210,11 @@ public:
 // only fire kills it instantly per project spec
 class MummyWarrior : public UndeadEnemy {
 private:
-    bool  isCrumbled;
     float resumeTimer;
     float resumeDuration;
 
 public:
-    MummyWarrior() : isCrumbled(false), resumeTimer(0.f), resumeDuration(3.f)
+    MummyWarrior() : resumeTimer(0.f), resumeDuration(3.f)
     {
         name = "Mummy Warrior";
         hp = maxHp = 5;
@@ -1216,7 +1225,7 @@ public:
         height = 52.f;
         transformOnContact = true;
         onlyDeadFromFire = true;
-
+        isCrumbled = false;
 
         // walk animation (slow shamble)
         static const int walkXs[18] = { 196, 232, 270, 312, 353, 394, 432, 472, 508, 548, 592, 638, 680, 721, 768, 804, 843, 883 };
@@ -1380,7 +1389,6 @@ public:
     void move(float dt) override {
         if (largestPlayer)
             chasePlayer(largestPlayer);
-        x += velocityX * dt;
     }
 
     void attack() override {
@@ -1406,6 +1414,7 @@ public:
         detectPlayer(largestPlayer);
         move(dt);
         attack();
+        updateAnimState(dt);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -1418,12 +1427,12 @@ public:
 // has 2 phases like martian
 class AlienEnemy : public Enemy {
 protected:
-    static const int PHASE1  = 0;
-    static const int PHASE2  = 1;
+    static const int PHASE1 = 0;
+    static const int PHASE2 = 1;
     static const int ATTACK1 = 2;
     static const int ATTACK2 = 3;
-    static const int HURT    = 4;
-    static const int DIE     = 5;
+    static const int HURT = 4;
+    static const int DIE = 5;
 
     int   phase;
     float massPhase;
@@ -1564,7 +1573,7 @@ public:
                 float targetX = largestPlayer->getPlayerX() - width * 0.5f;
                 float dx = targetX - x;
                 if (dx > 0) velocityX = 1.f * speed;
-                else velocityX = -1.f * speed;
+                else        velocityX = -1.f * speed;
                 facingRight = (dx > 0);
             }
             // hover at fixed height no vertical movement
@@ -1672,8 +1681,6 @@ public:
         height = 60.f;
         detectionRange = 600.f;
         attackRange = 500.f;
-
-
 
         // idle animation (uses PHASE1 slot)
         static const int idleXs[2] = { 0, 0 };
@@ -1803,4 +1810,5 @@ public:
         AlienEnemy::render(window, camX, camY);
     }
 };
+
 void Enemy::spawnLoot() {}

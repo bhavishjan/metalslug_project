@@ -262,7 +262,7 @@ private:
 public:
 
 
-    Level1() : SurvivalLevel("Level 1", 1, 83, 14)
+    Level1() : SurvivalLevel("Level 1", 1, 83, 15)
     {
         //for level 1
         rebelBatchCount = 2;
@@ -382,7 +382,7 @@ private:
     int powPrisonerOther;
 
 public:
-    Level2() : SurvivalLevel("Level 2", 2, 83, 14)//250/3
+    Level2() : SurvivalLevel("Level 2", 2, 83, 15)//250/3
     {
         rebelBatchCount = 3;
         shieldedBatchCount = 3;
@@ -497,7 +497,7 @@ private:
     int powPerBiome;
 
 public:
-    Level3() : SurvivalLevel("Level 3", 3, 83, 14)
+    Level3() : SurvivalLevel("Level 3", 3, 83, 15)
     {
 
         rebelBatchCount = 3;
@@ -656,6 +656,8 @@ public:
     // Blended biome
     void activateBlendedBiome();
 };
+
+
 class Vehicle {
 protected:
     char* name;
