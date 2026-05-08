@@ -1,5 +1,5 @@
 #pragma once
-#include "Header.h"
+#include "Level.h"
 #include <SFML/Graphics.hpp>
 
 class Animation {
@@ -34,8 +34,12 @@ public:
 
         frameTime = seconds;
 
-        if (count > MAX_FRAMES) frameCount = MAX_FRAMES;
-        else frameCount = count;
+        if (count > MAX_FRAMES) {
+            frameCount = MAX_FRAMES;
+        }
+        else {
+            frameCount = count;
+        }
 
         for (int i = 0; i < frameCount; i++)
             frames[i] = IntRect(xs[i], ys[i], widths[i], heights[i]);
@@ -47,8 +51,12 @@ public:
 
         legsFrameTime = seconds;
 
-        if (count > MAX_FRAMES) legsFrameCount = MAX_FRAMES;
-        else legsFrameCount = count;
+        if (count > MAX_FRAMES) {
+            legsFrameCount = MAX_FRAMES;
+        }
+        else {
+            legsFrameCount = count;
+        }
 
         legsOffsetY = offsetY;
 
@@ -64,8 +72,9 @@ public:
     }
 
     void update(float dt) {
-        if (frameCount <= 0) 
+        if (frameCount <= 0) {
             return;
+        }
 
         timer += dt;
 
@@ -98,18 +107,22 @@ public:
         return legsTexture;
     }
 
-    IntRect currentRect() const { 
-		if (frameCount > 0)
-            return frames[currentFrame]; 
-        else
+    IntRect currentRect() const {
+        if (frameCount > 0) {
+            return frames[currentFrame];
+        }
+        else {
             return IntRect(0, 0, 0, 0);
+        }
     }
 
     IntRect currentLegsRect() const {
-        if (legsFrameCount > 0)
+        if (legsFrameCount > 0) {
             return legsFrames[legsCurrentFrame];
-        else
+        }
+        else {
             return IntRect(0, 0, 0, 0);
+        }
     }
 
     bool hasLegs() const { return legsFrameCount > 0; }

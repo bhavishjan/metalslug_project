@@ -24,11 +24,18 @@
   <ItemGroup>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="collectibilies.h" />
+    <ClInclude Include="Collectibles.h" />
+    <ClInclude Include="echo.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="entity.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="GameMode.h" />
-    <ClInclude Include="Header.h" />
+    <ClInclude Include="GameState.h" />
+    <ClInclude Include="Level.h" />
     <ClInclude Include="Menu.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="PlayerSoldier.h" />
     <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -126,14 +126,20 @@ public:
     }
 
     void update(float dt) override {
-        if (!isActive || isPaused) return;
+        if (!isActive || isPaused) {
+            return;
+        }
         gameTimer += dt;
-        if (currentLevel) currentLevel->update(dt);
+        if (currentLevel) {
+            currentLevel->update(dt);
+        }
         checkLevelComplete();
     }
 
     void update(float dt, CharacterManager* characters) {
-        if (!isActive || isPaused) return;
+        if (!isActive || isPaused) {
+            return;
+        }
         gameTimer += dt;
         if (currentLevel) {
             currentLevel->update(dt);
@@ -143,13 +149,19 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        if (currentLevel) currentLevel->render(window, cameraX, cameraY);
+        if (currentLevel) {
+            currentLevel->render(window, cameraX, cameraY);
+        }
     }
 
-    bool checkGameOver() override { return false; }
+    bool checkGameOver() override {
+        return false;
+    }
 
     void switchToLevel(int index) {
-        if (index < 0 || index >= totalLevels) return;
+        if (index < 0 || index >= totalLevels) {
+            return;
+        }
         currentLevelIndex = index;
         currentLevel = levels[index];
         isBossLevel = (index == 3);
@@ -161,13 +173,20 @@ public:
     }
 
     void checkLevelComplete() {
-        if (!currentLevel) return;
-        if (currentLevel->checkLevelComplete()) nextLevel();
+        if (!currentLevel) {
+            return;
+        }
+        if (currentLevel->checkLevelComplete()) {
+            nextLevel();
+        }
     }
 
     void nextLevel() {
         int next = currentLevelIndex + 1;
-        if (next >= totalLevels) { end(); return; }
+        if (next >= totalLevels) {
+            end();
+            return;
+        }
         switchToLevel(next);
     }
 
@@ -285,25 +304,35 @@ public:
     }
 
     void update(float dt) override {
-        if (!isActive || isPaused) return;
+        if (!isActive || isPaused) {
+            return;
+        }
         gameTimer += dt;
 
         if (fusionCooldownTimer > 0.0f) {
             fusionCooldownTimer -= dt;
-            if (fusionCooldownTimer < 0.0f) fusionCooldownTimer = 0.0f;
+            if (fusionCooldownTimer < 0.0f) {
+                fusionCooldownTimer = 0.0f;
+            }
         }
 
-        if (campaignLevel) campaignLevel->update(0);
+        if (campaignLevel) {
+            campaignLevel->update(0);
+        }
         checkKillQuota();
     }
 
     void update(float dt, CharacterManager* characters) {
-        if (!isActive || isPaused) return;
+        if (!isActive || isPaused) {
+            return;
+        }
         gameTimer += dt;
 
         if (fusionCooldownTimer > 0.0f) {
             fusionCooldownTimer -= dt;
-            if (fusionCooldownTimer < 0.0f) fusionCooldownTimer = 0.0f;
+            if (fusionCooldownTimer < 0.0f) {
+                fusionCooldownTimer = 0.0f;
+            }
         }
 
         if (campaignLevel) {
@@ -316,32 +345,42 @@ public:
     void render(RenderWindow& window) override {
         backgroundSprite.setPosition(0, 0);
         window.draw(backgroundSprite);
-        if (campaignLevel) campaignLevel->render(window, cameraX, cameraY);
+        if (campaignLevel) {
+            campaignLevel->render(window, cameraX, cameraY);
+        }
     }
 
     bool checkGameOver() override { return false; }
 
     void checkKillQuota() {
-        for (int i = 0; i < 8; i++)
-            if (enemiesKilledPerType[i] < killQuotaPerType) return;
+        for (int i = 0; i < 8; i++) {
+            if (enemiesKilledPerType[i] < killQuotaPerType) {
+                return;
+            }
+        }
         isKillQuotaReached = true;
     }
 
     bool checkVehicleQuota() {
-        for (int i = 0; i < 3; i++)
-            if (vehiclesDestroyedPerType[i] < vehicleDestroyQuota) return false;
+        for (int i = 0; i < 3; i++) {
+            if (vehiclesDestroyedPerType[i] < vehicleDestroyQuota) {
+                return false;
+            }
+        }
         return true;
     }
 
     void onEnemyKilled(int typeIndex) {
-        if (typeIndex >= 0 && typeIndex < 8)
+        if (typeIndex >= 0 && typeIndex < 8) {
             enemiesKilledPerType[typeIndex]++;
+        }
         checkKillQuota();
     }
 
     void onVehicleDestroyed(int typeIndex) {
-        if (typeIndex >= 0 && typeIndex < 3)
+        if (typeIndex >= 0 && typeIndex < 3) {
             vehiclesDestroyedPerType[typeIndex]++;
+        }
     }
 
     bool canUseFusion() { return fusionCooldownTimer <= 0.0f; }

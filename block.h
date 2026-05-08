@@ -1,4 +1,3 @@
-
 #pragma once
 #include <SFML/Graphics.hpp>
 using namespace sf;
@@ -11,14 +10,13 @@ static  const int BIOME_PLAINS = 1;
 static const int BIOME_AQUATIC = 2;
 
 
-//campaign level
-//perlin noise
+// Campaign level - Perlin noise
 class PerlinNoise {
 private:
     int seed;
-    int p[512];      // 256 double = 512
-    int tableSize;   //  256
-    //permutatiipntable for randmoness
+    int p[512];
+    int tableSize;
+    // Permutation table for randomness
 public:
     PerlinNoise(int seed) {
         tableSize = 256;
@@ -27,11 +25,10 @@ public:
         for (int i = 0;i < 256;i++) {
             p[i] = i;
         }
-        srand(seed);//1st val-230//220th =12
-        //fisher yates alog
+        srand(seed);
+        // Fisher-Yates shuffle
         for (int i = 255;i > 0;i--) {
             int n = rand() % (i + 1);
-            //bubble sort
             int temp = p[i];
             p[i] = p[n];
             p[n] = temp;
@@ -39,13 +36,13 @@ public:
 
 
 
-        //double to avoid overflow
+        // Double to avoid overflow
         for (int i = 0;i < 256;i++) {
             p[i + 256] = p[i];
         }
     }
 
-    //smmothness
+    // Smoothness
     float fade(float num) {
         return (6 * num * num * num * num * num - 15 * num * num * num * num + 10 * num * num * num);
     }
@@ -53,19 +50,19 @@ public:
     float LINEARINTERPOLATION(float a, float b, float l) {
         return a + (l * (b - a));
     }
-    //hash give random number to each corner so terrian is smooth and varient
-    //grad function to check direction and analyze ke point us direction se kitna distance per ha
+    // Hash gives random number to each corner for smooth terrain
+    // Grad function checks direction and distance
     float gradient(int hash, float dx, float dy) {
 
         
-        switch (hash & 7) {          // 8 direction
+        switch (hash & 7) {
         case 0: return  dx + dy;
         case 1: return -dx + dy;
         case 2: return  dx - dy;
         case 3: return -dx - dy;
-        case 4: return  dx;       // pure horizontal
+        case 4: return  dx;
         case 5: return -dx;
-        case 6: return  dy;       // pure vertical
+        case 6: return  dy;
         case 7: return -dy;
         default: return 0;
         }
@@ -73,24 +70,23 @@ public:
 
 
     }
-    //floor for intefer prevent dec
+    // Floor to prevent decimals
     float noise(float x, float y) {
-        //to get val btw 1 and -1
+        // Get value between -1 and 1
         int xx = int(floor(x)) & 255;
         int yy = int(floor(y)) & 255;
-        //to find how much distant is point inside block;
+        // Distance of point inside block
         float dx = x - floor(x);
         float dy = y - floor(y);
-        //fade for smoothness
+        // Fade for smoothness
         float a = fade(dx);
         float b = fade(dy);
-        //hash of 4 corners
+        // Hash of 4 corners
         int aa = p[p[xx] + yy];
         int ab = p[p[xx] + yy + 1];
         int ba = p[p[xx + 1] + yy];
         int bb = p[p[xx + 1] + yy + 1];
-        //blending
-        //but firts i need gradient val of eac corner
+        // Blending - need gradient values of each corner
         float gradAA = gradient(aa, dx, dy);
         float gradAB = gradient(ab, dx, dy - 1.0f);
         float gradBA = gradient(ba, dx - 1.0f, dy);
@@ -100,11 +96,10 @@ public:
         return LINEARINTERPOLATION(lerp1, lerp2, b);
     }
 
-    //factual noise to add layers Frequency = Zoom level more frequency = more detai amplitude =effect more amplitude=more height octave is one layer
-    //in every layer fre doubles and amp halves to add more detail but not too much
+    // Fractal noise adds layers - frequency doubles, amplitude halves per octave
 
 
-    //normalize to 1 to -1
+    // Normalize to -1 to 1
     float fractal(float x, float y, int octaves) {
         float sum = 0;
         float f = 1.0f;
@@ -117,30 +112,32 @@ public:
             a = a / 2;
         }
         return sum / max;
-        //so normalization is done by dividing sum by max which is the total amplitude of all octaves combined this way we get a value between -1 and 1
     }
 
 
-    //decid biome
+    // Decide biome
     int getBiome(float x, float y) {
         float height = fractal(x, y, 6);
 
         int section = (int)(x * 10) % 3;
 
-        if (section == 0) return BIOME_PLAINS;
-        if (section == 1) return BIOME_AERIAL;
+        if (section == 0) {
+            return BIOME_PLAINS;
+        }
+        if (section == 1) {
+            return BIOME_AERIAL;
+        }
         return BIOME_AQUATIC;
     }
 
 };
 
-//fractual nosie is multiple perlin noises //perlin is a single layer
-//realsitic terrians with  small detail and large feature
+// Fractal noise is multiple perlin layers for realistic terrain
 class NoiseProfile {
 public:
-    virtual float getScale() = 0;//how much to zoom in and out
-    virtual int getOctaves() = 0;//how many layers of noise
-    //will define in childs
+    virtual float getScale() = 0;
+    virtual int getOctaves() = 0;
+    // Defined in child classes
 
 
 };
@@ -184,13 +181,17 @@ public:
 
 
 
-//fac class decide which profile is require
+// Factory class to decide which profile to use
 class NoiseProfileFactory {
 public:
     NoiseProfile* createProfile(int choice) {
-        if (choice == 1) return new AmplifiedProfile;
-        if (choice == 2) return new FlatProfile;
-        return new NormalProfile;  // default Normal
+        if (choice == 1) {
+            return new AmplifiedProfile;
+        }
+        if (choice == 2) {
+            return new FlatProfile;
+        }
+        return new NormalProfile;
     }
 };
 
@@ -253,12 +254,20 @@ public:
         isVisible = true;
         hp = 3;
     }
-    //check if player us touching mean oonverlapping this blovk 
+    // Check if player is touching/overlapping this block 
     bool checkCollisionRaw(float px, float py, float pw, float ph) {
-        if (px + pw <= x) return false;
-        if (px >= x + width) return false;
-        if (py + ph <= y) return false;
-        if (py >= y + height) return false;
+        if (px + pw <= x) {
+            return false;
+        }
+        if (px >= x + width) {
+            return false;
+        }
+        if (py + ph <= y) {
+            return false;
+        }
+        if (py >= y + height) {
+            return false;
+        }
         return true;
     }
 
@@ -283,23 +292,43 @@ public:
 
     // Collision check
     bool checkCollision(float px, float py, float pw, float ph) {
-        if (!isSolid) return false;
-        if (px + pw <= x) return false;
-        if (px >= x + width) return false;
-        if (py + ph <= y) return false;
-        if (py >= y + height) return false;
+        if (!isSolid) {
+            return false;
+        }
+        if (px + pw <= x) {
+            return false;
+        }
+        if (px >= x + width) {
+            return false;
+        }
+        if (py + ph <= y) {
+            return false;
+        }
+        if (py >= y + height) {
+            return false;
+        }
         return true;
     }
     
     void resolveCollision(float& px, float& py, float pw, float ph,
         float& velX, float& velY, bool& onGround) {
 
-        if (!isSolid) return;
+        if (!isSolid) {
+            return;
+        }
 
-        if (px + pw <= x) return;
-        if (px >= x + width) return;
-        if (py + ph <= y) return;
-        if (py >= y + height) return;
+        if (px + pw <= x) {
+            return;
+        }
+        if (px >= x + width) {
+            return;
+        }
+        if (py + ph <= y) {
+            return;
+        }
+        if (py >= y + height) {
+            return;
+        }
 
         float overlapLeft = (x + width) - px;
         float overlapRight = (px + pw) - x;
@@ -310,21 +339,17 @@ public:
         float minY = min(overlapTop, overlapBottom);
 
         if (minY < minX) {
-            // Y collision
             if (velY > 0) {
-                // landing on ground
                 py = y - ph;
                 velY = 0;
                 onGround = true;  
             }
             else if (velY < 0) {
-                // hitting ceiling
                 py = y + height;
                 velY = 0;
             }
         }
         else {
-            // X collision
             if (velX > 0) {
                 px = x - pw;
             }
@@ -340,14 +365,20 @@ public:
     virtual void update(float dt) {}
 
     virtual void render(RenderWindow& window, float camX, float camY) {
-        if (!isVisible) return;
-        if (blockType == BLOCK_EMPTY) return;
+        if (!isVisible) {
+            return;
+        }
+        if (blockType == BLOCK_EMPTY) {
+            return;
+        }
         sprite.setPosition(x - camX, y - camY);
         window.draw(sprite);
     }
 
     virtual void takeDamage(int amount) {
-        if (isIndestructible) return;
+        if (isIndestructible) {
+            return;
+        }
         hp -= amount;
         if (hp <= 0) {
             blockType = BLOCK_EMPTY;
@@ -359,7 +390,7 @@ public:
     bool isDestroyed() { return blockType == BLOCK_EMPTY; }
 };
 
-//childblock
+// Child block
 class IndestructibleBlock : public Block {
 public:
     IndestructibleBlock(float x, float y, int biomeType, int layerIndex)
@@ -370,7 +401,7 @@ public:
         hp = 99999;
     }
 
-    void takeDamage(int amount) override {  }
+    void takeDamage(int amount) override {}
 
     void render(RenderWindow& window, float camX, float camY) override {
         sprite.setPosition(x - camX, y - camY);
@@ -379,17 +410,14 @@ public:
 };
 
 
-//if speed is less = gentle wave
-//if speed is more = more peaks
-//if size is less = smaller hill
-//if size is more = bigger hill
+// Speed affects wave steepness, size affects hill height
 class Biome {
 protected:
     string name;
     int    biomeType;
     float  startX, endX;
     float  startY, endY;
-    Block** blocks;//agggregation with block
+    Block** blocks;
     int    blockCount;
     Texture solidTex;
     Texture waterTex;
@@ -426,13 +454,14 @@ public:
     bool checkWaterCollision(float px, float py, float pw, float ph) {
         for (int i = 0; i < blockCount; i++) {
             if (blocks[i] && blocks[i]->getIsWater()) {
-                if (blocks[i]->checkCollisionRaw(px, py, pw, ph))
+                if (blocks[i]->checkCollisionRaw(px, py, pw, ph)) {
                     return true;
+                }
             }
         }
         return false;
     }
-    // Pure virtual so every biome can make her terrian
+    // Pure virtual - each biome generates its terrain
     virtual void generateTerrain(int widthInBlocks, int heightInBlocks) = 0;
 
     void loadTextures(string solidPath, string waterPath) {
@@ -441,12 +470,18 @@ public:
     }
 
     void update(float dt) {
-        for (int i = 0; i < blockCount; i++)
-            if (blocks[i]) blocks[i]->update(dt);
+        for (int i = 0; i < blockCount; i++) {
+            if (blocks[i]) {
+                blocks[i]->update(dt);
+            }
+        }
     }
     void render(RenderWindow& window, float camX, float camY) {
-        for (int i = 0; i < blockCount; i++)
-            if (blocks[i]) blocks[i]->render(window, camX, camY);
+        for (int i = 0; i < blockCount; i++) {
+            if (blocks[i]) {
+                blocks[i]->render(window, camX, camY);
+            }
+        }
     }
     
 
@@ -454,23 +489,27 @@ public:
         return (playerX >= startX - 2000 && playerX <= endX + 2000);
     }
     bool checkCollision(float px, float py, float pw, float ph) {
+        if (!isInBiome(px)) {
+            return false;
+        }
 
-        // check is playerin  biome 
-        if (!isInBiome(px)) return false;
-
-        // then  block check 
-        for (int i = 0; i < blockCount; i++)
-            if (blocks[i] && blocks[i]->checkCollision(px, py, pw, ph))
+        for (int i = 0; i < blockCount; i++) {
+            if (blocks[i] && blocks[i]->checkCollision(px, py, pw, ph)) {
                 return true;
+            }
+        }
 
         return false;
     }
     void resolveCollisions(float& px, float& py, float pw, float ph,
         float& velX, float& velY, bool& onGround) {
-        if (!isInBiome(px)) return;
-        for (int i = 0; i < blockCount; i++)
-            if (blocks[i])
+        if (!isInBiome(px)) {
+            return;
+        }
+        for (int i = 0; i < blockCount; i++) {
+            if (blocks[i]) {
                 blocks[i]->resolveCollision(px, py, pw, ph, velX, velY, onGround);
+            }
     }
     float getStartX() { return startX; }
     float getEndX() { return endX; }
@@ -494,8 +533,7 @@ public:
         blocks = new Block * [widthInBlocks * heightInBlocks];
         blockCount = 0;
 
-        //3 ROWS ABOVE BOTTOM TO CREATE GENTLE HILLS
-        int surfaceRow = heightInBlocks -4; 
+        int surfaceRow = heightInBlocks - 4; 
 
 
         PerlinNoise perlin(42);
@@ -510,14 +548,12 @@ public:
         for (int col = 0; col < widthInBlocks; col++) {
             float x = startX + col * 64.0f;
             int sr;
-            // Gentle wave
             if (useperlin) {
                 float globalCol = (startX / 64.0f) + col;
                 float noiseVal = perlin.fractal((globalCol) * 0.005f, 0, 4);
                 sr = (int)(heightInBlocks * 0.65f) + (int)(noiseVal * hillSize);
             }
             else {
-                // Survival: sin wave
                 sr = surfaceRow + (int)(sin(col * speed) * hillSize);
             }
 
@@ -528,16 +564,20 @@ public:
 
 
 
-            if (sr < 1) sr = 1;
-            if (sr >= heightInBlocks - 1) sr = heightInBlocks-2;
+            if (sr < 1) {
+                sr = 1;
+            }
+            if (sr >= heightInBlocks - 1) {
+                sr = heightInBlocks - 2;
+            }
 
             for (int row = sr; row < heightInBlocks; row++) {
-                //GEN BLOCKS AT BOTTOM OF SUR
                 float y = row * 64.0f;
                 Block* b;
 
-                if (row == heightInBlocks - 1)
+                if (row == heightInBlocks - 1) {
                     b = new IndestructibleBlock(x, y, BIOME_PLAINS, row);
+                }
                 else {
                     b = new Block(x, y, BLOCK_SOLID, BIOME_PLAINS);
                     b->setTexture(solidTex);
@@ -551,7 +591,7 @@ public:
 
 };
 
-//ariel biome use two sin waves to create more peak variant mountains
+// Aerial biome uses two sin waves for varied mountains
 class AerialBiome : public Biome {
 protected:
     bool useperlin;
@@ -564,7 +604,6 @@ public:
         blocks = new Block * [widthInBlocks * heightInBlocks];
         blockCount = 0;
         PerlinNoise perlin(42);
-        // Mountains are above  divide by 3 to get highh peak
         int topRow = 2;
 
         for (int col = 0; col < widthInBlocks; col++) {
@@ -574,31 +613,28 @@ public:
             if (useperlin) {
                 float globalCol = (startX / 64.0f) + col;
 
-                // 2 layer  large feature + detail
+                // 2 layers - large features + detail
                 float n1 = perlin.fractal(globalCol * 0.003f, 0.0f, 5);
                 float n2 = perlin.fractal(globalCol * 0.09f, 99.0f, 3) * 0.4f;
                 float combined = (n1 + n2) / 1.4f;
                 surfaceRow = (int)(heightInBlocks * 0.5f) + (int)(combined *6.0f);
             }
-          // hillRows = 5 in aerial 
+ 
             
             else {
-                // Survival: 2 sin waves
                 surfaceRow = topRow
                     + (int)(sin(col * 0.08f) * 5)
                     + (int)(sin(col * 0.20f) * 3);
             }
             
 
-            //// 2 sin waves
-            //// 1st wave =  slow wave 
-            //// 2md wave =  fast wave 
-            //int surfaceRow = topRow
-            //    + (int)(sin(col * 0.08f) * 5)   // slow
-            //    + (int)(sin(col * 0.20f) * 3);  // jagged wave
 
-            if (surfaceRow < 1)                  surfaceRow = 1;
-            if (surfaceRow >= heightInBlocks - 1) surfaceRow = heightInBlocks - 2;
+            if (surfaceRow < 1) {
+                surfaceRow = 1;
+            }
+            if (surfaceRow >= heightInBlocks - 1) {
+                surfaceRow = heightInBlocks - 2;
+            }
 
             for (int row = surfaceRow; row < heightInBlocks; row++) {
                 float y = row * 64.0f;
@@ -617,7 +653,7 @@ public:
     }
 };
 
-//water on top and floor at bottom with very gentle wave
+// Water on top, floor at bottom with gentle wave
 class AquaticBiome : public Biome {
 protected:
     bool useperlin;
@@ -631,9 +667,7 @@ public:
         blocks = new Block * [widthInBlocks * heightInBlocks];
         blockCount = 0;
 
-        // Sea level water start
         int seaLevelRow = heightInBlocks / 3;
-        // Sea floor solid ground start
         int floorMidRow = (int)(heightInBlocks * 0.75f);
 
         PerlinNoise perlin(42);
@@ -649,39 +683,37 @@ public:
 
 
 
-            //GENTLE WAVE IN Sea floor 
-            // speed = 0.05 THATS SLOW
             if (useperlin) {
                 float globalCol = (startX / 64.0f) + col;
                 float noiseVal = perlin.fractal(globalCol * 0.004f, 55.0f, 4);
                 floorRow = floorMidRow + (int)(noiseVal * 3);
             }
                 else {
-                    // Survival has gentle sin
                     floorRow = floorMidRow + (int)(sin(col * 0.03f) * 2);
                 }
 
 
 
-            if (floorRow < seaLevelRow + 2)       floorRow = seaLevelRow + 2;
-            if (floorRow >= heightInBlocks - 1)    floorRow = heightInBlocks - 2;
+            if (floorRow < seaLevelRow + 2) {
+                floorRow = seaLevelRow + 2;
+            }
+            if (floorRow >= heightInBlocks - 1) {
+                floorRow = heightInBlocks - 2;
+            }
 
             for (int row = seaLevelRow; row < heightInBlocks; row++) {
                 float y = row * 64.0f;
                 Block* b;
 
                 if (row < floorRow) {
-                    // water blocks
                     b = new Block(x, y, BLOCK_WATER, BIOME_AQUATIC);
                     b->setTexture(waterTex);
                     b->setIsSolid(false);
                 }
                 else if (row == heightInBlocks - 1) {
-                    // bottom most indestructible
                     b = new IndestructibleBlock(x, y, BIOME_AQUATIC, row);
                 }
                 else {
-                    // Sea floor solid
                     b = new Block(x, y, BLOCK_SOLID, BIOME_AQUATIC);
                     b->setTexture(solidTex);
                 }
@@ -700,7 +732,7 @@ public:
 
 
 
-//infinite terrian
+// Infinite terrain
 class CampaignLevel {
 private:
     bool isInfinite;
@@ -710,15 +742,15 @@ private:
 
     int* enemiesKilledPerType;
     int* vehiclesDestroyedPerType;
-    int killQuotaPerType;      // 5 enemies per type
-    int vehicleDestroyQuota;   // 3 vehicles per type
+    int killQuotaPerType;
+    int vehicleDestroyQuota;
 
     bool isKillQuotaReached;
     bool isDynamicSpawning;
     float spawnRadius;
 
     float fusionCooldownTimer;
-    float fusionCooldownDuration;  // 3 minutes
+    float fusionCooldownDuration;
 
     int currentChunkX;
     bool generatedLeft;
@@ -756,15 +788,15 @@ public:
         generatedLeft = false;
         generatedRight = false;
         currentGeneratedWidth = 0;
-        maxGeneratedWidth = 1000000; // 1 million blocks
+        maxGeneratedWidth = 1000000;
 
         // Quota tracking
         isKillQuotaReached = false;
         isDynamicSpawning = true;
 
-        // Arrays  8 enemy types
+        // Arrays - 8 enemy types, 3 vehicle types
         enemiesKilledPerType = new int[8];
-        vehiclesDestroyedPerType = new int[3]; // 3 vehicle types
+        vehiclesDestroyedPerType = new int[3];
 
         for (int i = 0; i < 8; i++)
             enemiesKilledPerType[i] = 0;
@@ -799,15 +831,14 @@ public:
             activeBiomes[i]->resolveCollisions(px, py, pw, ph, velX, velY, onGround);
     }
 
-    //one chunk is 16 blocks wide when player more forwarrd new chunk create
-    //first x pos;then height from perlin and dec biome from height; then create block bottom to top and add in block array
+    // Chunk is 16 blocks wide - generates terrain from perlin noise
 
 
     void generateChunk(int startCol) {
         float scale = profile->getScale();
         int octaves = profile->getOctaves();
 
-        // Biome decide karo noise se
+        // Decide biome from noise
         float noiseX = startCol * 0.03f;
 
 
@@ -818,23 +849,27 @@ public:
         float startX = startCol * 64.0f;
         float endX = (startCol + generationChunkSize) * 64.0f;
 
-        // POLYMORPHISM - Biome* pointer se child class banao
+        // Polymorphism - create child class from Biome pointer
         Biome* b = nullptr;
-        if (biomeType == BIOME_AERIAL)
-            b = new AerialBiome(startX, endX,true);
-        else if (biomeType == BIOME_AQUATIC)
-            b = new AquaticBiome(startX, endX,true);
-        else
-            b = new PlainsBiome(startX, endX,true);
+        if (biomeType == BIOME_AERIAL) {
+            b = new AerialBiome(startX, endX, true);
+        }
+        else if (biomeType == BIOME_AQUATIC) {
+            b = new AquaticBiome(startX, endX, true);
+        }
+        else {
+            b = new PlainsBiome(startX, endX, true);
+        }
 
-        // Texture aur terrain - virtual functions call honge
+        // Load textures and generate terrain
         b->loadTextures("Sprites/blocks/stone.png", "Sprites/blocks/water.png");
         b->generateTerrain(generationChunkSize, 20);
 
-        if (biomeCount < maxBiomes)
+        if (biomeCount < maxBiomes) {
             activeBiomes[biomeCount++] = b;
+        }
     }
-        //drae block stored in chunsk array
+        // Draw blocks stored in chunk array
     void render(RenderWindow& window, float camX, float camY) {
         for (int i = 0; i < biomeCount; i++)
             activeBiomes[i]->render(window, camX, camY);
@@ -842,18 +877,13 @@ public:
 
 
         void update(float playerX) {
-            //cal on which chunk player is
-            int plaChunk = (int)(playerX / (generationChunkSize * 64.0f));
-            //genrate forward
-            if (plaChunk + 5 > currentChunkX) {
+            int playerChunk = (int)(playerX / (generationChunkSize * 64.0f));
+            if (playerChunk + 5 > currentChunkX) {
                 generateChunk(currentChunkX * generationChunkSize);
                 currentChunkX++;
                 generatedRight = true;
             }
-
-
-            //generete backward
-            if (plaChunk - 2 < 0) {
+            if (playerChunk - 2 < 0) {
                 generateChunk((currentChunkX - 1) * generationChunkSize);
                 generatedLeft = true;
             }
@@ -862,11 +892,11 @@ public:
 
 
 
-        // in CampaignLevel class
         bool checkWaterAt(float px, float py, float pw, float ph) {
             for (int i = 0; i < biomeCount; i++) {
-                if (activeBiomes[i]->checkWaterCollision(px, py, pw, ph))
+                if (activeBiomes[i]->checkWaterCollision(px, py, pw, ph)) {
                     return true;
+                }
             }
             return false;
         }

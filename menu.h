@@ -234,16 +234,28 @@ public:
     }
 
     void moveSelectionUp() {
-        if (menuState == 0) return;
-        if (selectionIndex > 0) selectionIndex--;
+        if (menuState == 0) {
+            return;
+        }
+        if (selectionIndex > 0) {
+            selectionIndex--;
+        }
     }
 
     void moveSelectionDown() {
         int maxIdx;
-        if (menuState == 1) maxIdx = 3;
-        else if (menuState == 2) maxIdx = 1;
-        else maxIdx = 0;
-        if (selectionIndex < maxIdx) selectionIndex++;
+        if (menuState == 1) {
+            maxIdx = 3;
+        }
+        else if (menuState == 2) {
+            maxIdx = 1;
+        }
+        else {
+            maxIdx = 0;
+        }
+        if (selectionIndex < maxIdx) {
+            selectionIndex++;
+        }
     }
 
     int getSelectionIndex() { return selectionIndex; }

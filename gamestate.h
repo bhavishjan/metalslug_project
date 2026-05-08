@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Header.h"
+#include "Level.h"
 #include "GameMode.h"
 #include "entity.h"
 #include"echo.h"
@@ -17,7 +17,7 @@ class LevelManager;
 class EntityManager;
 
 
-//abstraxt
+//abstract base class
 class GameState {
 
 protected:
@@ -30,7 +30,7 @@ public:
     GameState();
     virtual ~GameState();
 
-    //abstract doesnot create its own object
+    //abstract
     virtual void onEnter() = 0;
     virtual void onExit() = 0;
     virtual void update(float dt) = 0;
@@ -45,13 +45,11 @@ public:
 
 
 GameState::GameState() {
-    //start both false game not running yet
     active = false;
     paused = false;
 }
 
 GameState::~GameState() {
-    //virtual destructor so child destructor runs first then parent
 }
 
 void GameState::pause() {
@@ -73,12 +71,11 @@ bool GameState::isPaused() const {
 
 
 
-//this class make leveles composition with levels concrete
+//Level composition manager
 class LevelManager {
 
 private:
 
-    //composition
     Level* levels[4];
     int     totalLevels;
     int     currentIndex;
@@ -89,7 +86,6 @@ public:
     LevelManager();
     ~LevelManager();
 
-    //objects are made in loadall levels
     void    loadAllLevels();
     void    switchToLevel(int index);
     void    nextLevel();
@@ -107,7 +103,6 @@ public:
 
 
 LevelManager::LevelManager() {
-    //all null at start 
     totalLevels = 0;
     currentIndex = -1;
     current = nullptr;
@@ -117,7 +112,6 @@ LevelManager::LevelManager() {
 }
 
 LevelManager::~LevelManager() {
-    //composition so manager is responsible to delete all levels it created
     for (int i = 0; i < 4; i++) {
         delete levels[i];
         levels[i] = nullptr;
@@ -125,11 +119,10 @@ LevelManager::~LevelManager() {
 }
 
 void LevelManager::loadAllLevels() {
-    //objects are made here so this is composition LevelManager owns these
     levels[0] = new Level1();
     levels[1] = new Level2();
     levels[2] = new Level3();
-    //levels[3] = new BossLevel(); uncomment when BossLevel is done
+    //levels[3] = new BossLevel();
     totalLevels = 3;
 }
 
@@ -140,7 +133,6 @@ void LevelManager::switchToLevel(int index) {
     currentIndex = index;
     current = levels[index];
     if (current != nullptr) {
-        //virtual calls so Level1 or Level2 own version runs polymorphism
         current->generateBiomes();
         current->spawnEnemies();
     }
@@ -190,14 +182,13 @@ int LevelManager::getTotalLevels() {
 
 
 
-//concrete every person inherit from this composition with entity of manager destroy entity destroy
+//Entity composition manager
 class EntityManager {
 
 private:
 
     static const int MAX_ENTITIES = 512;
 
-    //responsibility of manager to create entities
     Entity* pool[MAX_ENTITIES];
     int     count;
 
@@ -226,7 +217,6 @@ EntityManager::EntityManager() {
 }
 
 EntityManager::~EntityManager() {
-    //composition so manager deletes all entities it owns
     clearAll();
 }
 
@@ -245,7 +235,6 @@ void EntityManager::removeEntity(Entity* e) {
     for (int i = 0; i < count; i++) {
         if (pool[i] == e) {
             delete pool[i];
-            //bring last entity to this slot so no gap stays
             count--;
             pool[i] = pool[count];
             pool[count] = nullptr;
@@ -265,14 +254,12 @@ void EntityManager::clearAll() {
 void EntityManager::update(float dt) {
     for (int i = 0; i < count; i++) {
         if (pool[i] != nullptr) {
-            //virtual call each entity runs its own update polymorphism
             pool[i]->update(dt);
         }
     }
 }
 
 void EntityManager::render(RenderWindow& window, float camX, float camY) {
-    //fill this when Entity render is ready
     for (int i = 0; i < count; i++) {
         if (pool[i] != nullptr) {
             pool[i]->render(window, camX, camY);
@@ -294,23 +281,18 @@ Entity* EntityManager::getAt(int index) {
 
 
 
-//concrete manage game active when game on
-//composition with level manager and entity manager if playstate deleted both deleted
-//aggregation with gamemode pointers of gamemode given to playstate
+//Concrete play state
 class PlayState : public GameState {
 
 private:
 
-    //aggregation
     GameMode* activeMode;
 
-    //composition
     LevelManager* levelManager;
     EntityManager* entityManager;
 
 
 
-    //for audio
     whisper originalBGM;
     whisper muffledBGM;
     sf::SoundBuffer normalBuffer;
@@ -321,7 +303,6 @@ private:
 
 public:
 
-    //constructor need gamemode pointer
     PlayState(GameMode* mode, CharacterManager* chars);
     ~PlayState();
 
@@ -336,11 +317,9 @@ public:
 };
 
 
-PlayState::PlayState(GameMode* mode, CharacterManager* chars){
-    //aggregation gamemode came from outside we just store pointer not our responsibility to delete
+PlayState::PlayState(GameMode* mode, CharacterManager* chars) {
     activeMode = mode;
 
-    //composition we create these here so we own them and will delete them
     levelManager = new LevelManager();
     entityManager = new EntityManager();
 
@@ -353,35 +332,27 @@ PlayState::PlayState(GameMode* mode, CharacterManager* chars){
 
 
 PlayState::~PlayState() {
-    //composition so we delete what we created
     delete levelManager;
     delete entityManager;
     levelManager = nullptr;
     entityManager = nullptr;
-
-    //aggregation so we do not delete activeMode someone else owns it
-
-
 }
 
 void PlayState::onEnter() {
     active = true;
     paused = false;
-    muffledBGM = originalBGM.getMuffled(); // yahan karo
-    muffledBGM.header = originalBGM.header; 
+    muffledBGM = originalBGM.getMuffled();
+    muffledBGM.header = originalBGM.header;
     originalBGM.toSFML(normalBuffer);
     muffledBGM.toSFML(muffledBuffer);
-    // Phir buffers load karo
     originalBGM.toSFML(normalBuffer);
     muffledBGM.toSFML(muffledBuffer);
 
-    // Normal se shuru karo
     gameSound.setBuffer(normalBuffer);
     gameSound.setLoop(true);
     gameSound.play();
 
     if (activeMode != nullptr) {
-        //aggregation just using it not owning it
         activeMode->start();
     }
 
@@ -424,13 +395,13 @@ void PlayState::update(float dt) {
         );
 
         if (inWater && !playerInWater) {
-            gameSound.stop(); // pehle stop
+            gameSound.stop();
             gameSound.setBuffer(muffledBuffer);
             gameSound.play();
             playerInWater = true;
         }
         else if (!inWater && playerInWater) {
-            gameSound.stop(); // pehle stop
+            gameSound.stop();
             gameSound.setBuffer(normalBuffer);
             gameSound.play();
             playerInWater = false;
@@ -462,16 +433,13 @@ EntityManager* PlayState::getEntityManager() {
 
 
 
-//concrete composition with gamestate
-//manages states like stack
+//State stack manager
 class GameStateManager {
 
 private:
 
     static const int MAX_STATES = 8;
 
-    //what state is pushed in gamestate is owned by manager
-    //composition
     GameState* stateStack[MAX_STATES];
     int         stackTop;
 
@@ -480,9 +448,9 @@ public:
     GameStateManager();
     ~GameStateManager();
 
-    void        pushState(GameState* state);  //when gamestate push a state it is owned by manager
-    void        popState();                   //delete state
-    void        changeState(GameState* state);//first pop then change
+    void        pushState(GameState* state);
+    void        popState();
+    void        changeState(GameState* state);
 
     void        update(float dt);
     void        render(RenderWindow& window);
@@ -500,7 +468,6 @@ GameStateManager::GameStateManager() {
 }
 
 GameStateManager::~GameStateManager() {
-    //composition so pop everything stack owns these states
     while (isEmpty() == false) {
         popState();
     }
@@ -515,7 +482,6 @@ void GameStateManager::pushState(GameState* state) {
     }
     stackTop++;
     stateStack[stackTop] = state;
-    //ownership now belongs to manager
     state->onEnter();
 }
 
@@ -523,16 +489,13 @@ void GameStateManager::popState() {
     if (isEmpty()) {
         return;
     }
-    //tell state it is leaving
     stateStack[stackTop]->onExit();
-    //composition so manager deletes it
     delete stateStack[stackTop];
     stateStack[stackTop] = nullptr;
     stackTop--;
 }
 
 void GameStateManager::changeState(GameState* state) {
-    //first pop then change
     popState();
     pushState(state);
 }

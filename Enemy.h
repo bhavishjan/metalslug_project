@@ -1,5 +1,5 @@
 #pragma once
-#include "Player.h"
+#include "PlayerSoldier.h"
 #include <cmath>
 #include "Weapon.h"
 
@@ -7,8 +7,7 @@ using namespace std;
 using namespace sf;
 
 
-// helper function to check if two rectangles overlap
-// used for collision detection between enemies and player
+// Helper function for rectangle overlap
 static bool rectsOverlap(float ax, float ay, float aw, float ah,
     float bx, float by, float bw, float bh)
 {
@@ -17,8 +16,7 @@ static bool rectsOverlap(float ax, float ay, float aw, float ah,
 }
 
 
-// abstract base class for all enemies
-// every enemy type inherits from this
+// Abstract base class for all enemies
 class Enemy {
 protected:
     const char* name;
@@ -38,10 +36,10 @@ protected:
     bool  isShielded;
     float aggressionLevel;
 
-    // memory of coward system
+    // Coward system
     bool  hasGrudge;
     float grudgeMultiplier;
-    bool  isEnhanced;        // power boost when player scrolls past
+    bool  isEnhanced;
 
     // detection variables
     float detectionRange;
@@ -49,10 +47,10 @@ protected:
     int   currentBiome;
     bool  isPatrolling;
     bool  isTargetingPlayer;
-    Player* largestPlayer;
+    PlayerSoldier* largestPlayer;
 
     float gravityConstant = 200.0f;
-    float groundY = 1600 - height;  // default floor (screen_y - height)
+    float groundY = 1600 - height;
 public:
     Enemy() : x(0), y(0), width(32), height(48),
         velocityX(0), velocityY(0),
@@ -65,27 +63,32 @@ public:
         isPatrolling(true), isTargetingPlayer(false), largestPlayer(nullptr) {
     }
 
-    // virtual destructor so child destructors get called properly
+    // Virtual destructor
     virtual ~Enemy() {}
 
-    // pure virtuals every enemy must implement these
+    // Pure virtual functions
     virtual void attack() = 0;
     virtual void update(float deltaTime) = 0;
     virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) = 0;
 
-    // overide in case of special behaviour
+    // Override for special behavior
     virtual void move(float dt) {
-        if (isTargetingPlayer) chasePlayer(largestPlayer);
-        else                   patrol();
-        // x position updated externally in main.cpp after collision checks
+        if (isTargetingPlayer) {
+            chasePlayer(largestPlayer);
+        }
+        else {
+            patrol();
+        }
     }
 
     virtual void takeDamage(int dmg, float bulletX = 0, float bulletY = 0,
         bool isExplosive = false)
     {
-        // grudge enemies need more damage to kill
+        // Grudge enemies need more damage
         hp -= dmg / grudgeMultiplier;
-        if (hp <= 0) die();
+        if (hp <= 0) {
+            die();
+        }
     }
 
     virtual void die() {
@@ -93,31 +96,36 @@ public:
         dropLoot();
     }
 
-    void detectPlayer(Player* player) {
+    void detectPlayer(PlayerSoldier* player) {
         float xx = player->getPlayerX();
         float yy = player->getPlayerY();
 
-        // distance of player from enemy
+        // Distance from player
         float dx = xx - x;
         float dy = yy - y;
         float distance = sqrt(dx * dx + dy * dy);
 
         if (distance < detectionRange) {
+
+        
             isTargetingPlayer = true;
             largestPlayer = player;
         }
         else {
+        
             isTargetingPlayer = false;
         }
     }
 
-    void chasePlayer(Player* player) {
+    void chasePlayer(PlayerSoldier* player) {
         float xp = player->getPlayerX();
         if (xp > x) {
+        
             velocityX = speed;
             facingRight = true;
         }
         else {
+        
             velocityX = -speed;
             facingRight = false;
         }
@@ -127,19 +135,25 @@ public:
         float patrollingRange = 50;
 
         if (x > spawnX + patrollingRange) {
+
+        
             velocityX = -speed;  // move left
             facingRight = false;
         }
         else if (x < spawnX - patrollingRange) {
+        
             velocityX = speed;   // move right
             facingRight = true;
         }
         else {
+        
             // inside range so keep moving in current direction
             if (facingRight) {
+            
                 velocityX = speed;
             }
             else {
+            
                 velocityX = -speed;
             }
         }
@@ -147,71 +161,82 @@ public:
 
     void applyGravity(float deltaTime) {
         if (isGrounded == false) {
+        
             velocityY += gravityConstant * deltaTime;
         }
     }
 
     void checkGrounded() {
         if (y + height >= groundY) {
+        
             y = groundY - height;
             velocityY = 0.f;
             isGrounded = true;
         }
         else {
+        
             isGrounded = false;
         }
     }
 
-    // block enemy movement into player — revert enemy x so they stop at player edge
-    void checkPlayerCollision(Player* player) {
-        if (!player || !isAlive) return;
+    // Block enemy movement into player
+    void checkPlayerCollision(PlayerSoldier* player) {
+        if (!player || !isAlive) {
+            return;
+        }
 
         float px = player->getPlayerX();
         float py = player->getPlayerY();
         float pw = (float)player->getWidth();
         float ph = (float)player->getHeight();
 
-        if (!rectsOverlap(x, y, width, height, px, py, pw, ph)) return;
+        if (!rectsOverlap(x, y, width, height, px, py, pw, ph)) {
+            return;
+        }
 
         float overlapLeft  = (x + width) - px;
         float overlapRight = (px + pw)   - x;
 
-        // stop enemy at player boundary — neither pushed
         if (overlapLeft < overlapRight) {
-            x -= overlapLeft;   // enemy was moving right, push enemy back left
+            x -= overlapLeft;
         }
         else {
-            x += overlapRight;  // enemy was moving left, push enemy back right
+            x += overlapRight;
         }
         velocityX = 0.f;
     }
 
-    // call when enemy dies chance of food drop
+    // Call when enemy dies - chance of food drop
     void dropLoot() {
         int roll = rand() % 100;
-        if (roll < 20)  // 20 percent chance of food drop
+        if (roll < 20) {
             spawnLoot();
+        }
     }
 
 
     void checkEnemyCollision(Enemy* other) {
-        if (!other || other == this) return;
-        if (!isAlive || !other->getIsAlive()) return;
+        if (!other || other == this) {
+            return;
+        }
+        if (!isAlive || !other->getIsAlive()) {
+            return;
+        }
 
         if (!rectsOverlap(x, y, width, height,
             other->getX(), other->getY(),
-            other->getWidth(), other->getHeight())) return;
+            other->getWidth(), other->getHeight())) {
+            return;
+        }
 
         float myCenter = x + width / 2.f;
         float hisCenter = other->getX() + other->getWidth() / 2.f;
 
         if (myCenter < hisCenter) {
-            // main left hun, mujhe left push karo
             float overlap = (x + width) - other->getX();
             x -= overlap / 2.f;
         }
         else {
-            // main right hun, mujhe right push karo
             float overlap = (other->getX() + other->getWidth()) - x;
             x += overlap / 2.f;
         }
@@ -240,8 +265,10 @@ public:
         hp += (float)(maxHp) * 0.25f;  // plus 25 percent hp
     }
 
-    void returnToPlayer(Player* player) {
-        if (!player) return;
+    void returnToPlayer(PlayerSoldier* player) {
+        if (!player) {
+            return;
+        }
         largestPlayer = player;
         isTargetingPlayer = true;
         chasePlayer(player);
@@ -261,19 +288,23 @@ public:
 
 
     void setPosition(float nx, float ny) { x = nx; y = ny; }
-    void setPlayer(Player* p) { largestPlayer = p; }
+    void setPlayer(PlayerSoldier* p) { largestPlayer = p; }
     void setX(float nx) { x = nx; }
     void setGroundY(float gy) { groundY = gy; }
     float getVelocityY() const { return velocityY; }
     void  setVelocityY(float vy) { velocityY = vy; }
     float getVelocityX() const { return velocityX; }
     void  setVelocityX(float vx) { velocityX = vx; }
-    void  setGrounded(bool g) { isGrounded = g; if (g) velocityY = 0.f; }
+    void  setGrounded(bool g) {
+        isGrounded = g;
+        if (g) {
+            velocityY = 0.f;
+        }
+    }
 };
 
 
-// base class for all infantry type enemies
-// has pistol and basic movement
+// Base class for infantry enemies
 class InfantryEnemy : public Enemy {
 protected:
     static const int WALK  = 0;
@@ -312,36 +343,36 @@ public:
     }
 
     void attack() override {
-        // check player exist
-        if (largestPlayer == nullptr) 
+        if (largestPlayer == nullptr) {
             return;
+        }
 
-        // can pistol fire
-        if (!pistol.canFire()) 
+        if (!pistol.canFire()) {
             return;
+        }
 
-        // distance check
         float dx = largestPlayer->getPlayerX() - x;
         float dy = largestPlayer->getPlayerY() - y;
         float distance = sqrt(dx * dx + dy * dy);
 
-        // range check
-        if (distance > attackRange) return;
+        if (distance > attackRange) {
+            return;
+        }
 
-        // angle towards player
         float angle = atan2(dy, dx);
-
-        // firing
         pistol.fire(angle);
-        fireTimer = 0.4f;   // drives SHOOT animation state
+        fireTimer = 0.4f;
 
-        // facing direction update
         facingRight = (dx > 0);
     }
 
     void update(float dt) override {
-        if (!isAlive)             return;
-        if (largestPlayer == nullptr) return;
+        if (!isAlive) {
+            return;
+        }
+        if (largestPlayer == nullptr) {
+            return;
+        }
 
         detectPlayer(largestPlayer);
         move(dt);
@@ -350,17 +381,19 @@ public:
         float dy = largestPlayer->getPlayerY() - y;
         float distanceToplayer = sqrt(dx * dx + dy * dy);
 
-        if (isTargetingPlayer && distanceToplayer < attackRange)
+        if (isTargetingPlayer && distanceToplayer < attackRange) {
             attack();
+        }
 
         pistol.update(dt);
-        if (fireTimer > 0.f)  
+        if (fireTimer > 0.f) {
             fireTimer -= dt;
+        }
 
         updateAnimState(dt);
     }
 
-    // pick animation based on current enemy behavior and advance its frame
+    // Pick animation based on enemy behavior
     virtual void updateAnimState(float dt) {
         int desired;
         if (!isAlive) {
@@ -385,20 +418,27 @@ public:
     }
 
     virtual void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
-        if (!isAlive && currentAnim != DIE) return;
+        if (!isAlive && currentAnim != DIE) {
+            return;
+        }
 
         Animation& a = anims[currentAnim];
         IntRect r = a.currentRect();
-        if (r.width == 0 || r.height == 0) return;
+        if (r.width == 0 || r.height == 0) {
+            return;
+        }
 
         sprite.setTexture(a.getTexture(), true);
         sprite.setTextureRect(r);
 
-        // sprite sheet faces LEFT by default, so flip when facing right
         float sc = 2.0f;
         float scX;
-        if (facingRight) scX = -sc;
-        else scX = sc;
+        if (facingRight) {
+            scX = -sc;
+        }
+        else {
+            scX = sc;
+        }
         sprite.setOrigin(r.width / 2.0f, (float)r.height);
         sprite.setPosition((x + width / 2.0f) - camX, (y + height) - camY);
         sprite.setScale(scX, sc);
@@ -408,8 +448,7 @@ public:
 };
 
 
-// most basic enemy has pistol and patrols
-// spawns in batches of 2 to 4
+// Basic enemy with pistol and patrols, spawns in batches
 class RebelSoldier : public InfantryEnemy {
 private:
     float patrolRange;
@@ -484,19 +523,21 @@ public:
         anims[DIE].load("Sprites/Enemies/Rebel Soldier.png", dieXs, dieYs, dieWs, dieHs, 4, 0.15f);
     }
 
-    // uses parent InfantryEnemy attack no need to override
     void attack() override {
-        if (isShooting) return; // already shooting
+        if (isShooting) {
+            return;
+        }
 
-        // start shooting sequence
         isShooting = true;
         bulletsFired = 0;
         shootingTimer = 0.0f;
-        currentAnim = STAND; // shift to stand animation
+        currentAnim = STAND;
     }
 
     void move(float dt) override {
-        if (isShooting) return; // stop moving while shooting
+        if (isShooting) {
+            return;
+        }
         InfantryEnemy::move(dt);
     }
 
@@ -504,14 +545,15 @@ public:
         if (isShooting) {
             shootingTimer += dt;
 
-            // shoot bullets with delay
             if (bulletsFired < 3 && shootingTimer >= bulletDelay) {
-                InfantryEnemy::attack(); // fire one bullet
+                float dx = largestPlayer->getPlayerX() - x;
+                float dy = largestPlayer->getPlayerY() - y;
+                float angle = atan2(dy, dx);
+                pistol.fire(angle);
                 bulletsFired++;
                 shootingTimer = 0.0f;
             }
 
-            // end shooting sequence after 3 bullets
             if (bulletsFired >= 3) {
                 isShooting = false;
                 bulletsFired = 0;
@@ -527,8 +569,7 @@ public:
 };
 
 
-// throws grenades in ballistic arc toward player
-// spawns in batches of 1 to 2
+// Throws grenades in ballistic arc, spawns in batches
 class GrenadeSoldier : public InfantryEnemy {
 private:
     int          grenadeCount;
@@ -585,43 +626,43 @@ public:
     }
 
     void attack() override {
-        // check player exist
-        if (largestPlayer == nullptr) return;
+        if (largestPlayer == nullptr) {
+            return;
+        }
 
-        // cooldown check
-        if (throwCooldown > 0) return;
+        if (throwCooldown > 0) {
+            return;
+        }
 
-        // distance check
         float dx = largestPlayer->getPlayerX() - x;
         float dy = largestPlayer->getPlayerY() - y;
         float distance = sqrt(dx * dx + dy * dy);
 
-        // range check
-        if (distance > attackRange) return;
+        if (distance > attackRange) {
+            return;
+        }
 
-        // throw grenade toward player
         throwGrenade();
-
-        // reset cooldown
         throwCooldown = 2.0f;
     }
 
     void throwGrenade() {
-        if (activeGrenades >= 5) return;
-        if (grenadeCount <= 0)   return;
+        if (activeGrenades >= 5) {
+            return;
+        }
+        if (grenadeCount <= 0) {
+            return;
+        }
 
         float tx = largestPlayer->getPlayerX();
         float ty = largestPlayer->getPlayerY();
 
-        // time to reach player in 1.2 sec
         float flightTime = 1.2f;
         float gravity = 980.0f;
 
         float dx = tx - x;
         float dy = ty - y;
 
-        // using ballistic projectile formula
-        // velocity is distance over time
         float velX = dx / flightTime;
         float velY = (dy - 0.5 * gravity * flightTime * flightTime) / flightTime;
 
@@ -633,10 +674,16 @@ public:
     }
 
     void update(float dt) override {
-        if (!isAlive)             return;
-        if (largestPlayer == nullptr) return;
+        if (!isAlive) {
+            return;
+        }
+        if (largestPlayer == nullptr) {
+            return;
+        }
 
-        if (throwCooldown > 0) throwCooldown -= dt;
+        if (throwCooldown > 0) {
+            throwCooldown -= dt;
+        }
 
         detectPlayer(largestPlayer);
         move(dt);
@@ -645,8 +692,9 @@ public:
         float dy = largestPlayer->getPlayerY() - y;
         float distanceToplayer = sqrt(dx * dx + dy * dy);
 
-        if (isTargetingPlayer && distanceToplayer < attackRange)
+        if (isTargetingPlayer && distanceToplayer < attackRange) {
             attack();
+        }
 
         pistol.update(dt);
         updateAnimState(dt);
@@ -658,8 +706,7 @@ public:
 };
 
 
-// rocket class used by bazooka soldier and bosses
-// gravity affects it after firing
+// Rocket class for bazooka soldier and bosses
 class Rocket {
 private:
     float x, y;
@@ -682,8 +729,10 @@ public:
     float getY()     const { return y; }
 
     void update(float dt) {
-        if (!active) return;
-        velY += 980 * dt;  // gravity pulls rocket down
+        if (!active) {
+            return;
+        }
+        velY += 980 * dt;
         x += velX * dt;
         y += velY * dt;
     }
@@ -692,8 +741,7 @@ public:
 };
 
 
-// slow moving fires rockets in steep arc
-// spawns in batches of 1 to 2
+// Slow moving, fires rockets in steep arc, spawns in batches
 class BazookaSoldier : public InfantryEnemy {
 private:
     float  rocketReloadTimer;
@@ -752,34 +800,36 @@ public:
     }
 
     void attack() override {
-        // check player exist
-        if (largestPlayer == nullptr) return;
+        if (largestPlayer == nullptr) {
+            return;
+        }
 
-        // distance check
         float dx = largestPlayer->getPlayerX() - x;
         float dy = largestPlayer->getPlayerY() - y;
         float distance = sqrt(dx * dx + dy * dy);
 
-        // range check
-        if (distance > attackRange) return;
+        if (distance > attackRange) {
+            return;
+        }
 
-        // fire rocket toward player
         fireRocket();
-
-        // facing direction update
         facingRight = (dx > 0);
     }
 
     void fireRocket() {
-        // cooldown check
-        if (rocketReloadTimer > 0)    return;
-        if (activeRockets >= 5)       return;
-        if (largestPlayer == nullptr) return;
+        if (rocketReloadTimer > 0) {
+            return;
+        }
+        if (activeRockets >= 5) {
+            return;
+        }
+        if (largestPlayer == nullptr) {
+            return;
+        }
 
         float tx = largestPlayer->getPlayerX();
         float ty = largestPlayer->getPlayerY();
 
-        // steeper arc flight time
         float flightTime = 1.5f;
         float gravity = 980.0f;
 
@@ -892,6 +942,7 @@ public:
     {
         // explosives bypass shield completly
         if (isExplosive) {
+        
             hp -= dmg;
             if (hp <= 0) die();
             return;
@@ -905,14 +956,17 @@ public:
 
         // bullet from front check
         if (facingRight) {
+        
             if (bulletX > x) isFront = true;
         }
         else {
+        
             if (bulletX < x) isFront = true;
         }
 
         // shield blocks frontal non explosive bullets
         if (shieldActive && isFront && !isAbove) {
+        
             shieldDurability--;
             if (shieldDurability <= 0)
                 shieldActive = false;
@@ -1121,6 +1175,7 @@ public:
         // check if landed floor check
         float GROUND_Y = 520.f;
         if (y + height >= GROUND_Y) {
+        
             y = GROUND_Y - height;
             if (!hasLanded)
                 spawnInfantry();
@@ -1165,7 +1220,7 @@ public:
 
     virtual ~UndeadEnemy() {}
 
-    virtual void transformPlayer(Player* p) {
+    virtual void transformPlayer(PlayerSoldier* p) {
         if (!p) return;
         // child classes implement the actual transform effect
     }
@@ -1189,19 +1244,25 @@ public:
     virtual void updateAnimState(float dt) {
         int desired;
         if (!isAlive) {
+        
             desired = DIE;
         }
         else if (isCrumbled) {
+        
             desired = HURT;
         }
         else if (velocityX > 0.5f || velocityX < -0.5f) {
+        
             desired = WALK;
         }
         else {
+        
             desired = WALK;
         }
 
         if (desired != currentAnim) {
+
+        
             currentAnim = desired;
             anims[currentAnim].reset();
         }
@@ -1297,6 +1358,7 @@ public:
     // fire kills instantly bullets just crumble it
     void takeDamage(int dmg, float bx, float by, bool isExplosive) override {
         if (isExplosive) {
+        
             // explosions and fire kill instantly per spec
             hp = 0;
             die();
@@ -1424,6 +1486,7 @@ public:
 
         // pistol shot if in range
         if (dist < attackRange) {
+        
             // pistol.fire(atan2(dy, dx));  // enable when weapon linked
         }
 
@@ -1591,8 +1654,10 @@ public:
 
     void move(float dt) override {
         if (phase == 1) {
+        
             // phase 1 pod flies above player horizontally
             if (largestPlayer) {
+            
                 float targetX = largestPlayer->getPlayerX() - width * 0.5f;
                 float dx = targetX - x;
                 if (dx > 0) velocityX = 1.f * speed;
@@ -1608,6 +1673,7 @@ public:
             podY = y - 80.f;
         }
         else {
+        
             // phase 2 martian on foot normal chase
             chasePlayer(largestPlayer);
             x += velocityX * dt;
@@ -1618,6 +1684,8 @@ public:
         if (!largestPlayer) return;
 
         if (phase == 1 && isPodAlive) {
+
+        
             // fire beam downward when directly above player
             float dx = largestPlayer->getPlayerX() - x;
             if (abs(dx) < 20.f)
@@ -1626,6 +1694,7 @@ public:
                 beamActive = false;
         }
         else if (phase == 2) {
+        
             // pistol fire in phase 2
             float dx = largestPlayer->getPlayerX() - x;
             float dy = largestPlayer->getPlayerY() - y;
@@ -1659,6 +1728,7 @@ public:
 
         // gravity only in phase 2 when on foot
         if (phase == 2) {
+        
             applyGravity(dt);
             checkGrounded();
             checkFlatGround();
@@ -1817,6 +1887,7 @@ public:
         // countdown timers
         if (rocketLauncherTimer > 0.f) rocketLauncherTimer -= dt;
         if (fireBombTimer > 0.f) {
+        
             fireBombTimer -= dt;
             if (fireBombTimer <= 0.f)
                 fireBombCooldown = false;  // ready to fire bomb again

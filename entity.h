@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 using namespace sf;
 
-// entity as abstract class
+// Abstract entity class
 class Entity {
 protected:
     float x, y;
@@ -34,7 +34,12 @@ public:
     DamagableEntity() : hp(1), maxHp(1), damage(0), isAlive(true) {}
     virtual ~DamagableEntity() {}
 
-    virtual void takeDamage(int dmg) { hp -= dmg; if (hp <= 0) die(); }
+    virtual void takeDamage(int dmg) {
+        hp -= dmg;
+        if (hp <= 0) {
+            die();
+        }
+    }
     virtual void die() { isAlive = false; isActive = false; }
 
     bool getIsAlive() const { return isAlive; }
@@ -42,7 +47,7 @@ public:
     int  getMaxHP()   const { return maxHp; }
 };
 
-// Soldier sits between DamagableEntity and PlayerSoldier
+// Soldier between DamagableEntity and PlayerSoldier
 class Soldier : public DamagableEntity {
 protected:
     bool  facingRight;

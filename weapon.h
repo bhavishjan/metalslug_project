@@ -4,7 +4,7 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <cmath>
-#include "Player.h"
+#include "PlayerSoldier.h"
 
 using namespace std;
 
@@ -134,7 +134,9 @@ public:
 
     void setAmmo(int amount) {
         ammo = amount;
-        if (ammo > maxAmmo) ammo = maxAmmo;
+        if (ammo > maxAmmo) {
+            ammo = maxAmmo;
+        }
     }
 
     void reload() { ammo = maxAmmo; }
@@ -581,7 +583,9 @@ public:
     void update(float dt) {
         if (isActive) {
             timer -= dt;
-            if (timer <= 0) isActive = false;
+            if (timer <= 0) {
+                isActive = false;
+            }
             float alpha = (timer / duration) * 130;
             poolCircle.setFillColor(sf::Color(255, 60, 0, (sf::Uint8)alpha));
         }
@@ -717,8 +721,12 @@ public:
             x += velocityX * dt;
             y += velocityY * dt;
             fuseTimer -= dt;
-            if (fuseTimer <= 0) explode();
-            if (y >= groundLevel) applyBounce();
+            if (fuseTimer <= 0) {
+                explode();
+            }
+            if (y >= groundLevel) {
+                applyBounce();
+            }
         }
     }
 
