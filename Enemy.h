@@ -136,7 +136,12 @@ public:
         }
         else {
             // inside range so keep moving in current direction
-            velocityX = speed;
+            if (facingRight) {
+                velocityX = speed;
+            }
+            else {
+                velocityX = -speed;
+            }
         }
     }
 
@@ -186,6 +191,31 @@ public:
         int roll = rand() % 100;
         if (roll < 20)  // 20 percent chance of food drop
             spawnLoot();
+    }
+
+
+    void checkEnemyCollision(Enemy* other) {
+        if (!other || other == this) return;
+        if (!isAlive || !other->getIsAlive()) return;
+
+        if (!rectsOverlap(x, y, width, height,
+            other->getX(), other->getY(),
+            other->getWidth(), other->getHeight())) return;
+
+        float myCenter = x + width / 2.f;
+        float hisCenter = other->getX() + other->getWidth() / 2.f;
+
+        if (myCenter < hisCenter) {
+            // main left hun, mujhe left push karo
+            float overlap = (x + width) - other->getX();
+            x -= overlap / 2.f;
+        }
+        else {
+            // main right hun, mujhe right push karo
+            float overlap = (other->getX() + other->getWidth()) - x;
+            x += overlap / 2.f;
+        }
+        velocityX = 0.f;
     }
 
     void spawnLoot();
@@ -619,6 +649,7 @@ public:
             attack();
 
         pistol.update(dt);
+        updateAnimState(dt);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
@@ -714,7 +745,7 @@ public:
         static const int dieWs[9] = {  46,  44,  45,  41,  41,  41,  36,  38,  31 };
         static const int dieHs[9] = {  42,  39,  45,  43,  48,  48,  48,  51,  47 };
 
-        anims[WALK].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", walkXs, walkYs, walkWs, walkHs, 6, 0.08f);
+        anims[WALK].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", walkXs, walkYs, walkWs, walkHs, 11, 0.08f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", standXs, standYs, standWs, standHs, 1, 0.18f);
         anims[SHOOT].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", fireXs, fireYs, fireWs, fireHs, 3, 0.14f);
         anims[DIE].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", dieXs, dieYs, dieWs, dieHs, 9, 0.12f);
@@ -992,7 +1023,7 @@ public:
         y += velocityY * dt;
     }
 
-    void attack()  override;
+    virtual void attack() = 0; // pure virtual
 
     void update(float dt) override {
         if (!isAlive || !largestPlayer) return;
@@ -1200,12 +1231,12 @@ public:
 // only fire kills it instantly per project spec
 class MummyWarrior : public UndeadEnemy {
 private:
-    bool  isCrumbled;
+  
     float resumeTimer;
     float resumeDuration;
 
 public:
-    MummyWarrior() : isCrumbled(false), resumeTimer(0.f), resumeDuration(3.f)
+    MummyWarrior() :  resumeTimer(0.f), resumeDuration(3.f)
     {
         name = "Mummy Warrior";
         hp = maxHp = 5;
@@ -1216,7 +1247,7 @@ public:
         height = 52.f;
         transformOnContact = true;
         onlyDeadFromFire = true;
-
+        isCrumbled = (false);
 
         // walk animation (slow shamble)
         static const int walkXs[18] = { 196, 232, 270, 312, 353, 394, 432, 472, 508, 548, 592, 638, 680, 721, 768, 804, 843, 883 };
@@ -1380,7 +1411,7 @@ public:
     void move(float dt) override {
         if (largestPlayer)
             chasePlayer(largestPlayer);
-        x += velocityX * dt;
+     
     }
 
     void attack() override {
@@ -1406,6 +1437,7 @@ public:
         detectPlayer(largestPlayer);
         move(dt);
         attack();
+        updateAnimState(dt);
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
