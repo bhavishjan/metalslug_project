@@ -287,7 +287,7 @@ int main() {
 
         // Player shooting (X key)
         if (playerFireCooldown > 0.f) playerFireCooldown -= dt;
-        fireHeld = Keyboard::isKeyPressed(Keyboard::X);
+        fireHeld = Keyboard::isKeyPressed(Keyboard::X) || Keyboard::isKeyPressed(Keyboard::F);
         if (fireHeld && playerFireCooldown <= 0.f) {
             float px = characters.getActivePlayer()->getPlayerX();
             float py = characters.getActivePlayer()->getPlayerY();
