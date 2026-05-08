@@ -39,6 +39,9 @@ int main() {
     static const int MAX_SURVIVAL_ENEMIES = 50;
     Enemy* survivalRebels[MAX_SURVIVAL_ENEMIES] = {};
     int survivalRebelCount = 0;
+    static const int MAX_CAMPAIGN_ENEMIES = 30;
+    Enemy* campaignRebels[MAX_CAMPAIGN_ENEMIES] = {};
+    int campaignRebelCount = 0;
 
     // PLAYER SETUP
 
@@ -181,6 +184,41 @@ int main() {
                             characters.getActivePlayer()->setIsGrounded(false);
                             cameraX = cameraY = 0;
                             Delay.restart();
+
+                            for (int i = 0; i < MAX_CAMPAIGN_ENEMIES; i++) {
+                                delete campaignRebels[i];
+                                campaignRebels[i] = nullptr;
+                            }
+                            int ci = 0;
+                            for (int i = 0; i < 4; i++) {
+                                campaignRebels[ci] = new RebelSoldier();
+                                campaignRebels[ci]->setPosition(700.f + i * 280.f, 260.f);
+                                campaignRebels[ci]->setPlayer(characters.getActivePlayer());
+                                campaignRebels[ci]->setBulletManager(&bulletManager);
+                                campaignRebels[ci]->setGroundY((float)(screen_y - 48));
+                                ci++;
+                            }
+                            for (int i = 0; i < 2; i++) {
+                                campaignRebels[ci] = new GrenadeSoldier();
+                                campaignRebels[ci]->setPosition(1700.f + i * 360.f, 260.f);
+                                campaignRebels[ci]->setPlayer(characters.getActivePlayer());
+                                campaignRebels[ci]->setBulletManager(&bulletManager);
+                                campaignRebels[ci]->setGroundY((float)(screen_y - 48));
+                                ci++;
+                            }
+                            campaignRebels[ci] = new BazookaSoldier();
+                            campaignRebels[ci]->setPosition(2500.f, 240.f);
+                            campaignRebels[ci]->setPlayer(characters.getActivePlayer());
+                            campaignRebels[ci]->setBulletManager(&bulletManager);
+                            campaignRebels[ci]->setGroundY((float)(screen_y - 48));
+                            ci++;
+                            campaignRebels[ci] = new ShieldedSoldier();
+                            campaignRebels[ci]->setPosition(3000.f, 240.f);
+                            campaignRebels[ci]->setPlayer(characters.getActivePlayer());
+                            campaignRebels[ci]->setBulletManager(&bulletManager);
+                            campaignRebels[ci]->setGroundY((float)(screen_y - 48));
+                            ci++;
+                            campaignRebelCount = ci;
                             cout << "Entered Campaign Mode" << endl;
                         }
                     }
@@ -200,8 +238,13 @@ int main() {
                     delete survivalRebels[i];
                     survivalRebels[i] = nullptr;
                 }
+                for (int i = 0; i < MAX_CAMPAIGN_ENEMIES; i++) {
+                    delete campaignRebels[i];
+                    campaignRebels[i] = nullptr;
+                }
                 bulletManager = BulletManager(); // clear leftover bullets when returning to menu
                 survivalRebelCount = 0;
+                campaignRebelCount = 0;
                 cameraX = cameraY = 0;
                 menu.setMenuState(0);
                 menu.resetSelection();
@@ -669,6 +712,60 @@ int main() {
 
                 // Update
                 campaignGame->update(dt, &characters);
+
+                // Update campaign enemies and let them auto fire
+                for (int i = 0; i < campaignRebelCount; i++) {
+                    if (!campaignRebels[i]) continue;
+                    if (!campaignRebels[i]->getIsAlive()) continue;
+
+                    campaignRebels[i]->setPlayer(characters.getActivePlayer());
+                    campaignRebels[i]->setBulletManager(&bulletManager);
+                    campaignRebels[i]->update(dt);
+
+                    float enemyX = campaignRebels[i]->getX();
+                    float enemyY = campaignRebels[i]->getY();
+                    float enemyVx = campaignRebels[i]->getVelocityX();
+                    float enemyVy = campaignRebels[i]->getVelocityY();
+                    const float enemyW = campaignRebels[i]->getWidth();
+                    const float enemyH = campaignRebels[i]->getHeight();
+
+                    campaignRebels[i]->applyGravity(dt);
+                    enemyVy = campaignRebels[i]->getVelocityY();
+
+                    // Horizontal collision with terrain
+                    float newX = enemyX + enemyVx * dt;
+                    if (campaignLevel->checkCollision(newX, enemyY, enemyW, enemyH)) {
+                        enemyVx = -enemyVx;
+                        campaignRebels[i]->setVelocityX(enemyVx);
+                        newX = enemyX;
+                    }
+                    enemyX = newX;
+
+                    // Vertical collision with terrain
+                    enemyY += enemyVy * dt;
+                    if (campaignLevel->checkCollision(enemyX, enemyY, enemyW, enemyH)) {
+                        if (enemyVy > 0) {
+                            enemyVy = 0.f;
+                            campaignRebels[i]->setGrounded(true);
+                            while (campaignLevel->checkCollision(enemyX, enemyY, enemyW, enemyH)) {
+                                enemyY -= 1.f;
+                            }
+                        }
+                        else {
+                            enemyVy = 0.f;
+                            while (campaignLevel->checkCollision(enemyX, enemyY, enemyW, enemyH)) {
+                                enemyY += 1.f;
+                            }
+                        }
+                    }
+                    else if (enemyVy >= 0.f) {
+                        campaignRebels[i]->setGrounded(false);
+                    }
+
+                    campaignRebels[i]->setVelocityY(enemyVy);
+                    campaignRebels[i]->setPosition(enemyX, enemyY);
+                }
+
                 bulletManager.update(dt);
 
                 int playerDamageFromProjectiles = 0;
@@ -683,9 +780,30 @@ int main() {
                     characters.getActivePlayer()->takeDamage(playerDamageFromProjectiles);
                 }
 
+                // Player bullets hit campaign enemies
+                for (int i = 0; i < campaignRebelCount; i++) {
+                    if (!campaignRebels[i] || !campaignRebels[i]->getIsAlive()) continue;
+                    int dmg = 0;
+                    float hitX = 0.f, hitY = 0.f;
+                    while (bulletManager.popPlayerBulletHit(
+                        campaignRebels[i]->getX(),
+                        campaignRebels[i]->getY(),
+                        campaignRebels[i]->getWidth(),
+                        campaignRebels[i]->getHeight(),
+                        dmg, hitX, hitY))
+                    {
+                        campaignRebels[i]->takeDamage(dmg, hitX, hitY, false);
+                        if (!campaignRebels[i]->getIsAlive()) break;
+                    }
+                }
+
                 // Render
                 window.clear(Color(135, 206, 235));
                 campaignGame->render(window);
+                for (int i = 0; i < campaignRebelCount; i++) {
+                    if (campaignRebels[i] && campaignRebels[i]->getIsAlive())
+                        campaignRebels[i]->render(window, cameraX, cameraY);
+                }
                 bulletManager.render(window, cameraX, cameraY);
                 characters.getActivePlayer()->render(window, cameraX, cameraY);
                 window.display();
@@ -699,5 +817,6 @@ int main() {
     delete survivalGame;
     delete campaignGame;
     for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) delete survivalRebels[i];
+    for (int i = 0; i < MAX_CAMPAIGN_ENEMIES; i++) delete campaignRebels[i];
     return 0;
 }
