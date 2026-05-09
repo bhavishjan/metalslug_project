@@ -146,7 +146,6 @@ public:
         gameTimer += dt;
         if (currentLevel) {
             currentLevel->update(dt);
-            characters->getActivePlayer()->updateAnimation(dt);
         }
         checkLevelComplete();
     }
@@ -171,7 +170,7 @@ public:
         fusionUsedThisLevel = false;
         if (currentLevel) {
             currentLevel->generateBiomes();
-            currentLevel->spawnEnemies();
+            // currentLevel->spawnEnemies(); - commented out, requires EnemyManager and PlayerSoldier*
         }
     }
 
@@ -346,7 +345,6 @@ public:
 
         if (campaignLevel) {
             campaignLevel->update(characters->getActivePlayer()->getPlayerX());
-            characters->getActivePlayer()->updateAnimation(dt);
         }
         checkKillQuota();
     }

@@ -123,7 +123,8 @@ public:
         meleeCooldown = 0.5f;
         meleeTimer = 0.0f;
         inVehicle = false;
-        isAlive = isImmortal = isFat = isInWater = false;
+        isAlive = true;
+        isImmortal = isFat = isInWater = false;
         score = saturation = 0;
         specialPowerActive = false;
         specialPowerTimer = 0.0f;
@@ -189,7 +190,7 @@ public:
 
     void jump() {
         if (isGrounded && !inVehicle) {
-            velocityY = -12.0f;
+            velocityY = getJumpPower();
             isJumping = true;
             isGrounded = false;
         }
@@ -370,8 +371,8 @@ public:
                 sprite.setTextureRect(lr);
                 sprite.setOrigin(lr.width / 2.0f, (float)lr.height);
                 sprite.setPosition(player_x + width / 2.0f - camX,
-                    player_y + height - camY + a.getLegsOffsetY());
-                float scX = facingRight ? -2.0f : 2.0f;
+                    player_y + height - camY + a.getLegsOffsetY() * 2.0f);
+                float scX = facingRight ? 2.0f : -2.0f;
                 sprite.setScale(scX, 2.0f);
                 window.draw(sprite);
             }
@@ -383,9 +384,9 @@ public:
             sprite.setTextureRect(r);
             sprite.setOrigin(r.width / 2.0f, (float)r.height);
             float hx = player_x + width / 2.0f - camX
-                + (facingRight ? a.getHeadOffsetX() : -a.getHeadOffsetX());
-            sprite.setPosition(hx, player_y + height - camY - a.getHeadOffsetY());
-            float scX = facingRight ? -2.0f : 2.0f;
+                + (facingRight ? a.getHeadOffsetX() : -a.getHeadOffsetX()) * 2.0f;
+            sprite.setPosition(hx, player_y + height - camY - a.getHeadOffsetY() * 2.0f);
+            float scX = facingRight ? 2.0f : -2.0f;
             sprite.setScale(scX, 2.0f);
             window.draw(sprite);
         }
@@ -411,8 +412,8 @@ public:
     int   getHeight()    const { return (int)height; }
     float getFriction()  const { return 0.85f; }
     float getAirFriction() const { return 0.95f; }
-    float getJumpPower() const { return 400.0f; }
-    float getGravity()   const { return 2000.0f; }
+    float getJumpPower() const { return -60.0f; }
+    float getGravity()   const { return 1.0f; }
     float getMaxFallSpeed() const { return 800.0f; }
     bool  getIsGrounded() const { return isGrounded; }
 
@@ -785,10 +786,10 @@ public:
 
     ~FusionCompanion() {}
 
-    void fuseCharacters(PlayerSoldier** characters, int count) {
+    void fuseCharacters(PlayerSoldier** chars, int count) {
         fusedCount = count;
         for (int i = 0; i < count && i < 4; i++) {
-            fusedCharacters[i] = characters[i];
+            fusedCharacters[i] = chars[i];
         }
         averageStats();
     }
@@ -855,7 +856,7 @@ public:
 
 class CharacterManager {
 private:
-    PlayerSoldier* characters[4];
+    PlayerSoldier* Player[4];
     int activeIndex;
     int activeCharacterCount;
 
@@ -866,8 +867,8 @@ private:
         if (!isCharacterAvailable(index) || index == activeIndex) {
             return;
         }
-        PlayerSoldier* oldP = characters[activeIndex];
-        PlayerSoldier* newP = characters[index];
+        PlayerSoldier* oldP = Player[activeIndex];
+        PlayerSoldier* newP = Player[index];
         if (oldP && newP) {
             newP->setPlayerPosition(oldP->getPlayerX(), oldP->getPlayerY() - oldP->getHeight());
             newP->setVelocity(oldP->getVelocityX(), oldP->getVelocityY());
@@ -878,10 +879,10 @@ private:
 
 public:
     CharacterManager() {
-        characters[0] = new Marco();
-        characters[1] = new Tarma();
-        characters[2] = new Eri();
-        characters[3] = new Fiolina();
+        Player[0] = new Marco();
+        Player[1] = new Tarma();
+        Player[2] = new Eri();
+        Player[3] = new Fiolina();
         activeIndex = 0;
         activeCharacterCount = 4;
         fusionCompanion = new FusionCompanion();
@@ -890,8 +891,8 @@ public:
 
     ~CharacterManager() {
         for (int i = 0; i < 4; i++) {
-            delete characters[i];
-            characters[i] = nullptr;
+            delete Player[i];
+            Player[i] = nullptr;
         }
         delete fusionCompanion;
         fusionCompanion = nullptr;
@@ -908,8 +909,8 @@ public:
         if (index < 0 || index >= 4 || !isCharacterAvailable(index)) {
             return;
         }
-        PlayerSoldier* oldP = characters[activeIndex];
-        PlayerSoldier* newP = characters[index];
+        PlayerSoldier* oldP = Player[activeIndex];
+        PlayerSoldier* newP = Player[index];
         if (oldP && newP && index != activeIndex) {
             newP->setPlayerPosition(oldP->getPlayerX(), oldP->getPlayerY());
             newP->setVelocity(oldP->getVelocityX(), oldP->getVelocityY());
@@ -917,12 +918,21 @@ public:
         activeIndex = index;
     }
 
-    PlayerSoldier* getActivePlayer() { return characters[activeIndex]; }
+    PlayerSoldier* getActivePlayer() { return Player[activeIndex]; }
+
+    float getX() { return Player[activeIndex]->getPlayerX(); }
+    float getY() { return Player[activeIndex]->getPlayerY(); }
+    float getVelocityX() { return Player[activeIndex]->getVelocityX(); }
+    float getVelocityY() { return Player[activeIndex]->getVelocityY(); }
+    int getWidth() { return Player[activeIndex]->getWidth(); }
+    int getHeight() { return Player[activeIndex]->getHeight(); }
+    bool getIsGrounded() { return Player[activeIndex]->getIsGrounded(); }
+    bool isFacingRight() { return Player[activeIndex]->isFacingRight(); }
 
     bool isCharacterAvailable(int index) const {
         return (index >= 0 && index < 4)
-            && characters[index]
-            && characters[index]->getIsAlive();
+            && Player[index]
+            && Player[index]->getIsAlive();
     }
 
     int getNextAvailableIndex() const {
@@ -937,7 +947,7 @@ public:
 
     bool allDead() const {
         for (int i = 0; i < 4; i++) {
-            if (characters[i] && characters[i]->getIsAlive()) {
+            if (Player[i] && Player[i]->getIsAlive()) {
                 return false;
             }
         }
@@ -946,8 +956,8 @@ public:
 
     void resetAll() {
         for (int i = 0; i < 4; i++) {
-            if (characters[i]) {
-                characters[i]->respawn();
+            if (Player[i]) {
+                Player[i]->respawn();
             }
         }
         activeIndex = 0;
@@ -960,8 +970,8 @@ public:
         PlayerSoldier* alive[4];
         int count = 0;
         for (int i = 0; i < 4; i++) {
-            if (characters[i] && characters[i]->getIsAlive()) {
-                alive[count++] = characters[i];
+            if (Player[i] && Player[i]->getIsAlive()) {
+                alive[count++] = Player[i];
             }
         }
         fusionCompanion->fuseCharacters(alive, count);
@@ -969,8 +979,8 @@ public:
     }
 
     void update() {
-        if (characters[activeIndex]) {
-            characters[activeIndex]->update();
+        if (Player[activeIndex]) {
+            Player[activeIndex]->update();
         }
         if (fusionCompanion) {
             fusionCompanion->update();
@@ -984,8 +994,8 @@ public:
     }
 
     void render(RenderWindow& window) {
-        if (characters[activeIndex]) {
-            characters[activeIndex]->render(window, 0, 0);
+        if (Player[activeIndex]) {
+            Player[activeIndex]->render(window, 0, 0);
         }
         if (fusionCompanion) {
             fusionCompanion->render(window);

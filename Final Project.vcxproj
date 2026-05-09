@@ -25,6 +25,7 @@
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Biome.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Collectibilies.h" />
     <ClInclude Include="Echo.h" />
     <ClInclude Include="Enemy.h" />
@@ -34,6 +35,7 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="PauseMenu.h" />
     <ClInclude Include="PerlinNoise.h" />
     <ClInclude Include="PlayerSoldier.h" />
     <ClInclude Include="Weapon.h" />

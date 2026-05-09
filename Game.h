@@ -9,6 +9,7 @@
 #include "Menu.h"
 #include "GameMode.h"
 #include "GameState.h"
+#include "Camera.h"
 
 using namespace sf;
 using namespace std;
@@ -26,49 +27,47 @@ private:
 
     int selectedCharacter;
 
-
-    Menu menu;
-
-
     SurvivalGame* survivalGame;
-    static const int MAX_SURVIVAL_ENEMIES = 50;
-    Enemy* survivalRebels[MAX_SURVIVAL_ENEMIES];
-    int survivalRebelCount;
-
 
     CampaignGame* campaignGame;
 
-
     CharacterManager characters;
+    EnemyManager enemies;
+    LevelManager levelManager;
     bool jumpHeld;
+    bool showLevelTitle;
+    Clock levelTitleTimer;
+    int currentLevelNumber;
 
 
     Clock clock;
     Clock Delay;
+    Clock pauseDelay;
 
-
-    float cameraX;
-    float cameraY;
+    Camera camera;
+    Menu startMenu;
+    Menu pauseMenu;
 
 public:
     Game() 
-        : screenX(1600), screenY(900),
+        : screenX(1600),
+          screenY(900),
           gameMode(0),
           selectedCharacter(0),
-          menu(),
+          startMenu(false),
+          pauseMenu(true),
           survivalGame(nullptr),
           campaignGame(nullptr),
           jumpHeld(false),
-          cameraX(0), cameraY(0) {
-
-
-        for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) {
-            survivalRebels[i] = nullptr;
-        }
-        survivalRebelCount = 0;
-
+          showLevelTitle(false),
+          currentLevelNumber(0),
+          camera(screenX, screenY) {
 
         window.create(VideoMode(screenX, screenY), "Metal Slug", Style::Close);
+
+        Delay.restart();
+        pauseDelay.restart();
+
         window.setVerticalSyncEnabled(true);
         window.setFramerateLimit(60);
     }
@@ -98,23 +97,23 @@ public:
 
             if (gameMode == 0 && ev.type == Event::KeyPressed) {
                 if (ev.key.code == Keyboard::Up) {
-                    menu.moveSelectionUp();
+                    startMenu.moveSelectionUp();
                 }
                 else if (ev.key.code == Keyboard::Down) {
-                    menu.moveSelectionDown();
+                    startMenu.moveSelectionDown();
                 }
                 else if (ev.key.code == Keyboard::Enter) {
-                    int menuState = menu.getMenuState();
+                    int menuState = startMenu.getMenuState();
                     if (menuState == 0) {
-                        menu.setMenuState(1);
+                        startMenu.setMenuState(1);
                     }
                     else if (menuState == 1) {
-                        selectedCharacter = menu.getSelectionIndex();
+                        selectedCharacter = startMenu.getSelectionIndex();
                         characters.switchCharacterToIndex(selectedCharacter);
-                        menu.setMenuState(2);
+                        startMenu.setMenuState(2);
                     }
                     else if (menuState == 2) {
-                        int modeSelection = menu.getSelectionIndex();
+                        int modeSelection = startMenu.getSelectionIndex();
                         if (modeSelection == 0) {
                             gameMode = 1;
                             survivalGame = new SurvivalGame(screenX, screenY);
@@ -123,59 +122,18 @@ public:
                             characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
                             characters.getActivePlayer()->setVelocity(0, 0);
                             characters.getActivePlayer()->setGrounded(false);
-                            cameraX = cameraY = 0;
+                            camera.reset();
                             Delay.restart();
-                            
 
-                            for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) {
-                                delete survivalRebels[i];
-                                survivalRebels[i] = nullptr;
+                            // Get the level from survivalGame and spawn enemies directly
+                            Level* level = survivalGame->getCurrentLevel();
+                            if (level) {
+                                level->spawnEnemies(enemies, characters.getActivePlayer());
                             }
-                            int ei = 0;
-                            for (int i = 0; i < 2; i++) {
-                                survivalRebels[ei] = new RebelSoldier();
-                                survivalRebels[ei]->setPosition(300.f + i * 350.f, 200.f);
-                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                                survivalRebels[ei]->setGroundY((float)(screenY - 48));
-                                ei++;
-                            }
-                            for (int i = 0; i < 2; i++) {
-                                survivalRebels[ei] = new GrenadeSoldier();
-                                survivalRebels[ei]->setPosition(500.f + i * 400.f, 200.f);
-                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                                survivalRebels[ei]->setGroundY((float)(screenY - 48));
-                                ei++;
-                            }
-                            survivalRebels[ei] = new BazookaSoldier();
-                            survivalRebels[ei]->setPosition(600.f, 200.f);
-                            survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                            survivalRebels[ei]->setGroundY((float)(screenY - 48));
-                            ei++;
-                            survivalRebels[ei] = new ShieldedSoldier();
-                            survivalRebels[ei]->setPosition(800.f, 200.f);
-                            survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                            survivalRebels[ei]->setGroundY((float)(screenY - 48));
-                            ei++;
-                            for (int i = 0; i < 2; i++) {
-                                survivalRebels[ei] = new MummyWarrior();
-                                survivalRebels[ei]->setPosition(1000.f + i * 400.f, 200.f);
-                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                                survivalRebels[ei]->setGroundY((float)(screenY - 48));
-                                ei++;
-                            }
-                            for (int i = 0; i < 2; i++) {
-                                survivalRebels[ei] = new Zombie();
-                                survivalRebels[ei]->setPosition(1200.f + i * 400.f, 200.f);
-                                survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                                survivalRebels[ei]->setGroundY((float)(screenY - 48));
-                                ei++;
-                            }
-                            survivalRebels[ei] = new Martian();
-                            survivalRebels[ei]->setPosition(1400.f, 200.f);
-                            survivalRebels[ei]->setPlayer(characters.getActivePlayer());
-                            survivalRebels[ei]->setGroundY((float)(screenY - 48));
-                            ei++;
-                            survivalRebelCount = ei;
+                            
+                            currentLevelNumber = 1;
+                            showLevelTitle = true;
+                            levelTitleTimer.restart();
                         }
                         else if (modeSelection == 1) {
                             gameMode = 2;
@@ -185,7 +143,7 @@ public:
                             characters.getActivePlayer()->setPlayerPosition(200, 50);
                             characters.getActivePlayer()->setVelocity(0, 0);
                             characters.getActivePlayer()->setGrounded(false);
-                            cameraX = cameraY = 0;
+                            camera.reset();
                             Delay.restart();
                         }
                     }
@@ -196,44 +154,57 @@ public:
 
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
             if (gameMode != 0) {
-                gameMode = 0;
-                delete survivalGame;
-                survivalGame = nullptr;
-                delete campaignGame;
-                campaignGame = nullptr;
-                for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) {
-                    delete survivalRebels[i];
-                    survivalRebels[i] = nullptr;
+                if (pauseMenu.getPauseMenuVisible()) {
+                    pauseMenu.handlePauseInput();
+                    if (!pauseMenu.getPauseMenuVisible()) {
+                        int selectedOption = pauseMenu.getPauseSelection();
+                        if (selectedOption == 1) {
+                            cleanup();
+                            window.close();
+                        }
+                    }
+                    pauseDelay.restart();
                 }
-                survivalRebelCount = 0;
-                cameraX = cameraY = 0;
-                menu.setMenuState(0);
-                menu.resetSelection();
+                else {
+                    pauseMenu.showPauseMenu();
+                    pauseDelay.restart();
+                }
             }
             else {
-                int menuState = menu.getMenuState();
+                int menuState = startMenu.getMenuState();
                 if (menuState == 2) {
-                    menu.setMenuState(1);
-                    menu.resetSelection();
+                    startMenu.setMenuState(1);
+                    startMenu.resetSelection();
                 }
                 else if (menuState == 1) {
-                    menu.setMenuState(0);
-                    menu.resetSelection();
+                    startMenu.setMenuState(0);
+                    startMenu.resetSelection();
                 }
                 else {
                     window.close();
                 }
+                pauseDelay.restart();
             }
         }
     }
 
     void update(float dt) {
         if (gameMode == 0) {
-            menu.updateAnimation(dt);
+            startMenu.updateAnimation(dt);
+            return;
+        }
+
+        if (pauseMenu.getPauseMenuVisible()) {
+            pauseMenu.handlePauseInput();
             return;
         }
 
         characters.getActivePlayer()->update(dt);
+
+        if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f) {
+            characters.switchCharacter();
+            Delay.restart();
+        }
 
         if (Keyboard::isKeyPressed(Keyboard::Left)) {
             if (characters.getActivePlayer()->isFacingRight()) {
@@ -302,236 +273,82 @@ public:
                 float pVelocityX = characters.getActivePlayer()->getVelocityX();
                 float pVelocityY = characters.getActivePlayer()->getVelocityY();
 
+                checkEnemyCollisions(pX, pY, pVelocityX);
+                updatePlayerPhysics(currentLevel, pX, pY, pVelocityX, pVelocityY);
 
-                pX += pVelocityX;
-
-
-                float stepHeight = 20.0f;
-                if (pVelocityX != 0 &&
-                    currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    float tempY = pY - stepHeight;
-                    if (!currentLevel->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                        pY = tempY;
-                    }
-                    else {
-                        pX = characters.getActivePlayer()->getPlayerX();
-                        pVelocityX = 0;
-                    }
+                if (pX < 0) {
+                    pX = 0;
+                    pVelocityX = 0;
                 }
 
-
-                if (pVelocityX != 0 && characters.getActivePlayer()->getIsGrounded()) {
-                    float pW = (float)characters.getActivePlayer()->getWidth();
-                    float pH = (float)characters.getActivePlayer()->getHeight();
-                    for (int i = 0; i < survivalRebelCount; i++) {
-                        if (!survivalRebels[i]) {
-                            continue;
-                        }
-                        if (!survivalRebels[i]->getIsAlive()) {
-                            continue;
-                        }
-                        float ex2 = survivalRebels[i]->getX(), ey2 = survivalRebels[i]->getY();
-                        float ew2 = survivalRebels[i]->getWidth(), eh2 = survivalRebels[i]->getHeight();
-                        if (pX < ex2 + ew2 && pX + pW > ex2 &&
-                            pY < ey2 + eh2 && pY + pH > ey2) {
-                            pX = characters.getActivePlayer()->getPlayerX();
-                            pVelocityX = 0;
-                            break;
-                        }
-                    }
+                if (pX < 10) {
+                    pX = 10;
+                    pVelocityX = 0;
                 }
 
-
-                pY += pVelocityY;
-
-
-                if (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    if (pVelocityY > 0) {
-                        characters.getActivePlayer()->setGrounded(true);
-                        pVelocityY = 0;
-                        while (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                            pY -= 1;
-                        }
-                    }
-                    else {
-                        pVelocityY = 0;
-                        while (currentLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                            pY += 1;
-                        }
-                    }
+                if (pX + characters.getActivePlayer()->getWidth() > currentLevel->getLevelEnd()) {
+                    pX = currentLevel->getLevelEnd() - characters.getActivePlayer()->getWidth();
+                    pVelocityX = 0;
                 }
-                else {
-                    if (pVelocityY >= 0) {
-                        characters.getActivePlayer()->setGrounded(false);
-                    }
+
+                if (pX + characters.getActivePlayer()->getWidth() >= currentLevel->getLevelEnd() - 100) {
+                    currentLevel->playerReachedEnd();
                 }
 
                 characters.getActivePlayer()->setPlayerPosition(pX, pY);
                 characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
 
+                camera.follow(pX, pY);
+                camera.setBounds(0.0f, currentLevel->getLevelEnd() - screenX, 0.0f, 0.0f);
+                camera.update();
 
-                if (pX < 0) {
-                    characters.getActivePlayer()->setPlayerX(0);
-                }
-                if (characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getWidth() > currentLevel->getLevelEnd())
-                    characters.getActivePlayer()->setPlayerX(currentLevel->getLevelEnd() - characters.getActivePlayer()->getWidth());
+                survivalGame->setCamera(camera.getX(), camera.getY());
 
+                enemies.updateAll(dt, characters.getActivePlayer());
 
-                if (characters.getActivePlayer()->getPlayerX() + characters.getActivePlayer()->getWidth() >= currentLevel->getLevelEnd() - 100)
-                    currentLevel->playerReachedEnd();
-
-            
-                float targetCamX = characters.getActivePlayer()->getPlayerX() - screenX / 2.0f;
-                cameraX += (targetCamX - cameraX) * 0.2f;
-                if (cameraX < 0) {
-                    cameraX = 0;
-                }
-                if (cameraX > currentLevel->getLevelEnd() - screenX) {
-                    cameraX = currentLevel->getLevelEnd() - screenX;
-                }
-                cameraY = 0;
-
-                survivalGame->setCamera(cameraX, cameraY);
-
-
-                if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f) {
-                    characters.switchCharacter();
-                    Delay.restart();
-                }
-
-
-                for (int i = 0; i < survivalRebelCount; i++) {
-                    if (!survivalRebels[i]) {
-                        continue;
-                    }
-                    if (!survivalRebels[i]->getIsAlive()) {
+                // Handle enemy collision with level blocks (must be in Game.h to avoid circular dependency)
+                for (int i = 0; i < enemies.getEnemyCount(); i++) {
+                    Enemy* enemy = enemies.getEnemyAt(i);
+                    if (!enemy || !enemy->getIsAlive()) {
                         continue;
                     }
 
-                    survivalRebels[i]->setPlayer(characters.getActivePlayer());
-                    survivalRebels[i]->update(dt);
+                    float enemy_x = enemy->getX();
+                    float enemy_y = enemy->getY();
+                    float enemy_vx = enemy->getVelocityX();
+                    float enemy_vy = enemy->getVelocityY();
+                    const float enemy_w = enemy->getWidth();
+                    const float enemy_h = enemy->getHeight();
 
-                    float enemy_x = survivalRebels[i]->getX();
-                    float enemy_y = survivalRebels[i]->getY();
-                    float enemy_vx = survivalRebels[i]->getVelocityX();
-                    float enemy_vy = survivalRebels[i]->getVelocityY();
-                    const float enemy_w = survivalRebels[i]->getWidth();
-                    const float enemy_h = survivalRebels[i]->getHeight();
-
-                    survivalRebels[i]->applyGravity(dt);
-                    enemy_vy = survivalRebels[i]->getVelocityY();
-
-
-                    float newX = enemy_x + enemy_vx * dt;
-
-                    float lookAhead = 30.0f;
-                    if (enemy_vx != 0 && survivalRebels[i]->getIsGrounded()) {
-                        float checkX = enemy_x + (enemy_vx > 0 ? lookAhead : -lookAhead);
-                        if (currentLevel->checkCollision(checkX, enemy_y, enemy_w, enemy_h)) {
-                            enemy_vy = -200.0f;
-                            survivalRebels[i]->setVelocityY(enemy_vy);
-                            survivalRebels[i]->setGrounded(false);
-                        }
-                    }
-
-    
-                    float stepHeightE = 20.0f;
-                    if (enemy_vx != 0 &&
-                        currentLevel->checkCollision(newX, enemy_y, enemy_w, enemy_h)) {
-                        float tempY = enemy_y - stepHeightE;
-                        if (!currentLevel->checkCollision(newX, tempY, enemy_w, enemy_h)) {
-                            enemy_y = tempY;
-                        }
-                        else if (survivalRebels[i]->getIsGrounded()) {
-                            enemy_vy = -400.0f;
-                            survivalRebels[i]->setVelocityY(enemy_vy);
-                            survivalRebels[i]->setGrounded(false);
-                        }
-                        else {
-                            enemy_vx = -enemy_vx;
-                            survivalRebels[i]->setVelocityX(enemy_vx);
-                            newX = enemy_x;
-                        }
-                    }
-
-                    float px = characters.getActivePlayer()->getPlayerX();
-                    float py = characters.getActivePlayer()->getPlayerY();
-                    float pw = (float)characters.getActivePlayer()->getWidth();
-                    float ph = (float)characters.getActivePlayer()->getHeight();
-                    if (newX < px + pw && newX + enemy_w > px &&
-                        enemy_y < py + ph && enemy_y + enemy_h > py) {
-                        newX = enemy_x;
-                    }
-
-
-                    for (int j = 0; j < survivalRebelCount; j++) {
-                        if (j == i) {
-                            continue;
-                        }
-                        if (!survivalRebels[j]) {
-                            continue;
-                        }
-                        if (!survivalRebels[j]->getIsAlive()) {
-                            continue;
-                        }
-
-                        float bx = survivalRebels[j]->getX();
-                        float by = survivalRebels[j]->getY();
-                        float bw = survivalRebels[j]->getWidth();
-                        float bh = survivalRebels[j]->getHeight();
-
-                        bool vertOverlap = (enemy_y < by + bh && enemy_y + enemy_h > by);
-                        if (!vertOverlap) {
-                            continue;
-                        }
-
-                        bool horzOverlap = (newX < bx + bw && newX + enemy_w > bx);
-                        if (!horzOverlap) {
-                            continue;
-                        }
-
-                        float iCenter = newX + enemy_w / 2.f;
-                        float jCenter = bx + bw / 2.f;
-
-                        if (iCenter < jCenter) {
-                            newX = bx - enemy_w;
-                        }
-                        else {
-                            newX = bx + bw;
-                        }
-                        enemy_vx = 0.f;
-                        survivalRebels[i]->setVelocityX(0.f);
-                    }
-
-                    enemy_x = newX;
-
+                    enemy->applyGravity(dt);
+                    enemy_vy = enemy->getVelocityY();
 
                     enemy_y += enemy_vy * dt;
+                    enemy_x += enemy_vx * dt;
 
-                    if (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
-                        if (enemy_vy > 0) {
-                            enemy_vy = 0;
-                            survivalRebels[i]->setGrounded(true);
-                            while (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
-                                enemy_y -= 1;
-                            }
-                        }
-                        else {
-                            enemy_vy = 0;
-                            while (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h)) {
-                                enemy_y += 1;
-                            }
-                        }
-                    }
-                    else {
-                        if (enemy_vy >= 0) {
-                            survivalRebels[i]->setGrounded(false);
-                        }
+                    if (enemy_x < 0) {
+                        enemy_x = 0;
+                        enemy_vx = -enemy_vx;
+                        enemy->setVelocityX(enemy_vx);
                     }
 
-                    survivalRebels[i]->setVelocityY(enemy_vy);
-                    survivalRebels[i]->setGrounded(survivalRebels[i]->getIsGrounded());
-                    survivalRebels[i]->setPosition(enemy_x, enemy_y);
+                    // Use level collision resolution
+                    bool onGround = false;
+                    currentLevel->resolveCollisions(enemy_x, enemy_y, enemy_w, enemy_h, enemy_vx, enemy_vy, onGround);
+                    enemy->setGrounded(onGround);
+
+                    enemy->setVelocityY(enemy_vy);
+                    enemy->setVelocityX(enemy_vx);
+                    enemy->setPosition(enemy_x, enemy_y);
+                }
+
+                // Wire enemy death to level kill counter
+                for (int i = 0; i < enemies.getEnemyCount(); i++) {
+                    Enemy* e = enemies.getEnemyAt(i);
+                    if (e && !e->getIsAlive()) {
+                        SurvivalLevel* sl = dynamic_cast<SurvivalLevel*>(currentLevel);
+                        if (sl) sl->enemyKilled();
+                    }
                 }
 
                 survivalGame->update(dt, &characters);
@@ -541,7 +358,6 @@ public:
             }
         }
 
-     
         else if (gameMode == 2 && campaignGame) {
             CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
             if (campaignLevel) {
@@ -550,43 +366,7 @@ public:
                 float pVelocityX = characters.getActivePlayer()->getVelocityX();
                 float pVelocityY = characters.getActivePlayer()->getVelocityY();
 
-                pX += pVelocityX;
-
-                float stepHeight = 20.0f;
-                if (pVelocityX != 0 &&
-                    campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    float tempY = pY - stepHeight;
-                    if (!campaignLevel->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                        pY = tempY;
-                    }
-                    else {
-                        pX = characters.getActivePlayer()->getPlayerX();
-                        pVelocityX = 0;
-                    }
-                }
-
-                pY += pVelocityY;
-
-                if (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    if (pVelocityY > 0) {
-                        characters.getActivePlayer()->setGrounded(true);
-                        pVelocityY = 0;
-                        while (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                            pY -= 1;
-                        }
-                    }
-                    else {
-                        pVelocityY = 0;
-                        while (campaignLevel->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                            pY += 1;
-                        }
-                    }
-                }
-                else {
-                    if (pVelocityY >= 0) {
-                        characters.getActivePlayer()->setGrounded(false);
-                    }
-                }
+                updatePlayerPhysicsCampaign(campaignLevel, pX, pY, pVelocityX, pVelocityY);
 
                 if (pY + characters.getActivePlayer()->getHeight() > screenY) {
                     pY = screenY - characters.getActivePlayer()->getHeight();
@@ -601,19 +381,11 @@ public:
                 characters.getActivePlayer()->setPlayerPosition(pX, pY);
                 characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
 
-                float targetCamX = characters.getActivePlayer()->getPlayerX() - screenX / 2.0f;
-                cameraX += (targetCamX - cameraX) * 0.2f;
-                if (cameraX < 0) {
-                    cameraX = 0;
-                }
-                cameraY = 0;
+                camera.follow(pX, pY);
+                camera.setBounds(0.0f, screenX, 0.0f, 0.0f);
+                camera.update();
 
-                campaignGame->setCamera(cameraX, cameraY);
-
-                if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f) {
-                    characters.switchCharacter();
-                    Delay.restart();
-                }
+                campaignGame->setCamera(camera.getX(), camera.getY());
 
                 campaignGame->update(dt, &characters);
             }
@@ -627,15 +399,15 @@ public:
         window.clear(Color(135, 206, 235));
         
         if (gameMode == 0) {
-            int menuState = menu.getMenuState();
+            int menuState = startMenu.getMenuState();
             if (menuState == 0) {
-                menu.renderStartScreen(window);
+                startMenu.renderStartScreen(window);
             }
             else if (menuState == 1) {
-                menu.renderCharacterSelection(window);
+                startMenu.renderCharacterSelection(window);
             }
             else if (menuState == 2) {
-                menu.renderModeSelection(window);
+                startMenu.renderModeSelection(window);
             }
             window.display();
             return;
@@ -643,17 +415,55 @@ public:
 
         if (gameMode == 1 && survivalGame) {
             survivalGame->render(window);
-            for (int i = 0; i < survivalRebelCount; i++) {
-                if (survivalRebels[i])
-                    survivalRebels[i]->render(window, cameraX, cameraY);
+            enemies.renderAll(window, camera.getX(), camera.getY());
+            characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
+            
+            if (showLevelTitle) {
+                if (levelTitleTimer.getElapsedTime().asSeconds() < 3.0f) {
+                    Font font;
+                    font.loadFromFile("arial.TTF");
+                    Text levelTitle;
+                    levelTitle.setFont(font);
+                    levelTitle.setString("LEVEL " + to_string(currentLevelNumber));
+                    levelTitle.setCharacterSize(100);
+                    levelTitle.setFillColor(Color::White);
+                    levelTitle.setPosition(screenX / 2.0f - 200.0f, screenY / 2.0f - 50.0f);
+                    window.draw(levelTitle);
+                }
+                else {
+                    showLevelTitle = false;
+                }
             }
-            characters.getActivePlayer()->render(window, cameraX, cameraY);
+            
+            if (pauseMenu.getPauseMenuVisible()) {
+                RectangleShape overlay;
+                overlay.setSize(Vector2f((float)screenX, (float)screenY));
+                overlay.setFillColor(Color(0, 0, 0, 100));
+                overlay.setPosition(0, 0);
+                window.draw(overlay);
+                pauseMenu.renderPauseMenu(window);
+                window.display();
+                return;
+            }
+            
             window.display();
         }
 
         else if (gameMode == 2 && campaignGame) {
             campaignGame->render(window);
-            characters.getActivePlayer()->render(window, cameraX, cameraY);
+            characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
+            
+            if (pauseMenu.getPauseMenuVisible()) {
+                RectangleShape overlay;
+                overlay.setSize(Vector2f((float)screenX, (float)screenY));
+                overlay.setFillColor(Color(0, 0, 0, 100));
+                overlay.setPosition(0, 0);
+                window.draw(overlay);
+                pauseMenu.renderPauseMenu(window);
+                window.display();
+                return;
+            }
+            
             window.display();
         }
     }
@@ -661,9 +471,132 @@ public:
     void cleanup() {
         delete survivalGame;
         delete campaignGame;
-        for (int i = 0; i < MAX_SURVIVAL_ENEMIES; i++) {
-            delete survivalRebels[i];
-            survivalRebels[i] = nullptr;
+    }
+
+private:
+    void updatePlayerPhysics(Level* level, float& pX, float& pY, float& pVelocityX, float& pVelocityY) {
+        if (!level) {
+            return;
+        }
+
+        pX += pVelocityX;
+
+        float stepHeight = 20.0f;
+        if (pVelocityX != 0 &&
+            level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+            float tempY = pY - stepHeight;
+            if (!level->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                pY = tempY;
+            }
+            else {
+                pX = characters.getActivePlayer()->getPlayerX();
+                pVelocityX = 0;
+            }
+        }
+
+        pY += pVelocityY;
+
+        if (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+            if (pVelocityY > 0) {
+                characters.getActivePlayer()->setGrounded(true);
+                pVelocityY = 0;
+                while (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    pY -= 1;
+                }
+            }
+            else {
+                pVelocityY = 0;
+                while (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    pY += 1;
+                }
+            }
+        }
+        else {
+            if (pVelocityY >= 0) {
+                characters.getActivePlayer()->setGrounded(false);
+            }
         }
     }
+
+    void updatePlayerPhysicsCampaign(CampaignLevel* level, float& pX, float& pY, float& pVelocityX, float& pVelocityY) {
+        if (!level) {
+            return;
+        }
+
+        pX += pVelocityX;
+
+        float stepHeight = 20.0f;
+        if (pVelocityX != 0 &&
+            level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+            float tempY = pY - stepHeight;
+            if (!level->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                pY = tempY;
+            }
+            else {
+                pX = characters.getActivePlayer()->getPlayerX();
+                pVelocityX = 0;
+            }
+        }
+
+        pY += pVelocityY;
+
+        if (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+            if (pVelocityY > 0) {
+                characters.getActivePlayer()->setGrounded(true);
+                pVelocityY = 0;
+                while (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    pY -= 1;
+                }
+            }
+            else {
+                pVelocityY = 0;
+                while (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
+                    pY += 1;
+                }
+            }
+        }
+        else {
+            if (pVelocityY >= 0) {
+                characters.getActivePlayer()->setGrounded(false);
+            }
+        }
+    }
+
+    void checkEnemyCollisions(float& pX, float& pY, float& pVelocityX) {
+        // Commented out - let player pass through enemies
+        /*
+        if (pVelocityX == 0) {
+            return;
+        }
+
+        if (!characters.getIsGrounded()) {
+            return;
+        }
+
+        float pW = (float)characters.getWidth();
+        float pH = (float)characters.getHeight();
+
+        for (int i = 0; i < enemies.getEnemyCount(); i++) {
+            Enemy* enemy = enemies.getEnemy(i);
+            if (!enemy) {
+                continue;
+            }
+            if (!enemy->getIsAlive()) {
+                continue;
+            }
+            float ex2 = enemy->getX();
+            float ey2 = enemy->getY();
+            float ew2 = enemy->getWidth();
+            float eh2 = enemy->getHeight();
+            if (pX < ex2 + ew2 && pX + pW > ex2 &&
+                pY < ey2 + eh2 && pY + pH > ey2) {
+                pX = characters.getX();
+                pVelocityX = 0;
+                break;
+            }
+        }
+        */
+    }
+
+public:
 };

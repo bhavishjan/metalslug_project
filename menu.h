@@ -11,9 +11,12 @@ private:
     int screen_y;
     Font menuFont;
 
-    // Menu state: 0=Start, 1=Character, 2=Mode
+    // Menu state: 0=Start, 1=Character, 2=Mode, 3=Pause
     int menuState;
     int selectionIndex;
+
+    bool isPauseMenu;
+    bool pauseMenuVisible;
 
     // Background textures
     Texture startBgTexture;
@@ -50,14 +53,34 @@ private:
     Text modeTitle;
     RectangleShape modeTitleBar;
 
+    // Pause Menu UI
+    RectangleShape pauseBox;
+    RectangleShape pauseResumeButton;
+    RectangleShape pauseExitButton;
+    Text pauseTitle;
+    Text pauseResumeText;
+    Text pauseExitText;
+    Text pauseInstructions;
+    int pauseSelection;
+
 public:
-    Menu() : screen_x(1600), screen_y(900), menuState(0), selectionIndex(0),
-                          animationTime(0), pulse(0), blink(0) {
-        menuFont.loadFromFile("arial.ttf");
-        loadBackgrounds();
-        initializeStartScreen();
-        initializeCharacterSelection();
-        initializeModeSelection();
+    Menu(bool isPause = false) : screen_x(1600), screen_y(900), menuState(0), selectionIndex(0),
+                                   isPauseMenu(isPause), pauseMenuVisible(false), pauseSelection(0),
+                                   animationTime(0), pulse(0), blink(0) {
+        if (!menuFont.loadFromFile("arial.ttf")) {
+            if (!menuFont.loadFromFile("arial.TTF")) {
+                menuFont.loadFromFile("C:\\Windows\\Fonts\\arial.ttf");
+            }
+        }
+        if (isPauseMenu) {
+            initializePauseMenu();
+        }
+        else {
+            loadBackgrounds();
+            initializeStartScreen();
+            initializeCharacterSelection();
+            initializeModeSelection();
+        }
     }
 
     void loadBackgrounds() {
@@ -109,14 +132,12 @@ public:
         const float panelW = 480;
         const float panelH = 720;
 
-        // Subtle frosted glass panel
         charPanel.setSize(Vector2f(panelW, panelH));
         charPanel.setPosition(panelX, panelY);
         charPanel.setFillColor(Color(15, 25, 40, 180));
         charPanel.setOutlineColor(Color(220, 50, 50, 230));
         charPanel.setOutlineThickness(3);
 
-        // Title bar
         charTitleBar.setSize(Vector2f(panelW, 70));
         charTitleBar.setPosition(panelX, panelY);
         charTitleBar.setFillColor(Color(220, 50, 50, 230));
@@ -179,7 +200,6 @@ public:
         modePanel.setOutlineColor(Color(70, 180, 150, 230));
         modePanel.setOutlineThickness(3);
 
-        // Title bar
         modeTitleBar.setSize(Vector2f(panelW, 75));
         modeTitleBar.setPosition(panelX, panelY);
         modeTitleBar.setFillColor(Color(70, 180, 150, 230));
@@ -223,8 +243,116 @@ public:
             modeSubtitle[i].setString(subs[i]);
             modeSubtitle[i].setCharacterSize(18);
             modeSubtitle[i].setFillColor(Color(190, 210, 200));
-            modeSubtitle[i].setPosition(cardX + 30, startY + i * (cardH + gap) + 90);
+            modeSubtitle[i].setPosition(cardX + 30, startY + i * (cardH + gap) + 75);
         }
+    }
+
+    void initializePauseMenu() {
+        float boxWidth = 400.0f;
+        float boxHeight = 300.0f;
+
+        pauseBox.setSize(Vector2f(boxWidth, boxHeight));
+        pauseBox.setFillColor(Color(50, 50, 50, 230));
+        pauseBox.setOutlineColor(Color(255, 255, 255));
+        pauseBox.setOutlineThickness(3.0f);
+
+        float boxX = (screen_x - boxWidth) / 2.0f;
+        float boxY = (screen_y - boxHeight) / 2.0f;
+        pauseBox.setPosition(boxX, boxY);
+
+        pauseResumeButton.setSize(Vector2f(300.0f, 50.0f));
+        pauseResumeButton.setFillColor(Color(50, 200, 50));
+        pauseResumeButton.setPosition(boxX + 50.0f, boxY + 100.0f);
+
+        pauseExitButton.setSize(Vector2f(300.0f, 50.0f));
+        pauseExitButton.setFillColor(Color(100, 100, 100));
+        pauseExitButton.setPosition(boxX + 50.0f, boxY + 180.0f);
+
+        pauseTitle.setFont(menuFont);
+        pauseTitle.setString("PAUSED");
+        pauseTitle.setCharacterSize(48);
+        pauseTitle.setFillColor(Color::White);
+        pauseTitle.setPosition(boxX + boxWidth / 2.0f - 90.0f, boxY + 20.0f);
+
+        pauseInstructions.setFont(menuFont);
+        pauseInstructions.setString("UP / DOWN / ENTER");
+        pauseInstructions.setCharacterSize(16);
+        pauseInstructions.setFillColor(Color(255, 255, 255, 200));
+        pauseInstructions.setPosition(boxX + 50.0f, boxY + 260.0f);
+
+        pauseResumeText.setFont(menuFont);
+        pauseResumeText.setString("Resume");
+        pauseResumeText.setCharacterSize(32);
+        pauseResumeText.setFillColor(Color::White);
+        pauseResumeText.setPosition(boxX + boxWidth / 2.0f - 60.0f, boxY + 105.0f);
+
+        pauseExitText.setFont(menuFont);
+        pauseExitText.setString("Exit");
+        pauseExitText.setCharacterSize(32);
+        pauseExitText.setFillColor(Color::White);
+        pauseExitText.setPosition(boxX + boxWidth / 2.0f - 40.0f, boxY + 185.0f);
+    }
+
+    void showPauseMenu() {
+        pauseMenuVisible = true;
+        pauseSelection = 0;
+    }
+
+    void hidePauseMenu() {
+        pauseMenuVisible = false;
+    }
+
+    bool getPauseMenuVisible() const {
+        return pauseMenuVisible;
+    }
+
+    int getPauseSelection() const {
+        return pauseSelection;
+    }
+
+    void handlePauseInput() {
+        if (!pauseMenuVisible) {
+            return;
+        }
+
+        if (Keyboard::isKeyPressed(Keyboard::Up)) {
+            pauseSelection = 0;
+        }
+
+        if (Keyboard::isKeyPressed(Keyboard::Down)) {
+            pauseSelection = 1;
+        }
+
+        if (Keyboard::isKeyPressed(Keyboard::Enter)) {
+            hidePauseMenu();
+        }
+
+        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+            hidePauseMenu();
+        }
+
+        if (pauseSelection == 0) {
+            pauseResumeButton.setFillColor(Color(50, 200, 50));
+            pauseExitButton.setFillColor(Color(100, 100, 100));
+        }
+        else {
+            pauseResumeButton.setFillColor(Color(100, 100, 100));
+            pauseExitButton.setFillColor(Color(50, 200, 50));
+        }
+    }
+
+    void renderPauseMenu(RenderWindow& window) {
+        if (!pauseMenuVisible) {
+            return;
+        }
+
+        window.draw(pauseBox);
+        window.draw(pauseResumeButton);
+        window.draw(pauseExitButton);
+        window.draw(pauseTitle);
+        window.draw(pauseResumeText);
+        window.draw(pauseExitText);
+        window.draw(pauseInstructions);
     }
 
     void updateAnimation(float dt) {

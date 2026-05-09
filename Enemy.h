@@ -4,6 +4,9 @@
 #include <cmath>
 #include "Weapon.h"
 
+// Forward declaration to avoid circular dependency
+class Level;
+
 using namespace std;
 using namespace sf;
 
@@ -43,7 +46,8 @@ protected:
     PlayerSoldier* largestPlayer;
 
     float gravityConstant = 200.0f;
-    float groundY;
+    float jumpPower = -200.0f; // Higher jump power than player to cross walls
+    float patrolRange;
 public:
     Enemy() : Soldier(), speed(80.f),
         isGrounded(false), isCrouched(false),
@@ -51,12 +55,11 @@ public:
         scoreValue(0), isShielded(false), aggressionLevel(1.f),
         hasGrudge(false), grudgeMultiplier(1.f), isEnhanced(false),
         detectionRange(300.f), attackRange(250.f), currentBiome(0),
-        isPatrolling(true), isTargetingPlayer(false), largestPlayer(nullptr) {
+        isPatrolling(true), isTargetingPlayer(false), largestPlayer(nullptr), patrolRange(50.f) {
         x = 0;
         y = 0;
         width = 32;
         height = 48;
-        groundY = 1600 - height;
     }
 
     // Virtual destructor
@@ -134,25 +137,26 @@ public:
         }
     }
 
+    void setPatrolRange(float range) {
+        patrolRange = range;
+    }
+
+    float getPatrolRange() {
+        return patrolRange;
+    }
+
     void patrol() {
-        float patrollingRange = 50;
-
-        if (x > spawnX + patrollingRange) {
-
-        
-            velocityX = -speed;  // move left
+        if (x > spawnX + patrolRange) {
+            velocityX = -speed;
             facingRight = false;
         }
-        else if (x < spawnX - patrollingRange) {
-        
-            velocityX = speed;   // move right
+        else if (x < spawnX - patrolRange) {
+            velocityX = speed;
             facingRight = true;
         }
         else {
-        
             // inside range so keep moving in current direction
             if (facingRight) {
-            
                 velocityX = speed;
             }
             else {
@@ -169,15 +173,9 @@ public:
         }
     }
 
-    void checkGrounded() {
-        if (y + height >= groundY) {
-        
-            y = groundY - height;
-            velocityY = 0.f;
-            isGrounded = true;
-        }
-        else {
-        
+    void jump() {
+        if (isGrounded) {
+            velocityY = jumpPower;
             isGrounded = false;
         }
     }
@@ -286,7 +284,6 @@ public:
     void setPosition(float nx, float ny) { x = nx; y = ny; }
     void setPlayer(PlayerSoldier* p) { largestPlayer = p; }
     void setX(float nx) { x = nx; }
-    void setGroundY(float gy) { groundY = gy; }
     float getVelocityY() const { return velocityY; }
     void  setVelocityY(float vy) { velocityY = vy; }
     float getVelocityX() const { return velocityX; }
@@ -420,7 +417,14 @@ public:
 
         Animation& a = anims[currentAnim];
         IntRect r = a.currentRect();
+        
+        // Fallback: draw colored rectangle if texture failed to load
         if (r.width == 0 || r.height == 0) {
+            RectangleShape fallbackRect;
+            fallbackRect.setSize(Vector2f(width, height));
+            fallbackRect.setPosition(x - camX, y - camY);
+            fallbackRect.setFillColor(Color(255, 0, 0)); // Red for visibility
+            window.draw(fallbackRect);
             return;
         }
 
@@ -527,7 +531,7 @@ public:
         isShooting = true;
         bulletsFired = 0;
         shootingTimer = 0.0f;
-        currentAnim = STAND;
+        currentAnim = SHOOT;
     }
 
     void move(float dt) override {
@@ -1724,9 +1728,6 @@ public:
 
         // gravity only in phase 2 when on foot
         if (phase == 2) {
-        
-            applyGravity(dt);
-            checkGrounded();
             checkFlatGround();
         }
 
@@ -1736,6 +1737,73 @@ public:
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
         AlienEnemy::render(window, camX, camY);
+    }
+};
+
+
+class EnemyManager {
+private:
+    Enemy* enemies[50];
+    int enemyCount;
+    int maxEnemies;
+
+public:
+    EnemyManager() {
+        enemyCount = 0;
+        maxEnemies = 50;
+        for (int i = 0; i < maxEnemies; i++) {
+            enemies[i] = nullptr;
+        }
+    }
+
+    ~EnemyManager() {
+        for (int i = 0; i < maxEnemies; i++) {
+            delete enemies[i];
+            enemies[i] = nullptr;
+        }
+    }
+
+    void addEnemy(Enemy* enemy) {
+        if (enemyCount < maxEnemies) {
+            enemies[enemyCount] = enemy;
+            enemyCount++;
+        }
+    }
+
+    Enemy* getEnemyAt(int index) {
+        if (index >= 0 && index < enemyCount) {
+            return enemies[index];
+        }
+        return nullptr;
+    }
+
+    void updateAll(float dt, PlayerSoldier* player) {
+        for (int i = 0; i < enemyCount; i++) {
+            if (!enemies[i]) {
+                continue;
+            }
+            if (!enemies[i]->getIsAlive()) {
+                continue;
+            }
+
+            enemies[i]->setPlayer(player);
+            enemies[i]->update(dt);
+        }
+    }
+
+    // Collision resolution must be handled in Game.h where Level is fully defined
+    // to avoid circular dependency between Enemy.h and Level.h
+
+    void renderAll(RenderWindow& window, float camX, float camY) {
+        for (int i = 0; i < enemyCount; i++) {
+            if (enemies[i]) {
+                enemies[i]->render(window, camX, camY);
+            }
+        }
+    }
+
+    int getEnemyCount() const {
+        return enemyCount;
     }
 };
 
@@ -1890,8 +1958,6 @@ public:
         }
 
         detectPlayer(largestPlayer);
-        applyGravity(dt);
-        checkGrounded();
         checkFlatGround();
         move(dt);
         attack();
@@ -1902,4 +1968,5 @@ public:
         AlienEnemy::render(window, camX, camY);
     }
 };
+
 void Enemy::spawnLoot() {}
