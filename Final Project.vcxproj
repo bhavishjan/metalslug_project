@@ -25,6 +25,7 @@
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Biome.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="bosslevel.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collectibilies.h" />
     <ClInclude Include="Echo.h" />

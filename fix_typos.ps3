@@ -1,0 +1,1 @@
+(Get-Content "Level.h") -replace 'BazookaSoldier', 'BazookaSoldier' | Set-Content "Level.h"

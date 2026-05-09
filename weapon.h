@@ -1,11 +1,138 @@
+#define _CRT_SECURE_NO_WARNINGS
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <cmath>
-#include "PlayerSoldier.h"
+class PlayerSoldier;
 
 using namespace std;
+
+//bullets
+const int NOowner = 0;
+const int PLAYER = 1;
+const int ENEMY = 2;
+const int VEHICLE = 3;
+
+
+
+class Bullet {
+private:
+    float x, y;
+    float velX, velY;
+    bool  active;
+    int   damage;
+    int   ownerType;   // ENEMY ya PLAYER
+    float range;
+    float distanceTravelled;
+
+    sf::RectangleShape shape;  // simple rect, texture baad mein lagana
+
+public:
+    Bullet() : x(0), y(0), velX(0), velY(0),
+        active(false), damage(3), ownerType(NOowner),
+        range(400.f), distanceTravelled(0) {
+        shape.setSize({ 6.f, 3.f });
+        shape.setFillColor(sf::Color::Yellow);
+        shape.setOrigin(3.f, 1.5f);
+    }
+
+    // Enemy fire karta hai toh yeh call hoti hai
+    void spawn(float startX, float startY, float angle,
+        int dmg, int owner, float speed = 500.f, float maxRange = 400.f,
+        const sf::Color& bulletColor = sf::Color::Yellow)
+    {
+        x = startX;
+        y = startY;
+        velX = cos(angle) * speed;
+        velY = sin(angle) * speed;
+        damage = dmg;
+        ownerType = owner;
+        range = maxRange;
+        distanceTravelled = 0;
+        shape.setFillColor(bulletColor);
+        active = true;
+    }
+
+    void update(float dt) {
+        if (!active) return;
+        float dx = velX * dt;
+        float dy = velY * dt;
+        x += dx;
+        y += dy;
+        distanceTravelled += sqrt(dx * dx + dy * dy);
+        if (distanceTravelled >= range)
+            active = false;
+    }
+
+    // AABB collision — player ya enemy ke saath
+    bool checkHit(float tx, float ty, float tw, float th) const {
+        if (!active) return false;
+        return (x > tx && x < tx + tw && y > ty && y < ty + th);
+    }
+
+    void render(sf::RenderWindow& window, float camX = 0, float camY = 0) {
+        if (!active) return;
+        shape.setPosition(x - camX, y - camY);
+        shape.setRotation(atan2(velY, velX) * 180.f / 3.14159f);
+        window.draw(shape);
+    }
+
+    void     setActive(bool a) { active = a; }
+    bool     isActive()  const { return active; }
+    int      getDamage() const { return damage; }
+    int      getOwner()  const { return ownerType; }
+    float    getX()      const { return x; }
+    float    getY()      const { return y; }
+};
+
+
+
+// FireBombGrenade class ke BAAD, BulletManager se PEHLE yeh add karo
+
+class Rocket {
+private:
+    float x, y;
+    float velX, velY;
+    bool  active;
+
+public:
+    Rocket() {
+        x = y = velX = velY = 0;
+        active = false;
+    }
+
+    void setPosition(float px, float py) { x = px; y = py; }
+    void setVelocity(float vx, float vy) { velX = vx; velY = vy; }
+    void setActive(bool s) { active = s; }
+
+    bool  isActive() const { return active; }
+    float getX()     const { return x; }
+    float getY()     const { return y; }
+
+    void update(float dt) {
+        if (!active) return;
+        velY += 980.f * dt;
+        x += velX * dt;
+        y += velY * dt;
+        if (y > 1600.f) active = false;
+    }
+
+    void render(sf::RenderWindow& window, float camX = 0, float camY = 0) {
+        if (!active) return;
+        sf::RectangleShape s({ 12.f, 5.f });
+        s.setFillColor(sf::Color(200, 100, 0));
+        s.setOrigin(6.f, 2.5f);
+        s.setPosition(x - camX, y - camY);
+        s.setRotation(atan2(velY, velX) * 180.f / 3.14159f);
+        window.draw(s);
+    }
+};
+
+
+
+
+
 
 const float BLOCK_SIZE = 32.0f;
 
@@ -19,14 +146,11 @@ const int LASERGUN = 6;
 const int HANDGRENADE = 7;
 const int FIREBOMBGRENADE = 8;
 
-const int NOowner = 0;
-const int PLAYER = 1;
-const int ENEMY = 2;
-const int VEHICLE = 3;
+
 
 class Weapon {
 protected:
-    const char* name;
+    char  name[32];
     int   damage;
     bool  isActive;
     int   weaponType;
@@ -39,6 +163,7 @@ protected:
 
 public:
     Weapon() {
+        name[0] = '\0';
         damage = 0;
         isActive = false;
         weaponType = NONE;
@@ -132,9 +257,7 @@ public:
 
     void setAmmo(int amount) {
         ammo = amount;
-        if (ammo > maxAmmo) {
-            ammo = maxAmmo;
-        }
+        if (ammo > maxAmmo) ammo = maxAmmo;
     }
 
     void reload() { ammo = maxAmmo; }
@@ -168,7 +291,7 @@ private:
 
 public:
     Pistol() : Firearm() {
-        name = "Pistol";
+        strncpy(name, "Pistol", 31);
         weaponType = PISTOL;
         isDefault = true;
         damage = 3;
@@ -231,7 +354,7 @@ private:
 
 public:
     Knife() : Firearm() {
-        name = "Knife";
+        strncpy(name, "Knife", 31);
         weaponType = KNIFE;
         meleeRange = BLOCK_SIZE;
         meleeDamage = 2;
@@ -285,7 +408,7 @@ private:
 
 public:
     HeavyMachineGun() : Firearm() {
-        name = "HMG";
+        strncpy(name, "HMG", 31);
         weaponType = HMG;
         isHeldDown = false;
         spinUpTimer = 0;
@@ -346,7 +469,7 @@ private:
 
 public:
     RocketLauncher() : Firearm() {
-        name = "Rocket Launcher";
+        strncpy(name, "Rocket Launcher", 31);
         weaponType = ROCKETLAUNCHER;
         reloadTimer = 0;
         reloadDuration = 2.0f;
@@ -411,7 +534,7 @@ private:
 
 public:
     FlameShot() : Firearm() {
-        name = "Flame Shot";
+        strncpy(name, "Flame Shot", 31);
         weaponType = FLAMESHOT;
         streamLength = 5.0f * BLOCK_SIZE;
         damagePerSecond = 2;
@@ -483,7 +606,7 @@ private:
 
 public:
     LaserGun() : Firearm() {
-        name = "Laser Gun";
+        strncpy(name, "Laser Gun", 31);
         weaponType = LASERGUN;
         beamActive = false;
         beamLength = 1200.0f;
@@ -581,9 +704,7 @@ public:
     void update(float dt) {
         if (isActive) {
             timer -= dt;
-            if (timer <= 0) {
-                isActive = false;
-            }
+            if (timer <= 0) isActive = false;
             float alpha = (timer / duration) * 130;
             poolCircle.setFillColor(sf::Color(255, 60, 0, (sf::Uint8)alpha));
         }
@@ -695,7 +816,7 @@ private:
 
 public:
     HandGrenade() : Grenade() {
-        name = "Hand Grenade";
+        strncpy(name, "Hand Grenade", 31);
         weaponType = HANDGRENADE;
         bounceCount = 0;
         maxBounce = 3;
@@ -719,12 +840,8 @@ public:
             x += velocityX * dt;
             y += velocityY * dt;
             fuseTimer -= dt;
-            if (fuseTimer <= 0) {
-                explode();
-            }
-            if (y >= groundLevel) {
-                applyBounce();
-            }
+            if (fuseTimer <= 0) explode();
+            if (y >= groundLevel) applyBounce();
         }
     }
 
@@ -780,7 +897,7 @@ private:
 
 public:
     FireBombGrenade() : Grenade() {
-        name = "Fire Bomb Grenade";
+        strncpy(name, "Fire Bomb Grenade", 31);
         weaponType = FIREBOMBGRENADE;
         firePool = nullptr;
         firePoolDuration = 10.0f;
@@ -847,3 +964,120 @@ public:
     FirePool* getFirePool()  const { return firePool; }
     bool      isBombFlying() const { return isBombActive; }
 };
+
+
+//manager
+
+class BulletManager {
+private:
+    static const int MAX_BULLETS = 200;
+    static const int MAX_GRENADES = 20;
+    static const int MAX_ROCKETS = 20;
+
+    Bullet      bullets[MAX_BULLETS];
+    HandGrenade grenades[MAX_GRENADES];
+    Rocket      rockets[MAX_ROCKETS];
+
+public:
+    void spawnBullet(float x, float y, float angle,
+        int damage, int ownerType,
+        float speed = 500.f, float range = 400.f,
+        const sf::Color& bulletColor = sf::Color::Yellow)
+    {
+        for (int i = 0; i < MAX_BULLETS; i++) {
+            if (!bullets[i].isActive()) {
+                bullets[i].spawn(x, y, angle, damage, ownerType, speed, range, bulletColor);
+                return;
+            }
+        }
+    }
+
+    void spawnGrenade(float x, float y, float vx, float vy) {
+        for (int i = 0; i < MAX_GRENADES; i++) {
+            if (!grenades[i].getIsActive()) {
+                grenades[i].reset(x, y, vx, vy);
+                return;
+            }
+        }
+    }
+
+    void spawnRocket(float x, float y, float vx, float vy) {
+        for (int i = 0; i < MAX_ROCKETS; i++) {
+            if (!rockets[i].isActive()) {
+                rockets[i].setPosition(x, y);
+                rockets[i].setVelocity(vx, vy);
+                rockets[i].setActive(true);
+                return;
+            }
+        }
+    }
+
+    void update(float dt) {
+        for (int i = 0; i < MAX_BULLETS; i++) bullets[i].update(dt);
+        for (int i = 0; i < MAX_GRENADES; i++) grenades[i].update(dt);
+        for (int i = 0; i < MAX_ROCKETS; i++) rockets[i].update(dt);
+    }
+
+    void render(sf::RenderWindow& window, float camX = 0, float camY = 0) {
+        for (int i = 0; i < MAX_BULLETS; i++) bullets[i].render(window, camX, camY);
+        for (int i = 0; i < MAX_GRENADES; i++) grenades[i].render(window);
+        for (int i = 0; i < MAX_ROCKETS; i++) rockets[i].render(window, camX, camY);
+    }
+
+    void checkPlayerCollisions(float px, float py, float pw, float ph,
+        int& totalDamage)
+    {
+        totalDamage = 0;
+
+        for (int i = 0; i < MAX_BULLETS; i++) {
+            if (!bullets[i].isActive()) continue;
+            if (bullets[i].getOwner() != ENEMY) continue;
+            if (bullets[i].checkHit(px, py, pw, ph)) {
+                totalDamage += bullets[i].getDamage();
+                bullets[i].setActive(false);
+            }
+        }
+
+        for (int i = 0; i < MAX_GRENADES; i++) {
+            if (!grenades[i].getIsActive()) continue;
+            if (grenades[i].getIsExploded()) {
+                int hp = 0;
+                grenades[i].applyBlastDamage(px + pw / 2, py + ph / 2, hp);
+                totalDamage += (-hp);  // applyBlastDamage minus karta hai, hum add karte hain
+            }
+        }
+
+        for (int i = 0; i < MAX_ROCKETS; i++) {
+            if (!rockets[i].isActive()) continue;
+            float dx = rockets[i].getX() - (px + pw / 2);
+            float dy = rockets[i].getY() - (py + ph / 2);
+            if (sqrt(dx * dx + dy * dy) < 60.f) {
+                totalDamage += 15;
+                rockets[i].setActive(false);
+            }
+        }
+    }
+
+    bool popPlayerBulletHit(float tx, float ty, float tw, float th,
+        int& outDamage, float& hitX, float& hitY)
+    {
+        for (int i = 0; i < MAX_BULLETS; i++) {
+            if (!bullets[i].isActive()) continue;
+            if (bullets[i].getOwner() != PLAYER) continue;
+            if (!bullets[i].checkHit(tx, ty, tw, th)) continue;
+
+            outDamage = bullets[i].getDamage();
+            hitX = bullets[i].getX();
+            hitY = bullets[i].getY();
+            bullets[i].setActive(false);
+            return true;
+        }
+        return false;
+    }
+};
+
+
+
+
+
+

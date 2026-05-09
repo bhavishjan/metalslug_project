@@ -1,13 +1,15 @@
+#define _CRT_SECURE_NO_WARNINGS
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+// Game.h ke top mein yeh order rakho
+#include "Weapon.h"
+#include "Enemy.h"
+#include "GameMode.h"    // SurvivalGame aur CampaignGame yahan hain
 #include "Level.h"
 #include "Biome.h"
 #include "PlayerSoldier.h"
-#include "Weapon.h"
-#include "Enemy.h"
 #include "Menu.h"
-#include "GameMode.h"
 #include "GameState.h"
 #include "Camera.h"
 
@@ -39,10 +41,12 @@ private:
     Clock levelTitleTimer;
     int currentLevelNumber;
 
-
+    BulletManager bulletManager;  
     Clock clock;
     Clock Delay;
     Clock pauseDelay;
+    Clock playerFireTimer;
+    float playerFireCooldown = 0.2f;
 
     Camera camera;
     Menu startMenu;
@@ -70,6 +74,7 @@ public:
 
         window.setVerticalSyncEnabled(true);
         window.setFramerateLimit(60);
+        enemies.setBulletManager(&bulletManager);  // ADD KARO
     }
 
     ~Game() {
@@ -117,8 +122,11 @@ public:
                         if (modeSelection == 0) {
                             gameMode = 1;
                             survivalGame = new SurvivalGame(screenX, screenY);
+                          
                             survivalGame->setCharManager(&characters);
                             survivalGame->start();
+                            levelManager.loadAllLevels();
+                            survivalGame->setCurrentLevel(levelManager.getCurrentLevel());
                             characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
                             characters.getActivePlayer()->setVelocity(0, 0);
                             characters.getActivePlayer()->setGrounded(false);
@@ -206,6 +214,12 @@ public:
             Delay.restart();
         }
 
+        // F key for firing
+        if (Keyboard::isKeyPressed(Keyboard::F) && playerFireTimer.getElapsedTime().asSeconds() > playerFireCooldown) {
+            playerFire();
+            playerFireTimer.restart();
+        }
+
         if (Keyboard::isKeyPressed(Keyboard::Left)) {
             if (characters.getActivePlayer()->isFacingRight()) {
                 characters.getActivePlayer()->setVelocityX(0);
@@ -251,6 +265,15 @@ public:
                 jumpHeld = true;
             }
         }
+        else if (Keyboard::isKeyPressed(Keyboard::J)) {
+            if (characters.getActivePlayer()->getIsGrounded()) {
+
+                // direct velocity set — no jumpPower multiplier nonsense
+                characters.getActivePlayer()->setVelocityY(-40.0f);
+                characters.getActivePlayer()->setGrounded(false);
+                jumpHeld = true;  // true rakho taake halving na ho
+            }
+        }
         else {
             jumpHeld = false;
         }
@@ -285,15 +308,32 @@ public:
                     pX = 10;
                     pVelocityX = 0;
                 }
-
-                if (pX + characters.getActivePlayer()->getWidth() > currentLevel->getLevelEnd()) {
+                // Check if player reached level end - switch to next level
+                if (pX + characters.getActivePlayer()->getWidth() >= currentLevel->getLevelEnd() - 10.f) {
+                    if (levelManager.getCurrentLevelIndex() < levelManager.getTotalLevels() - 1) {
+                        levelManager.nextLevel();
+                        Level* newLevel = levelManager.getCurrentLevel();
+                        if (newLevel) {
+                            enemies.clearAll();
+                            enemies.setBulletManager(&bulletManager);
+                            newLevel->spawnEnemies(enemies, characters.getActivePlayer());
+                            characters.getActivePlayer()->setPlayerPosition(newLevel->getPlayerSpawnX(), newLevel->getPlayerSpawnY());
+                            characters.getActivePlayer()->setVelocity(0, 0);
+                            characters.getActivePlayer()->setGrounded(false);
+                            survivalGame->setCurrentLevel(newLevel);
+                            camera.reset();
+                            currentLevelNumber = levelManager.getCurrentLevelIndex() + 1;
+                            showLevelTitle = true;
+                            levelTitleTimer.restart();
+                        }
+                    }
+                }
+                else if (pX + characters.getActivePlayer()->getWidth() > currentLevel->getLevelEnd()) {
                     pX = currentLevel->getLevelEnd() - characters.getActivePlayer()->getWidth();
                     pVelocityX = 0;
                 }
+                
 
-                if (pX + characters.getActivePlayer()->getWidth() >= currentLevel->getLevelEnd() - 100) {
-                    currentLevel->playerReachedEnd();
-                }
 
                 characters.getActivePlayer()->setPlayerPosition(pX, pY);
                 characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
@@ -305,6 +345,9 @@ public:
                 survivalGame->setCamera(camera.getX(), camera.getY());
 
                 enemies.updateAll(dt, characters.getActivePlayer());
+
+                // Update bullets
+                bulletManager.update(dt);
 
                 // Handle enemy collision with level blocks (must be in Game.h to avoid circular dependency)
                 for (int i = 0; i < enemies.getEnemyCount(); i++) {
@@ -332,11 +375,34 @@ public:
                         enemy->setVelocityX(enemy_vx);
                     }
 
-                    // Use level collision resolution
+                    // resolve collisions
                     bool onGround = false;
                     currentLevel->resolveCollisions(enemy_x, enemy_y, enemy_w, enemy_h, enemy_vx, enemy_vy, onGround);
-                    enemy->setGrounded(onGround);
 
+                    // push enemy out of terrain if stuck inside
+                    int pushAttempts = 0;
+                    while (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h) && pushAttempts < 100) {
+                        enemy_y -= 1.0f;
+                        pushAttempts++;
+                    }
+
+                    // jump if block ahead
+                    if (onGround && enemy_vx != 0.0f) {
+                        float checkX = (enemy_vx > 0)
+                            ? (enemy_x + enemy_w + 5.f)
+                            : (enemy_x - 5.f);
+
+                        bool blockAhead = currentLevel->checkCollision(checkX, enemy_y, 5.f, enemy_h);
+                        bool canJumpOver = !currentLevel->checkCollision(checkX, enemy_y - 40.f, 5.f, enemy_h);
+
+                        if (blockAhead && canJumpOver) {
+                            enemy_vy = -250.0f;
+                            enemy->setVelocityY(enemy_vy);
+                            onGround = false;
+                        }
+                    }
+
+                    enemy->setGrounded(onGround);
                     enemy->setVelocityY(enemy_vy);
                     enemy->setVelocityX(enemy_vx);
                     enemy->setPosition(enemy_x, enemy_y);
@@ -350,8 +416,9 @@ public:
                         if (sl) sl->enemyKilled();
                     }
                 }
-
-                survivalGame->update(dt, &characters);
+                // Baad mein - level switch hone par enemies respawn
+                
+                
             }
             else {
                 gameMode = 0;
@@ -416,8 +483,9 @@ public:
         if (gameMode == 1 && survivalGame) {
             survivalGame->render(window);
             enemies.renderAll(window, camera.getX(), camera.getY());
+            bulletManager.render(window, camera.getX(), camera.getY());
             characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
-            
+
             if (showLevelTitle) {
                 if (levelTitleTimer.getElapsedTime().asSeconds() < 3.0f) {
                     Font font;
@@ -451,8 +519,10 @@ public:
 
         else if (gameMode == 2 && campaignGame) {
             campaignGame->render(window);
+            enemies.renderAll(window, camera.getX(), camera.getY());
+            bulletManager.render(window, camera.getX(), camera.getY());
             characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
-            
+
             if (pauseMenu.getPauseMenuVisible()) {
                 RectangleShape overlay;
                 overlay.setSize(Vector2f((float)screenX, (float)screenY));
@@ -468,6 +538,29 @@ public:
         }
     }
 
+    void playerFire() {
+        PlayerSoldier* player = characters.getActivePlayer();
+        if (!player) return;
+        
+        // Get player position and facing direction
+        float px = player->getPlayerX();
+        float py = player->getPlayerY();
+        bool facingRight = player->isFacingRight();
+        
+        // Calculate bullet spawn position (slightly in front of player)
+        float bulletX = facingRight ? px + 30 : px - 30;
+        float bulletY = py + 10; // Center height
+        
+        // Calculate angle (0 for right, PI for left)
+        float angle = facingRight ? 0.f : 3.14159f;
+        
+        // Spawn bullet with PLAYER owner type
+        bulletManager.spawnBullet(bulletX, bulletY, angle, 10, PLAYER, 800.f, 600.f, sf::Color::Yellow);
+        
+        // Call player's shoot animation
+        player->shoot();
+    }
+
     void cleanup() {
         delete survivalGame;
         delete campaignGame;
@@ -481,7 +574,7 @@ private:
 
         pX += pVelocityX;
 
-        float stepHeight = 20.0f;
+        float stepHeight = 64.0f;
         if (pVelocityX != 0 &&
             level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
             float tempY = pY - stepHeight;

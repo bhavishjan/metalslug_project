@@ -1,11 +1,16 @@
+#define _CRT_SECURE_NO_WARNINGS
 #pragma once
-#include "Entity.h"
-#include "PlayerSoldier.h"
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <cmath>
-#include "Weapon.h"
+#include "Entity.h"
+#include "Animation.h"
+#include "Weapon.h"        // BulletManager + PLAYER/ENEMY constants yahan hain
+#include "PlayerSoldier.h" // PlayerSoldier yahan hai
 
 // Forward declaration to avoid circular dependency
 class Level;
+
 
 using namespace std;
 using namespace sf;
@@ -44,8 +49,9 @@ protected:
     bool  isPatrolling;
     bool  isTargetingPlayer;
     PlayerSoldier* largestPlayer;
+    BulletManager* bulletMgr;
 
-    float gravityConstant = 50.0f;
+    float gravityConstant = 20.0f;
     float jumpPower = -200.0f; // Higher jump power than player to cross walls
     float patrolRange;
 public:
@@ -55,7 +61,7 @@ public:
         scoreValue(0), isShielded(false), aggressionLevel(1.f),
         hasGrudge(false), grudgeMultiplier(1.f), isEnhanced(false),
         detectionRange(300.f), attackRange(250.f), currentBiome(0),
-        isPatrolling(true), isTargetingPlayer(false), largestPlayer(nullptr), patrolRange(50.f) {
+        isPatrolling(true), isTargetingPlayer(false), largestPlayer(nullptr), bulletMgr(nullptr), patrolRange(50.f) {
         x = 0;
         y = 0;
         width = 32;
@@ -106,12 +112,12 @@ public:
 
         if (distance < detectionRange) {
 
-        
+
             isTargetingPlayer = true;
             largestPlayer = player;
         }
         else {
-        
+
             isTargetingPlayer = false;
         }
     }
@@ -119,16 +125,16 @@ public:
     void chasePlayer(PlayerSoldier* player) {
         float xp = player->getPlayerX();
         if (xp > x) {
-        
+
             velocityX = speed;
             facingRight = true;
         }
         else {
-        
+
             velocityX = -speed;
             facingRight = false;
         }
-        
+
         // Add bounds to prevent enemies from passing left side
         if (x < 0) {
             x = 0;
@@ -160,7 +166,7 @@ public:
                 velocityX = speed;
             }
             else {
-            
+
                 velocityX = -speed;
             }
         }
@@ -168,7 +174,7 @@ public:
 
     void applyGravity(float deltaTime) {
         if (isGrounded == false) {
-        
+
             velocityY += gravityConstant * deltaTime;
         }
     }
@@ -195,8 +201,8 @@ public:
             return;
         }
 
-        float overlapLeft  = (x + width) - px;
-        float overlapRight = (px + pw)   - x;
+        float overlapLeft = (x + width) - px;
+        float overlapRight = (px + pw) - x;
 
         if (overlapLeft < overlapRight) {
             x -= overlapLeft;
@@ -278,12 +284,49 @@ public:
     // getters and setters
     float getWidth() const { return width; }
     float getHeight() const { return height; }
-	bool getIsTargetingPlayer() const { return isTargetingPlayer; }
-	bool getIsGrounded() const { return isGrounded; }
+    bool getIsTargetingPlayer() const { return isTargetingPlayer; }
+    bool getIsGrounded() const { return isGrounded; }
 
     void setPosition(float nx, float ny) { x = nx; y = ny; }
     void setPlayer(PlayerSoldier* p) { largestPlayer = p; }
+    void setBulletManager(BulletManager* bm) { bulletMgr = bm; }
     void setX(float nx) { x = nx; }
+
+    // Helper method to fire bullet at player
+    void fireAtPlayer(float speed = 300.f, int damage = 5, float range = 400.f, sf::Color color = sf::Color(255, 70, 70)) {
+        if (!bulletMgr || !largestPlayer) return;
+        
+        float dx = largestPlayer->getPlayerX() - x;
+        float dy = largestPlayer->getPlayerY() - y;
+        float angle = atan2(dy, dx);
+        
+        bulletMgr->spawnBullet(x + width * 0.5f, y + height * 0.5f, angle,
+            damage, ENEMY, speed, range, color);
+    }
+    
+    // Helper method to fire bullet in a specific direction
+    void fireInDirection(float angle, float speed = 300.f, int damage = 5, float range = 400.f, sf::Color color = sf::Color(255, 70, 70)) {
+        if (!bulletMgr) return;
+        
+        bulletMgr->spawnBullet(x + width * 0.5f, y + height * 0.5f, angle,
+            damage, ENEMY, speed, range, color);
+    }
+    
+    // Fire cooldown system
+    float fireCooldown = 2.0f;  // Default: fire every 2 seconds
+    float fireTimer = 0.0f;
+    
+    bool canFire() {
+        return fireTimer <= 0.0f;
+    }
+    
+    void updateFireTimer(float dt) {
+        if (fireTimer > 0.0f) fireTimer -= dt;
+    }
+    
+    void resetFireTimer() {
+        fireTimer = fireCooldown;
+    }
     float getVelocityY() const { return velocityY; }
     void  setVelocityY(float vy) { velocityY = vy; }
     float getVelocityX() const { return velocityX; }
@@ -296,14 +339,93 @@ public:
     }
 };
 
+// Enemy Manager class - moved here to fix declaration order issues
+class EnemyManager {
+private:
+    Enemy* enemies[50];
+    int enemyCount;
+    int maxEnemies;
+    BulletManager* bulletMgr;
+
+public:
+    EnemyManager() {
+        enemyCount = 0;
+        maxEnemies = 50;
+        bulletMgr = nullptr;
+        for (int i = 0; i < maxEnemies; i++) {
+            enemies[i] = nullptr;
+        }
+    }
+
+    void setBulletManager(BulletManager* bm) {
+        bulletMgr = bm;
+    }
+
+    ~EnemyManager() {
+        clearAll();
+    }
+
+    void clearAll() {
+        for (int i = 0; i < maxEnemies; i++) {
+            delete enemies[i];
+            enemies[i] = nullptr;
+        }
+        enemyCount = 0;
+    }
+
+    void addEnemy(Enemy* enemy) {
+        if (enemyCount < maxEnemies) {
+            enemies[enemyCount] = enemy;
+            enemyCount++;
+        }
+    }
+
+    Enemy* getEnemyAt(int index) {
+        if (index >= 0 && index < enemyCount) {
+            return enemies[index];
+        }
+        return nullptr;
+    }
+
+    void updateAll(float dt, PlayerSoldier* player) {
+        for (int i = 0; i < enemyCount; i++) {
+            if (!enemies[i]) {
+                continue;
+            }
+            if (!enemies[i]->getIsAlive()) {
+                continue;
+            }
+
+            enemies[i]->setPlayer(player);
+            enemies[i]->setBulletManager(bulletMgr);
+            enemies[i]->update(dt);
+        }
+    }
+
+    // Collision resolution must be handled in Game.h where Level is fully defined
+    // to avoid circular dependency between Enemy.h and Level.h
+
+    void renderAll(RenderWindow& window, float camX, float camY) {
+        for (int i = 0; i < enemyCount; i++) {
+            if (enemies[i]) {
+                enemies[i]->render(window, camX, camY);
+            }
+        }
+    }
+
+    int getEnemyCount() const {
+        return enemyCount;
+    }
+};
+
 
 // Base class for infantry enemies
 class InfantryEnemy : public Enemy {
 protected:
-    static const int WALK  = 0;
+    static const int WALK = 0;
     static const int STAND = 1;
     static const int SHOOT = 2;
-    static const int DIE   = 3;
+    static const int DIE = 3;
 
     float   fireRate;
     float   fireTimer;
@@ -355,6 +477,8 @@ public:
         float angle = atan2(dy, dx);
         pistol.fire(angle);
         fireTimer = 0.4f;
+        // simple manager shot spawn, taake collison bhi central ho jaye
+
 
         facingRight = (dx > 0);
     }
@@ -364,8 +488,12 @@ public:
             return;
         }
         if (largestPlayer == nullptr) {
+            pistol.update(dt);
             return;
         }
+
+        pistol.setActive(true);
+        pistol.setPosition(x + width * 0.5f, y + height * 0.45f);
 
         detectPlayer(largestPlayer);
         move(dt);
@@ -377,6 +505,7 @@ public:
         if (isTargetingPlayer && distanceToplayer < attackRange) {
             attack();
         }
+
 
         pistol.update(dt);
         if (fireTimer > 0.f) {
@@ -417,7 +546,7 @@ public:
 
         Animation& a = anims[currentAnim];
         IntRect r = a.currentRect();
-        
+
         // Fallback: draw colored rectangle if texture failed to load
         if (r.width == 0 || r.height == 0) {
             RectangleShape fallbackRect;
@@ -444,6 +573,7 @@ public:
         sprite.setScale(scX, sc);
 
         window.draw(sprite);
+        pistol.render(window);
     }
 };
 
@@ -487,6 +617,8 @@ public:
         bulletsFired = 0;
         shootingTimer = 0.0f;
         bulletDelay = 0.3f;
+        
+        fireCooldown = 5.0f; // 5 seconds between attack bursts (slower)
 
         grudgeMultiplier = 1.0f;
 
@@ -494,28 +626,28 @@ public:
         height = 48.0f;
 
         // walk animation (12 frame running cycle - row 1)
-        static const int walkXs[12] = {   3,  40,  80, 125, 170, 210, 248, 285, 326, 369, 410, 450 };
-        static const int walkYs[12] = {  44,  44,  45,  46,  45,  44,  44,  44,  45,  46,  45,  44 };
-        static const int walkWs[12] = {  34,  37,  42,  42,  37,  35,  34,  38,  40,  38,  37,  35 };
-        static const int walkHs[12] = {  37,  37,  31,  33,  35,  37,  37,  36,  30,  32,  35,  37 };
+        static const int walkXs[12] = { 3,  40,  80, 125, 170, 210, 248, 285, 326, 369, 410, 450 };
+        static const int walkYs[12] = { 44,  44,  45,  46,  45,  44,  44,  44,  45,  46,  45,  44 };
+        static const int walkWs[12] = { 34,  37,  42,  42,  37,  35,  34,  38,  40,  38,  37,  35 };
+        static const int walkHs[12] = { 37,  37,  31,  33,  35,  37,  37,  36,  30,  32,  35,  37 };
 
         // stand animation (1 frame idle - row 0)
-        static const int standXs[1] = {  3 };
-        static const int standYs[1] = {  3 };
+        static const int standXs[1] = { 3 };
+        static const int standYs[1] = { 3 };
         static const int standWs[1] = { 40 };
         static const int standHs[1] = { 38 };
 
         // shoot animation (10 frame rifle fire - row 8, y≈330)
-        static const int shootXs[10] = {   3,  50, 101, 151, 196, 284, 257, 330, 380, 429 };
+        static const int shootXs[10] = { 3,  50, 101, 151, 196, 284, 257, 330, 380, 429 };
         static const int shootYs[10] = { 298, 298, 298, 298, 289, 292, 298, 298, 298, 298 };
-        static const int shootWs[10] = {  44,  48,  47,  42,  41,  43,  38,  47,  46,  40 };
-        static const int shootHs[10] = {  38,  38,  38,  40,  47,  44,  38,  38,  38,  38 };
+        static const int shootWs[10] = { 44,  48,  47,  42,  41,  43,  38,  47,  46,  40 };
+        static const int shootHs[10] = { 38,  38,  38,  40,  47,  44,  38,  38,  38,  38 };
 
         // die animation (4 frame collapse - row 20)
-        static const int dieXs[4] = {   3,  44,  86, 129 };
+        static const int dieXs[4] = { 3,  44,  86, 129 };
         static const int dieYs[4] = { 784, 785, 786, 786 };
-        static const int dieWs[4] = {  38,  39,  40,  40 };
-        static const int dieHs[4] = {  33,  32,  31,  31 };
+        static const int dieWs[4] = { 38,  39,  40,  40 };
+        static const int dieHs[4] = { 33,  32,  31,  31 };
 
         anims[WALK].load("Sprites/Enemies/Rebel Soldier.png", walkXs, walkYs, walkWs, walkHs, 12, 0.07f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier.png", standXs, standYs, standWs, standHs, 1, 0.18f);
@@ -542,22 +674,30 @@ public:
     }
 
     void update(float dt) override {
+        if (largestPlayer == nullptr) {
+            isShooting = false;
+            InfantryEnemy::update(dt);
+            return;
+        }
+
         if (isShooting) {
             shootingTimer += dt;
 
-            if (bulletsFired < 3 && shootingTimer >= bulletDelay) {
-                float dx = largestPlayer->getPlayerX() - x;
-                float dy = largestPlayer->getPlayerY() - y;
-                float angle = atan2(dy, dx);
-                pistol.fire(angle);
+            if (bulletsFired < 1 && shootingTimer >= bulletDelay) {
+                pistol.fire(0); // Just for animation/sound
+                fireAtPlayer(100.f, bulletDamage, 200.f, sf::Color(255, 165, 0)); // Orange bullets
                 bulletsFired++;
                 shootingTimer = 0.0f;
             }
 
-            if (bulletsFired >= 3) {
+            if (bulletsFired >= 1) {
                 isShooting = false;
                 bulletsFired = 0;
+                fireTimer = 3.0f; // Slower: 3 seconds between attacks
             }
+            pistol.update(dt);  // sirf pistol update, InfantryEnemy::update NAHI
+            updateAnimState(dt);
+            return;
         }
 
         InfantryEnemy::update(dt);
@@ -574,7 +714,6 @@ class GrenadeSoldier : public InfantryEnemy {
 private:
     int          grenadeCount;
     float        throwCooldown;
-    HandGrenade  grenades[5];
     int          activeGrenades;
     bool         isActive;
 
@@ -596,28 +735,28 @@ public:
         height = 35.f;
 
         // walk animation 
-        static const int walkXs[7] = {  2,  25,  51,  81, 110, 153, 203 };
+        static const int walkXs[7] = { 2,  25,  51,  81, 110, 153, 203 };
         static const int walkYs[7] = { 35,  25,  19,  17,  20,  24,  25 };
         static const int walkWs[7] = { 18,  21,  26,  25,  36,  46,  46 };
         static const int walkHs[7] = { 17,  27,  33,  35,  32,  28,  27 };
 
         // stand animation - first frame of walk row
-        static const int standXs[1] = {  203 };
-        static const int standYs[1] = {  25 };
-        static const int standWs[1] = {  46 };
-        static const int standHs[1] = {  27 };
+        static const int standXs[1] = { 203 };
+        static const int standYs[1] = { 25 };
+        static const int standWs[1] = { 46 };
+        static const int standHs[1] = { 27 };
 
         // throw grenade animation 
-        static const int throwXs[5] = {  2,  45,  90, 125, 157 };
+        static const int throwXs[5] = { 2,  45,  90, 125, 157 };
         static const int throwYs[5] = { 54,  74,  67,  66,  70 };
         static const int throwWs[5] = { 42,  39,  30,  26,  37 };
         static const int throwHs[5] = { 47,  27,  34,  35,  31 };
 
         // die animation - row Y=162 (6 frames)
-        static const int dieXs[6] = {   2,  68, 103, 130, 155, 180 };
+        static const int dieXs[6] = { 2,  68, 103, 130, 155, 180 };
         static const int dieYs[6] = { 162, 165, 167, 167, 167, 167 };
-        static const int dieWs[6] = {  65,  30,  23,  20,  20,  21 };
-        static const int dieHs[6] = {  49,  46,  28,  30,  32,  30 };
+        static const int dieWs[6] = { 65,  30,  23,  20,  20,  21 };
+        static const int dieHs[6] = { 49,  46,  28,  30,  32,  30 };
 
         anims[WALK].load("Sprites/Enemies/Rebel Soldier (RPG-2).png", walkXs, walkYs, walkWs, walkHs, 7, 0.08f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier (RPG-2).png", standXs, standYs, standWs, standHs, 1, 0.18f);
@@ -647,9 +786,6 @@ public:
     }
 
     void throwGrenade() {
-        if (activeGrenades >= 5) {
-            return;
-        }
         if (grenadeCount <= 0) {
             return;
         }
@@ -658,7 +794,7 @@ public:
         float ty = largestPlayer->getPlayerY();
 
         float flightTime = 1.2f;
-        float gravity = 9.0f;
+        float gravity = 980.0f;
 
         float dx = tx - x;
         float dy = ty - y;
@@ -666,10 +802,9 @@ public:
         float velX = dx / flightTime;
         float velY = (dy - 0.5 * gravity * flightTime * flightTime) / flightTime;
 
-        HandGrenade& g = grenades[activeGrenades];
-        g.launch(atan2(velY, velX), sqrt(velX * velX + velY * velY));
-
-        activeGrenades++;
+        if (bulletMgr) {
+            bulletMgr->spawnGrenade(x, y, velX, velY);
+        }
         grenadeCount--;
     }
 
@@ -706,39 +841,7 @@ public:
 };
 
 
-// Rocket class for bazooka soldier and bosses
-class Rocket {
-private:
-    float x, y;
-    float velX, velY;
-    bool  active;
-
-public:
-    Rocket() {
-        x = y = 0;
-        velX = velY = 0;
-        active = false;
-    }
-
-    void setPosition(float px, float py) { x = px; y = py; }
-    void setVelocity(float vx, float vy) { velX = vx; velY = vy; }
-    void setActive(bool state) { active = state; }
-
-    bool  isActive() const { return active; }
-    float getX()     const { return x; }
-    float getY()     const { return y; }
-
-    void update(float dt) {
-        if (!active) {
-            return;
-        }
-        velY += 980 * dt;
-        x += velX * dt;
-        y += velY * dt;
-    }
-
-    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f);
-};
+// Rocket class Weapon.h mein defined hai, yahan duplicate nhi rakhni
 
 
 // Slow moving, fires rockets in steep arc, spawns in batches
@@ -746,7 +849,6 @@ class BazookaSoldier : public InfantryEnemy {
 private:
     float  rocketReloadTimer;
     float  rocketReloadDuration;
-    Rocket rockets[5];  // rocket cant exist without bazooka
     int    activeRockets;
 
 public:
@@ -770,28 +872,28 @@ public:
         activeRockets = 0;
 
         // walk animation 
-        static const int walkXs[11] = {   3,  47,  91, 134, 178, 221, 265,  309,  350,  390, 429};
-        static const int walkYs[11] = {  55,  54,  53,  54,  56,  55,  54,   53,   52,   51,  53 };
-        static const int walkWs[11] = {  41,  41,  40,  41,  40,  41,  41,   38,   37,   36,  37 };
-        static const int walkHs[11] = {  39,  40,  40,  39,  38,  39,  40,   41,   41,   42,  41 };
+        static const int walkXs[11] = { 3,  47,  91, 134, 178, 221, 265,  309,  350,  390, 429 };
+        static const int walkYs[11] = { 55,  54,  53,  54,  56,  55,  54,   53,   52,   51,  53 };
+        static const int walkWs[11] = { 41,  41,  40,  41,  40,  41,  41,   38,   37,   36,  37 };
+        static const int walkHs[11] = { 39,  40,  40,  39,  38,  39,  40,   41,   41,   42,  41 };
 
         // stand animation 
-        static const int standXs[1] = {   3 };
-        static const int standYs[1] = {   3 };
-        static const int standWs[1] = {  36 };
-        static const int standHs[1] = {  45 };
+        static const int standXs[1] = { 3 };
+        static const int standYs[1] = { 3 };
+        static const int standWs[1] = { 36 };
+        static const int standHs[1] = { 45 };
 
         // fire rocket animation - row Y=241 H=44 (3 frames)
-        static const int fireXs[3] = {   3,  45,  89 };
+        static const int fireXs[3] = { 3,  45,  89 };
         static const int fireYs[3] = { 241, 243, 245 };
-        static const int fireWs[3] = {  39,  41,  41 };
-        static const int fireHs[3] = {  44,  42,  40 };
+        static const int fireWs[3] = { 39,  41,  41 };
+        static const int fireHs[3] = { 44,  42,  40 };
 
         // die animation - row Y=395 H=51 (9 frames)
-        static const int dieXs[9] = {   3,  52,  99, 147, 191, 235, 279, 318, 361 };
+        static const int dieXs[9] = { 3,  52,  99, 147, 191, 235, 279, 318, 361 };
         static const int dieYs[9] = { 404, 407, 401, 403, 398, 398, 398, 395, 399 };
-        static const int dieWs[9] = {  46,  44,  45,  41,  41,  41,  36,  38,  31 };
-        static const int dieHs[9] = {  42,  39,  45,  43,  48,  48,  48,  51,  47 };
+        static const int dieWs[9] = { 46,  44,  45,  41,  41,  41,  36,  38,  31 };
+        static const int dieHs[9] = { 42,  39,  45,  43,  48,  48,  48,  51,  47 };
 
         anims[WALK].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", walkXs, walkYs, walkWs, walkHs, 11, 0.08f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier (Bazooka).png", standXs, standYs, standWs, standHs, 1, 0.18f);
@@ -820,9 +922,6 @@ public:
         if (rocketReloadTimer > 0) {
             return;
         }
-        if (activeRockets >= 5) {
-            return;
-        }
         if (largestPlayer == nullptr) {
             return;
         }
@@ -840,13 +939,12 @@ public:
         float velX = dx / flightTime;
         float velY = (dy - 0.5 * gravity * flightTime * flightTime) / flightTime;
 
-        // rocket spawn at soldier position
-        rockets[activeRockets].setPosition(x, y);
-        rockets[activeRockets].setVelocity(velX, velY);
-        rockets[activeRockets].setActive(true);
+        // manager ke through spawn, central update/render/collision
+        if (bulletMgr) {
+            bulletMgr->spawnRocket(x, y, velX, velY);
+        }
 
         rocketReloadTimer = rocketReloadDuration;
-        activeRockets++;
     }
 
     void update(float dt) override {
@@ -864,10 +962,6 @@ public:
 
         if (isTargetingPlayer && distanceToplayer < attackRange)
             attack();
-
-        // update all active rockets
-        for (int i = 0; i < activeRockets; ++i)
-            rockets[i].update(dt);
 
         pistol.update(dt);
         if (fireTimer > 0.f)
@@ -900,11 +994,13 @@ public:
         damage = 3;
         scoreValue = 120;
         batchSize = 1;      // spawns in 1 to 2
+        
+        fireCooldown = 6.0f; // Much slower fire rate: 6 seconds
 
         detectionRange = 300.f;
         attackRange = 250.f;
 
-        width = 55.f; 
+        width = 55.f;
         height = 48.f;
 
         // walk animation -
@@ -914,22 +1010,22 @@ public:
         static const int walkHs[12] = { 40,  41,  40,  39,  38,  39,  40,  41,  40,  39,  38,  39 };
 
         // stand animation -
-        static const int standXs[6] = {  3, 38, 73, 107, 143, 177 };
-        static const int standYs[6] = {  5,  5,  5,   5,   5,   5 };
+        static const int standXs[6] = { 3, 38, 73, 107, 143, 177 };
+        static const int standYs[6] = { 5,  5,  5,   5,   5,   5 };
         static const int standWs[6] = { 32, 32, 31,  32,  31,  32 };
         static const int standHs[6] = { 38, 38, 38,  39,  38,  38 };
 
         // shoot animation 
-        static const int shootXs[9] = {   3,  39,  82, 126, 167, 218, 274, 326, 369 };
+        static const int shootXs[9] = { 3,  39,  82, 126, 167, 218, 274, 326, 369 };
         static const int shootYs[9] = { 389, 388, 379, 379, 385, 389, 389, 387, 393 };
-        static const int shootWs[9] = {  33,  40,  41,  38,  48,  53,  49,  40,  55 };
-        static const int shootHs[9] = {  38,  39,  48,  48,  42,  38,  38,  40,  34 };
+        static const int shootWs[9] = { 33,  40,  41,  38,  48,  53,  49,  40,  55 };
+        static const int shootHs[9] = { 38,  39,  48,  48,  42,  38,  38,  40,  34 };
 
         // die animation - row Y=481 H=44 (9 frames)
-        static const int dieXs[9] = {   3,  37,  72, 115, 162, 209, 257, 305, 353 };
+        static const int dieXs[9] = { 3,  37,  72, 115, 162, 209, 257, 305, 353 };
         static const int dieYs[9] = { 481, 482, 482, 482, 483, 484, 485, 484, 483 };
-        static const int dieWs[9] = {  31,  32,  38,  44,  44,  45,  45,  45,  44 };
-        static const int dieHs[9] = {  39,  40,  40,  41,  41,  40,  40,  40,  41 };
+        static const int dieWs[9] = { 31,  32,  38,  44,  44,  45,  45,  45,  44 };
+        static const int dieHs[9] = { 39,  40,  40,  41,  41,  40,  40,  40,  41 };
 
         anims[WALK].load("Sprites/Enemies/Rebel Soldier (Shield).png", walkXs, walkYs, walkWs, walkHs, 12, 0.08f);
         anims[STAND].load("Sprites/Enemies/Rebel Soldier (Shield).png", standXs, standYs, standWs, standHs, 6, 0.18f);
@@ -942,7 +1038,7 @@ public:
     {
         // explosives bypass shield completly
         if (isExplosive) {
-        
+
             hp -= dmg;
             if (hp <= 0) die();
             return;
@@ -956,17 +1052,17 @@ public:
 
         // bullet from front check
         if (facingRight) {
-        
+
             if (bulletX > x) isFront = true;
         }
         else {
-        
+
             if (bulletX < x) isFront = true;
         }
 
         // shield blocks frontal non explosive bullets
         if (shieldActive && isFront && !isAbove) {
-        
+
             shieldDurability--;
             if (shieldDurability <= 0)
                 shieldActive = false;
@@ -984,7 +1080,20 @@ public:
     }
 
     void attack() override {
-        InfantryEnemy::attack();
+        if (largestPlayer == nullptr || !canFire()) return;
+        
+        float dx = largestPlayer->getPlayerX() - x;
+        float dy = largestPlayer->getPlayerY() - y;
+        float distance = sqrt(dx * dx + dy * dy);
+        
+        if (distance > attackRange) return;
+        
+        // Fire red bullet
+        float angle = atan2(dy, dx);
+        pistol.fire(angle);
+        fireInDirection(angle, 200.f, 5, 300.f, sf::Color(255, 0, 0)); // Red bullets
+        resetFireTimer();
+        facingRight = (dx > 0);
     }
 
     // shield soldier update same as infantry
@@ -1003,8 +1112,7 @@ public:
             attack();
 
         pistol.update(dt);
-        if (fireTimer > 0.f)
-            fireTimer -= dt;
+        updateFireTimer(dt); // Use new cooldown system
 
         updateAnimState(dt);
     }
@@ -1019,10 +1127,10 @@ public:
 // gravity is ignored for these
 class AerialEnemy : public Enemy {
 protected:
-    static const int FLY     = 0;
+    static const int FLY = 0;
     static const int DESCEND = 1;
-    static const int ATTACK  = 2;
-    static const int DIE     = 3;
+    static const int ATTACK = 2;
+    static const int DIE = 3;
 
     float   flyHeight;
     bool    isDescending;
@@ -1090,7 +1198,14 @@ public:
         if (!isAlive && currentAnim != DIE) return;
         Animation& a = anims[currentAnim];
         IntRect r = a.currentRect();
-        if (r.width == 0 || r.height == 0) return;
+        if (r.width == 0 || r.height == 0) {
+            RectangleShape fallbackRect;
+            fallbackRect.setSize(Vector2f(width, height));
+            fallbackRect.setPosition(x - camX, y - camY);
+            fallbackRect.setFillColor(Color(150, 180, 255));
+            window.draw(fallbackRect);
+            return;
+        }
         sprite.setTexture(a.getTexture(), true);
         sprite.setTextureRect(r);
         float sc = 2.0f;
@@ -1154,17 +1269,28 @@ public:
         AerialEnemy::descend();
     }
 
-    // paratrooper doesnt attack while in air
-    // becomes infantry after landing
-    void attack() override {}
-
     void spawnInfantry() {
         // paratrooper landed so act like rebel soldier now
         hasLanded = true;
         name = "Rebel Soldier";
         speed = 80.f;
         isDescending = false;
+        fireCooldown = 5.5f; // Add firing capability (slower)
         // now normal infantry behaviour starts
+    }
+
+    void attack() override {
+        if (!hasLanded || !largestPlayer || !canFire()) return;
+        
+        float dx = largestPlayer->getPlayerX() - x;
+        float dy = largestPlayer->getPlayerY() - y;
+        float distance = sqrt(dx * dx + dy * dy);
+        
+        if (distance > 300.f) return; // Attack range
+        
+        // Fire blue bullet
+        fireAtPlayer(200.f, 3, 250.f, sf::Color(0, 100, 255));
+        resetFireTimer();
     }
 
     void update(float dt) override {
@@ -1175,10 +1301,18 @@ public:
         // check if landed floor check
         float GROUND_Y = 520.f;
         if (y + height >= GROUND_Y) {
-        
+
             y = GROUND_Y - height;
             if (!hasLanded)
                 spawnInfantry();
+        }
+        
+        // Attack when landed
+        if (hasLanded && largestPlayer) {
+            detectPlayer(largestPlayer);
+            if (isTargetingPlayer)
+                attack();
+            updateFireTimer(dt);
         }
 
         if (largestPlayer)
@@ -1195,11 +1329,11 @@ public:
 // immune to bullets only fire and explosions kill them
 class UndeadEnemy : public Enemy {
 protected:
-    static const int WALK   = 0;
+    static const int WALK = 0;
     static const int ATTACK = 1;
-    static const int SHOOT  = 2;
-    static const int HURT   = 3;
-    static const int DIE    = 4;
+    static const int SHOOT = 2;
+    static const int HURT = 3;
+    static const int DIE = 4;
 
     bool transformOnContact;
     bool onlyDeadFromFire;
@@ -1244,25 +1378,25 @@ public:
     virtual void updateAnimState(float dt) {
         int desired;
         if (!isAlive) {
-        
+
             desired = DIE;
         }
         else if (isCrumbled) {
-        
+
             desired = HURT;
         }
         else if (velocityX > 0.5f || velocityX < -0.5f) {
-        
+
             desired = WALK;
         }
         else {
-        
+
             desired = WALK;
         }
 
         if (desired != currentAnim) {
 
-        
+
             currentAnim = desired;
             anims[currentAnim].reset();
         }
@@ -1274,7 +1408,14 @@ public:
         if (!isAlive && currentAnim != DIE) return;
         Animation& a = anims[currentAnim];
         IntRect r = a.currentRect();
-        if (r.width == 0 || r.height == 0) return;
+        if (r.width == 0 || r.height == 0) {
+            RectangleShape fallbackRect;
+            fallbackRect.setSize(Vector2f(width, height));
+            fallbackRect.setPosition(x - camX, y - camY);
+            fallbackRect.setFillColor(Color(180, 180, 120));
+            window.draw(fallbackRect);
+            return;
+        }
         sprite.setTexture(a.getTexture(), true);
         sprite.setTextureRect(r);
         float sc = 2.0f;
@@ -1292,12 +1433,12 @@ public:
 // only fire kills it instantly per project spec
 class MummyWarrior : public UndeadEnemy {
 private:
-  
+
     float resumeTimer;
     float resumeDuration;
 
 public:
-    MummyWarrior() :  resumeTimer(0.f), resumeDuration(3.f)
+    MummyWarrior() : resumeTimer(0.f), resumeDuration(3.f)
     {
         name = "Mummy Warrior";
         hp = maxHp = 5;
@@ -1358,7 +1499,7 @@ public:
     // fire kills instantly bullets just crumble it
     void takeDamage(int dmg, float bx, float by, bool isExplosive) override {
         if (isExplosive) {
-        
+
             // explosions and fire kill instantly per spec
             hp = 0;
             die();
@@ -1473,7 +1614,7 @@ public:
     void move(float dt) override {
         if (largestPlayer)
             chasePlayer(largestPlayer);
-     
+
     }
 
     void attack() override {
@@ -1486,7 +1627,7 @@ public:
 
         // pistol shot if in range
         if (dist < attackRange) {
-        
+
             // pistol.fire(atan2(dy, dx));  // enable when weapon linked
         }
 
@@ -1513,12 +1654,12 @@ public:
 // has 2 phases like martian
 class AlienEnemy : public Enemy {
 protected:
-    static const int PHASE1  = 0;
-    static const int PHASE2  = 1;
+    static const int PHASE1 = 0;
+    static const int PHASE2 = 1;
     static const int ATTACK1 = 2;
     static const int ATTACK2 = 3;
-    static const int HURT    = 4;
-    static const int DIE     = 5;
+    static const int HURT = 4;
+    static const int DIE = 5;
 
     int   phase;
     float massPhase;
@@ -1560,7 +1701,14 @@ public:
         if (!isAlive && currentAnim != DIE) return;
         Animation& a = anims[currentAnim];
         IntRect r = a.currentRect();
-        if (r.width == 0 || r.height == 0) return;
+        if (r.width == 0 || r.height == 0) {
+            RectangleShape fallbackRect;
+            fallbackRect.setSize(Vector2f(width, height));
+            fallbackRect.setPosition(x - camX, y - camY);
+            fallbackRect.setFillColor(Color(200, 120, 220));
+            window.draw(fallbackRect);
+            return;
+        }
         sprite.setTexture(a.getTexture(), true);
         sprite.setTextureRect(r);
         float sc = 2.0f;
@@ -1572,6 +1720,92 @@ public:
     }
 };
 
+// Hovers at medium height, drops grenade when above player
+class FlyingTara : public AerialEnemy {
+private:
+    float grenadeCooldown;
+    float grenadeCooldownDuration;
+    float dropHeight;
+    float GroundY;
+
+public:
+    FlyingTara() {
+        name = "Flying Tara";
+        hp = maxHp = 3;
+        scoreValue = 100;
+        speed = 70.f;
+        flyHeight = 200.f;
+        dropHeight = 250.f;
+        grenadeCooldown = 0.f;
+        grenadeCooldownDuration = 3.0f;
+        width = 48.f;
+        height = 32.f;
+        detectionRange = 500.f;
+        attackRange = 300.f;
+        isGrounded = true; // aerial — gravity ignore
+
+        // placeholder anim frames (0,0 = fallback rect draw hoga)
+        static const int flyXs[2] = { 0, 0 };
+        static const int flyYs[2] = { 0, 0 };
+        static const int flyWs[2] = { 0, 0 };
+        static const int flyHs[2] = { 0, 0 };
+
+        static const int dieXs[2] = { 0, 0 };
+        static const int dieYs[2] = { 0, 0 };
+        static const int dieWs[2] = { 0, 0 };
+        static const int dieHs[2] = { 0, 0 };
+
+        anims[FLY].load("Sprites/Enemies/Flying Tara.png",
+            flyXs, flyYs, flyWs, flyHs, 2, 0.15f);
+        anims[DIE].load("Sprites/Enemies/Flying Tara.png",
+            dieXs, dieYs, dieWs, dieHs, 2, 0.15f);
+    }
+    float setGroundY() {
+        return GroundY;
+    }
+
+    void attack() override {
+        if (!largestPlayer || !bulletMgr) return;
+        if (grenadeCooldown > 0) return;
+
+        float dx = largestPlayer->getPlayerX() - x;
+        float dy = largestPlayer->getPlayerY() - y;
+
+        // sirf jab player ke upar ho grenade drop karo
+        if (abs(dx) < 60.f) {
+            float velX = dx / 1.5f;
+            float velY = 50.f; // thoda neeche velocity
+            bulletMgr->spawnGrenade(x, y, velX, velY);
+            grenadeCooldown = grenadeCooldownDuration;
+        }
+    }
+
+    void update(float dt) override {
+        if (!isAlive || !largestPlayer) return;
+
+        if (grenadeCooldown > 0.f)
+            grenadeCooldown -= dt;
+
+        detectPlayer(largestPlayer);
+        move(dt);
+        attack();
+        checkPlayerCollision(largestPlayer);
+
+        // anim update
+        anims[currentAnim].update(dt);
+    }
+
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        if (!isAlive) return;
+
+        // fallback — cyan rect jab tak sprite na ho
+        RectangleShape rect;
+        rect.setSize(Vector2f(width, height));
+        rect.setPosition(x - camX, y - camY);
+        rect.setFillColor(Color(0, 200, 255, 180));
+        window.draw(rect);
+    }
+};
 
 // 2 phase enemy
 // phase 1 flies in pod above player fires energy beam
@@ -1607,6 +1841,8 @@ public:
         fireSum = 0.f;
         isOnFlatGround = false;
         fireBombTimer = 0.f;
+        
+        fireCooldown = 7.0f; // 7 seconds between shots (much slower)
 
         // phase 1 (pod flying)
         static const int phase1Xs[4] = { 10, 64, 118, 171 };
@@ -1654,10 +1890,10 @@ public:
 
     void move(float dt) override {
         if (phase == 1) {
-        
+
             // phase 1 pod flies above player horizontally
             if (largestPlayer) {
-            
+
                 float targetX = largestPlayer->getPlayerX() - width * 0.5f;
                 float dx = targetX - x;
                 if (dx > 0) velocityX = 1.f * speed;
@@ -1673,7 +1909,7 @@ public:
             podY = y - 80.f;
         }
         else {
-        
+
             // phase 2 martian on foot normal chase
             chasePlayer(largestPlayer);
             x += velocityX * dt;
@@ -1685,7 +1921,7 @@ public:
 
         if (phase == 1 && isPodAlive) {
 
-        
+
             // fire beam downward when directly above player
             float dx = largestPlayer->getPlayerX() - x;
             if (abs(dx) < 20.f)
@@ -1693,13 +1929,18 @@ public:
             else
                 beamActive = false;
         }
-        else if (phase == 2) {
-        
-            // pistol fire in phase 2
+        else if (phase == 2 && canFire()) {
+
+            // pistol fire in phase 2 - green bullets
             float dx = largestPlayer->getPlayerX() - x;
             float dy = largestPlayer->getPlayerY() - y;
             float dist = sqrt(dx * dx + dy * dy);
-            // pistol.fire(atan2(dy, dx));  // enable when weapon linked
+            
+            if (dist < 350.f) { // Attack range
+                float angle = atan2(dy, dx);
+                fireInDirection(angle, 250.f, 5, 400.f, sf::Color(0, 255, 100)); // Green bullets
+                resetFireTimer();
+            }
         }
     }
 
@@ -1733,77 +1974,12 @@ public:
 
         attack();
         checkPlayerCollision(largestPlayer);
+        
+        updateFireTimer(dt); // Update fire cooldown
     }
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
         AlienEnemy::render(window, camX, camY);
-    }
-};
-
-
-class EnemyManager {
-private:
-    Enemy* enemies[50];
-    int enemyCount;
-    int maxEnemies;
-
-public:
-    EnemyManager() {
-        enemyCount = 0;
-        maxEnemies = 50;
-        for (int i = 0; i < maxEnemies; i++) {
-            enemies[i] = nullptr;
-        }
-    }
-
-    ~EnemyManager() {
-        for (int i = 0; i < maxEnemies; i++) {
-            delete enemies[i];
-            enemies[i] = nullptr;
-        }
-    }
-
-    void addEnemy(Enemy* enemy) {
-        if (enemyCount < maxEnemies) {
-            enemies[enemyCount] = enemy;
-            enemyCount++;
-        }
-    }
-
-    Enemy* getEnemyAt(int index) {
-        if (index >= 0 && index < enemyCount) {
-            return enemies[index];
-        }
-        return nullptr;
-    }
-
-    void updateAll(float dt, PlayerSoldier* player) {
-        for (int i = 0; i < enemyCount; i++) {
-            if (!enemies[i]) {
-                continue;
-            }
-            if (!enemies[i]->getIsAlive()) {
-                continue;
-            }
-
-            enemies[i]->setPlayer(player);
-            enemies[i]->update(dt);
-        }
-    }
-
-    // Collision resolution must be handled in Game.h where Level is fully defined
-    // to avoid circular dependency between Enemy.h and Level.h
-
-    void renderAll(RenderWindow& window, float camX, float camY) {
-        for (int i = 0; i < enemyCount; i++) {
-            if (enemies[i]) {
-                enemies[i]->render(window, camX, camY);
-            }
-        }
-    }
-
-    int getEnemyCount() const {
-        return enemyCount;
     }
 };
 
@@ -1951,7 +2127,7 @@ public:
         // countdown timers
         if (rocketLauncherTimer > 0.f) rocketLauncherTimer -= dt;
         if (fireBombTimer > 0.f) {
-        
+
             fireBombTimer -= dt;
             if (fireBombTimer <= 0.f)
                 fireBombCooldown = false;  // ready to fire bomb again
@@ -1966,6 +2142,169 @@ public:
 
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
         AlienEnemy::render(window, camX, camY);
+    }
+};
+
+// Aerial boss phase 2
+// Flies and drops energy bombs from above
+// 30 HP spawns in aerial biome only
+class HairbusterRiberts : public AerialEnemy {
+private:
+    bool  energyBombActive;
+    float bombCooldown;
+    float bombCooldownDuration;
+    float flightHeight;
+    bool  isDiving;
+
+public:
+    HairbusterRiberts() : AerialEnemy(),
+        energyBombActive(false), bombCooldown(0.f), 
+        bombCooldownDuration(2.5f), flightHeight(200.f), isDiving(false)
+    {
+        name = "Hairbuster Riberts";
+        hp = 30.f;
+        maxHp = 30;
+        width = 80.f;
+        height = 60.f;
+        speed = 120.f;
+        damage = 8;
+        scoreValue = 800;
+        detectionRange = 600.f;
+        attackRange = 500.f;
+        isAlive = true;
+        facingRight = true;
+    }
+
+    void attack() override {
+        if (bombCooldown > 0.f) return;
+        if (!largestPlayer) return;
+
+        // Drop energy bomb on player
+        float dx = largestPlayer->getPlayerX() - x;
+        float dy = largestPlayer->getPlayerY() - y;
+        float distance = sqrt(dx * dx + dy * dy);
+
+        if (distance < attackRange) {
+            dropEnergyBomb();
+            bombCooldown = bombCooldownDuration;
+        }
+    }
+
+    void dropEnergyBomb() {
+        // Spawn energy bomb projectile
+        if (bulletMgr) {
+            float angle = 3.14159f / 2.f; // Downward
+            bulletMgr->spawnBullet(x + width * 0.5f, y + height, 
+                angle, damage, ENEMY, 300.f, 400.f, sf::Color(150, 150, 255));
+        }
+        energyBombActive = true;
+    }
+
+    void update(float dt) override {
+        if (!isAlive || !largestPlayer) return;
+
+        if (bombCooldown > 0.f) bombCooldown -= dt;
+
+        detectPlayer(largestPlayer);
+        move(dt);
+        attack();
+        checkPlayerCollision(largestPlayer);
+    }
+
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        if (!isAlive) return;
+
+        // Draw boss as colored rectangle for now
+        RectangleShape bossShape(Vector2f(width, height));
+        bossShape.setFillColor(sf::Color(100, 100, 200)); // Blue color for aerial boss
+        bossShape.setPosition(x - camX, y - camY);
+        window.draw(bossShape);
+    }
+};
+
+// Aquatic boss phase 3
+// Swims and fires torpedoes underwater
+// 30 HP spawns in aquatic biome only
+class SeaSatan : public Enemy {
+private:
+    bool  underwater;
+    bool  torpedoActive;
+    float torpedoCooldown;
+    float torpedoCooldownDuration;
+    float swimSpeed;
+    float surfaceLevel;
+
+public:
+    SeaSatan() : Enemy(),
+        underwater(true), torpedoActive(false), torpedoCooldown(0.f),
+        torpedoCooldownDuration(3.0f), swimSpeed(80.f), surfaceLevel(450.f)
+    {
+        name = "Sea Satan";
+        hp = 30.f;
+        maxHp = 30;
+        width = 90.f;
+        height = 50.f;
+        speed = 80.f;
+        damage = 10;
+        scoreValue = 1000;
+        detectionRange = 400.f;
+        attackRange = 350.f;
+        isAlive = true;
+        facingRight = true;
+        isGrounded = false;
+    }
+
+    void attack() override {
+        if (torpedoCooldown > 0.f) return;
+        if (!largestPlayer) return;
+
+        float dx = largestPlayer->getPlayerX() - x;
+        float dy = largestPlayer->getPlayerY() - y;
+        float distance = sqrt(dx * dx + dy * dy);
+
+        if (distance < attackRange) {
+            fireTorpedo();
+            torpedoCooldown = torpedoCooldownDuration;
+        }
+    }
+
+    void fireTorpedo() {
+        // Fire horizontal torpedo
+        if (bulletMgr) {
+            float angle = facingRight ? 0.f : 3.14159f;
+            bulletMgr->spawnBullet(x + (facingRight ? width : 0), y + height * 0.5f,
+                angle, damage, ENEMY, 200.f, 500.f, sf::Color(0, 200, 200));
+        }
+        torpedoActive = true;
+    }
+
+    void update(float dt) override {
+        if (!isAlive || !largestPlayer) return;
+
+        if (torpedoCooldown > 0.f) torpedoCooldown -= dt;
+
+        // Swim underwater but surface to attack
+        if (y > surfaceLevel) {
+            y -= swimSpeed * dt;
+            underwater = false;
+        } else {
+            underwater = true;
+        }
+
+        detectPlayer(largestPlayer);
+        move(dt);
+        attack();
+        checkPlayerCollision(largestPlayer);
+    }
+
+    void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
+        if (!isAlive) return;
+
+        // Draw boss as colored rectangle
+        RectangleShape bossShape(Vector2f(width, height));
+        bossShape.setFillColor(sf::Color(0, 150, 150)); // Teal color for aquatic boss
+        bossShape.setPosition(x - camX, y - camY);
+        window.draw(bossShape);
     }
 };
 

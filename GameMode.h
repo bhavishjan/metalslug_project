@@ -124,8 +124,8 @@ public:
         fusionUsedThisLevel = false;
         cameraX = 0;
         cameraY = 0;
-        loadAllLevels();
-        switchToLevel(0);
+        //loadAllLevels();
+        //switchToLevel(0);
     }
 
     void update(float dt) override {
@@ -138,7 +138,9 @@ public:
         }
         checkLevelComplete();
     }
-
+    void setCurrentLevel(Level* level) {
+        currentLevel = level;
+    }
     void update(float dt, CharacterManager* characters) {
         if (!isActive || isPaused) {
             return;
@@ -169,7 +171,7 @@ public:
         isBossLevel = (index == 3);
         fusionUsedThisLevel = false;
         if (currentLevel) {
-            currentLevel->generateBiomes();
+            //currentLevel->generateBiomes();
             // currentLevel->spawnEnemies(); - commented out, requires EnemyManager and PlayerSoldier*
         }
     }
@@ -225,10 +227,10 @@ public:
     }
 
     void loadAllLevels() override {
-        levels[0] = new Level1();
-        levels[1] = new Level2();
-        levels[2] = new Level3();
-        levels[3] = nullptr; // Boss level to be implemented
+        //levels[0] = new Level1();
+        //levels[1] = new Level2();
+        //levels[2] = new Level3();
+        //levels[3] = nullptr; // Boss level to be implemented
     }
 
     void render(RenderWindow& window) override {

@@ -1,5 +1,4 @@
 #pragma once
-#include "Level.h"
 #include <SFML/Graphics.hpp>
 
 class Animation {

@@ -1,5 +1,5 @@
 #pragma once
-#include "Level.h"
+class Level;
 #include "Block.h"
 #include "Animation.h"
 #include <SFML/Graphics.hpp>
