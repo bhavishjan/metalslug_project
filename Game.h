@@ -12,6 +12,7 @@
 #include "Menu.h"
 #include "GameState.h"
 #include "Camera.h"
+#include "ScoreSystem.h"
 
 using namespace sf;
 using namespace std;
@@ -41,19 +42,24 @@ private:
     Clock levelTitleTimer;
     int currentLevelNumber;
 
-    BulletManager bulletManager;  
+    BulletManager bulletManager;
     Clock clock;
     Clock Delay;
     Clock pauseDelay;
     Clock playerFireTimer;
+    Clock playerDiedTimer;
+    bool showPlayerDiedMessage;
     float playerFireCooldown = 0.2f;
+
+    // Score system
+    ScoreSystem scoreSystem;
 
     Camera camera;
     Menu startMenu;
     Menu pauseMenu;
 
 public:
-    Game() 
+    Game()
         : screenX(1600),
           screenY(900),
           gameMode(0),
@@ -65,16 +71,20 @@ public:
           jumpHeld(false),
           showLevelTitle(false),
           currentLevelNumber(0),
+          showPlayerDiedMessage(false),
           camera(screenX, screenY) {
 
         window.create(VideoMode(screenX, screenY), "Metal Slug", Style::Close);
 
         Delay.restart();
         pauseDelay.restart();
+        playerDiedTimer.restart();
 
         window.setVerticalSyncEnabled(true);
         window.setFramerateLimit(60);
         enemies.setBulletManager(&bulletManager);  // ADD KARO
+
+        scoreSystem.loadFont("arial.TTF");
     }
 
     ~Game() {
@@ -82,8 +92,6 @@ public:
     }
 
     void run() {
-        Event ev;
-
         while (window.isOpen()) {
             float dt = clock.restart().asSeconds();
 
@@ -205,6 +213,30 @@ public:
         if (pauseMenu.getPauseMenuVisible()) {
             pauseMenu.handlePauseInput();
             return;
+        }
+
+        // Check if player died (HP <= 0)
+        if (!showPlayerDiedMessage && characters.getActivePlayer() && characters.getActivePlayer()->getHP() <= 0) {
+            showPlayerDiedMessage = true;
+            playerDiedTimer.restart();
+        }
+
+        // Handle player died message display
+        if (showPlayerDiedMessage) {
+            float elapsed = playerDiedTimer.getElapsedTime().asSeconds();
+            if (elapsed > 3.0f) {
+                // Return to menu after 3 seconds
+                showPlayerDiedMessage = false;
+                cleanup();
+                gameMode = 0;
+                startMenu.setMenuState(2); // Go to mode selection
+                // Reset player for next game
+                if (characters.getActivePlayer()) {
+                    characters.getActivePlayer()->forceRespawn();
+                }
+                return;
+            }
+            return; // Don't update game while showing death message
         }
 
         characters.getActivePlayer()->update(dt);
@@ -349,6 +381,10 @@ public:
                 // Update bullets
                 bulletManager.update(dt);
 
+                // Check bullet collisions
+                checkBulletEnemyCollisions();    // Player bullets hit enemies
+                checkBulletPlayerCollisions();   // Enemy bullets hit player
+
                 // Handle enemy collision with level blocks (must be in Game.h to avoid circular dependency)
                 for (int i = 0; i < enemies.getEnemyCount(); i++) {
                     Enemy* enemy = enemies.getEnemyAt(i);
@@ -454,6 +490,13 @@ public:
 
                 campaignGame->setCamera(camera.getX(), camera.getY());
 
+                // Update bullets for campaign mode
+                bulletManager.update(dt);
+
+                // Check bullet collisions
+                checkBulletEnemyCollisions();
+                checkBulletPlayerCollisions();
+
                 campaignGame->update(dt, &characters);
             }
             else {
@@ -464,7 +507,7 @@ public:
 
     void render() {
         window.clear(Color(135, 206, 235));
-        
+
         if (gameMode == 0) {
             int menuState = startMenu.getMenuState();
             if (menuState == 0) {
@@ -485,6 +528,45 @@ public:
             enemies.renderAll(window, camera.getX(), camera.getY());
             bulletManager.render(window, camera.getX(), camera.getY());
             characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
+
+            // Render score
+            scoreSystem.render(window, screenX, screenY);
+
+            // Render player died message overlay on game screen
+            if (showPlayerDiedMessage) {
+                Font font;
+                if (!font.loadFromFile("arial.TTF")) {
+                    // Fallback if font fails to load
+                    return;
+                }
+
+                // Semi-transparent overlay (smaller, at top)
+                RectangleShape overlay(Vector2f(screenX, 150));
+                overlay.setFillColor(Color(0, 0, 0, 150));
+                overlay.setPosition(0, 0);
+                window.draw(overlay);
+
+                // Player Died text
+                Text diedText;
+                diedText.setFont(font);
+                diedText.setString("PLAYER DIED");
+                diedText.setCharacterSize(60);
+                diedText.setFillColor(Color::Red);
+                diedText.setStyle(Text::Bold);
+                FloatRect textBounds = diedText.getLocalBounds();
+                diedText.setPosition(screenX / 2.0f - textBounds.width / 2.0f, 30.0f);
+                window.draw(diedText);
+
+                // Returning to menu text
+                Text returnText;
+                returnText.setFont(font);
+                returnText.setString("Returning to menu...");
+                returnText.setCharacterSize(25);
+                returnText.setFillColor(Color::White);
+                FloatRect returnBounds = returnText.getLocalBounds();
+                returnText.setPosition(screenX / 2.0f - returnBounds.width / 2.0f, 100.0f);
+                window.draw(returnText);
+            }
 
             if (showLevelTitle) {
                 if (levelTitleTimer.getElapsedTime().asSeconds() < 3.0f) {
@@ -523,20 +605,56 @@ public:
             bulletManager.render(window, camera.getX(), camera.getY());
             characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
 
-            if (pauseMenu.getPauseMenuVisible()) {
-                RectangleShape overlay;
-                overlay.setSize(Vector2f((float)screenX, (float)screenY));
-                overlay.setFillColor(Color(0, 0, 0, 100));
+            // Render score
+            scoreSystem.render(window, screenX, screenY);
+
+            // Render player died message overlay on game screen
+            if (showPlayerDiedMessage) {
+                Font font;
+                if (!font.loadFromFile("arial.TTF")) {
+                    // Fallback if font fails to load
+                    return;
+                }
+
+                // Semi-transparent overlay (smaller, at top)
+                RectangleShape overlay(Vector2f(screenX, 150));
+                overlay.setFillColor(Color(0, 0, 0, 150));
                 overlay.setPosition(0, 0);
                 window.draw(overlay);
-                pauseMenu.renderPauseMenu(window);
-                window.display();
-                return;
+
+                // Player Died text
+                Text diedText;
+                diedText.setFont(font);
+                diedText.setString("PLAYER DIED");
+                diedText.setCharacterSize(60);
+                diedText.setFillColor(Color::Red);
+                diedText.setStyle(Text::Bold);
+                FloatRect textBounds = diedText.getLocalBounds();
+                diedText.setPosition(screenX / 2.0f - textBounds.width / 2.0f, 30.0f);
+                window.draw(diedText);
+
+                // Returning to menu text
+                Text returnText;
+                returnText.setFont(font);
+                returnText.setString("Returning to menu...");
+                returnText.setCharacterSize(25);
+                returnText.setFillColor(Color::White);
+                FloatRect returnBounds = returnText.getLocalBounds();
+                returnText.setPosition(screenX / 2.0f - returnBounds.width / 2.0f, 100.0f);
+                window.draw(returnText);
             }
-            
-            window.display();
+
+            if (pauseMenu.getPauseMenuVisible()) {
+                RectangleShape overlay;
+                overlay.setSize(Vector2f(screenX, screenY));
+                overlay.setFillColor(Color(0, 0, 0, 180));
+                window.draw(overlay);
+                pauseMenu.renderPauseMenu(window);
+            }
         }
     }
+
+    // Score system handled by ScoreSystem class
 
     void playerFire() {
         PlayerSoldier* player = characters.getActivePlayer();
@@ -689,6 +807,79 @@ private:
             }
         }
         */
+    }
+
+    // Check player bullets hitting enemies
+    void checkBulletEnemyCollisions() {
+        PlayerSoldier* player = characters.getActivePlayer();
+        if (!player) return;
+
+        // Get all bullets from bullet manager
+        for (int i = 0; i < bulletManager.getBulletCount(); i++) {
+            Bullet* bullet = bulletManager.getBullet(i);
+            if (!bullet || !bullet->isActive()) continue;
+            if (bullet->getOwner() != PLAYER) continue; // Only player bullets
+
+            float bx = bullet->getX();
+            float by = bullet->getY();
+            float br = bullet->getRadius();
+
+            // Check collision with each enemy
+            for (int j = 0; j < enemies.getEnemyCount(); j++) {
+                Enemy* enemy = enemies.getEnemyAt(j);
+                if (!enemy || !enemy->getIsAlive()) continue;
+
+                float ex = enemy->getX();
+                float ey = enemy->getY();
+                float ew = enemy->getWidth();
+                float eh = enemy->getHeight();
+
+                // Simple AABB collision
+                if (bx + br > ex && bx - br < ex + ew &&
+                    by + br > ey && by - br < ey + eh) {
+                    // Hit enemy
+                    enemy->takeDamage(bullet->getDamage(), bx, by, false);
+                    
+                    // Check if enemy died and add score
+                    if (!enemy->getIsAlive()) {
+                        scoreSystem.addEnemyKillScore(enemy->getName());
+                    }
+                    
+                    bullet->deactivate();
+                    break; // Bullet hit one enemy, move to next bullet
+                }
+            }
+        }
+    }
+
+    // Check enemy bullets hitting player
+    void checkBulletPlayerCollisions() {
+        PlayerSoldier* player = characters.getActivePlayer();
+        if (!player || !player->getIsAlive()) return;
+
+        float px = player->getPlayerX();
+        float py = player->getPlayerY();
+        float pw = player->getWidth();
+        float ph = player->getHeight();
+
+        // Get all bullets from bullet manager
+        for (int i = 0; i < bulletManager.getBulletCount(); i++) {
+            Bullet* bullet = bulletManager.getBullet(i);
+            if (!bullet || !bullet->isActive()) continue;
+            if (bullet->getOwner() != ENEMY) continue; // Only enemy bullets
+
+            float bx = bullet->getX();
+            float by = bullet->getY();
+            float br = bullet->getRadius();
+
+            // Check collision with player
+            if (bx + br > px && bx - br < px + pw &&
+                by + br > py && by - br < py + ph) {
+                // Hit player
+                player->takeDamage(bullet->getDamage());
+                bullet->deactivate();
+            }
+        }
     }
 
 public:

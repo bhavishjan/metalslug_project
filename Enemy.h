@@ -5,11 +5,13 @@
 #include <cmath>
 #include "Entity.h"
 #include "Animation.h"
+
+// Forward declarations to avoid circular dependency
+class Level;
+class PlayerSoldier;
+
 #include "Weapon.h"        // BulletManager + PLAYER/ENEMY constants yahan hain
 #include "PlayerSoldier.h" // PlayerSoldier yahan hai
-
-// Forward declaration to avoid circular dependency
-class Level;
 
 
 using namespace std;
@@ -55,7 +57,7 @@ protected:
     float jumpPower = -200.0f; // Higher jump power than player to cross walls
     float patrolRange;
 public:
-    Enemy() : Soldier(), speed(80.f),
+    Enemy() : Soldier(), name("Enemy"), speed(80.f),
         isGrounded(false), isCrouched(false),
         spawnX(0), spawnY(0),
         scoreValue(0), isShielded(false), aggressionLevel(1.f),
@@ -186,31 +188,10 @@ public:
         }
     }
 
-    // Block enemy movement into player
+    // Enemy player collision - disabled (pass through)
     void checkPlayerCollision(PlayerSoldier* player) {
-        if (!player || !isAlive) {
-            return;
-        }
-
-        float px = player->getPlayerX();
-        float py = player->getPlayerY();
-        float pw = (float)player->getWidth();
-        float ph = (float)player->getHeight();
-
-        if (!rectsOverlap(x, y, width, height, px, py, pw, ph)) {
-            return;
-        }
-
-        float overlapLeft = (x + width) - px;
-        float overlapRight = (px + pw) - x;
-
-        if (overlapLeft < overlapRight) {
-            x -= overlapLeft;
-        }
-        else {
-            x += overlapRight;
-        }
-        velocityX = 0.f;
+        // No collision - enemies pass through player
+        (void)player; // Suppress unused warning
     }
 
     // Call when enemy dies - chance of food drop
@@ -223,31 +204,8 @@ public:
 
 
     void checkEnemyCollision(Enemy* other) {
-        if (!other || other == this) {
-            return;
-        }
-        if (!isAlive || !other->getIsAlive()) {
-            return;
-        }
-
-        if (!rectsOverlap(x, y, width, height,
-            other->getX(), other->getY(),
-            other->getWidth(), other->getHeight())) {
-            return;
-        }
-
-        float myCenter = x + width / 2.f;
-        float hisCenter = other->getX() + other->getWidth() / 2.f;
-
-        if (myCenter < hisCenter) {
-            float overlap = (x + width) - other->getX();
-            x -= overlap / 2.f;
-        }
-        else {
-            float overlap = (other->getX() + other->getWidth()) - x;
-            x += overlap / 2.f;
-        }
-        velocityX = 0.f;
+        // Enemy-enemy collision disabled - pass through each other
+        (void)other; // Suppress unused warning
     }
 
     void spawnLoot();
@@ -284,6 +242,7 @@ public:
     // getters and setters
     float getWidth() const { return width; }
     float getHeight() const { return height; }
+    string getName() const { return string(name); }
     bool getIsTargetingPlayer() const { return isTargetingPlayer; }
     bool getIsGrounded() const { return isGrounded; }
 
@@ -307,7 +266,7 @@ public:
     // Helper method to fire bullet in a specific direction
     void fireInDirection(float angle, float speed = 300.f, int damage = 5, float range = 400.f, sf::Color color = sf::Color(255, 70, 70)) {
         if (!bulletMgr) return;
-        
+
         bulletMgr->spawnBullet(x + width * 0.5f, y + height * 0.5f, angle,
             damage, ENEMY, speed, range, color);
     }
@@ -1729,7 +1688,7 @@ private:
     float GroundY;
 
 public:
-    FlyingTara() {
+    FlyingTara() : grenadeCooldownDuration(3.0f), dropHeight(250.f), GroundY(700.f) {
         name = "Flying Tara";
         hp = maxHp = 3;
         scoreValue = 100;

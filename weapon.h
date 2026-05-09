@@ -4,9 +4,11 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <cmath>
-class PlayerSoldier;
 
 using namespace std;
+
+// Forward declaration
+class PlayerSoldier;
 
 //bullets
 const int NOowner = 0;
@@ -80,10 +82,12 @@ public:
 
     void     setActive(bool a) { active = a; }
     bool     isActive()  const { return active; }
+    void     deactivate() { active = false; }
     int      getDamage() const { return damage; }
     int      getOwner()  const { return ownerType; }
     float    getX()      const { return x; }
     float    getY()      const { return y; }
+    float    getRadius() const { return 3.f; }
 };
 
 
@@ -1073,6 +1077,17 @@ public:
             return true;
         }
         return false;
+    }
+
+    int getBulletCount() const {
+        return MAX_BULLETS;
+    }
+
+    Bullet* getBullet(int index) {
+        if (index >= 0 && index < MAX_BULLETS) {
+            return &bullets[index];
+        }
+        return nullptr;
     }
 };
 

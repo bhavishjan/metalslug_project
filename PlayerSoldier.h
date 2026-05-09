@@ -265,9 +265,19 @@ public:
     void die() {
         isAlive = false;
         lives--;
-        if (lives > 0) {
+        // Don't respawn immediately - let game handle it
+        // Trigger player died event
+        onPlayerDied();
+    }
+
+    void forceRespawn() {
+        if (lives >= 0) {
             respawn();
         }
+    }
+
+    virtual void onPlayerDied() {
+        // Override in subclasses if needed
     }
 
     void respawn() {
@@ -360,10 +370,43 @@ public:
     virtual void applyVehicleBonus() {}
     virtual void removeVehicleBonus() {}
 
+    void renderHealthBar(RenderWindow& window, float camX = 0, float camY = 0) {
+        const float barWidth = 50.0f;
+        const float barHeight = 8.0f;
+        const float barOffsetY = -20.0f;
+
+        float healthPercent = (float)hp / maxHp;
+        if (healthPercent < 0) healthPercent = 0;
+        if (healthPercent > 1) healthPercent = 1;
+
+        // Background bar (dark red)
+        RectangleShape bgBar(Vector2f(barWidth, barHeight));
+        bgBar.setPosition(player_x + width / 2.0f - barWidth / 2.0f - camX,
+                         player_y + barOffsetY - camY);
+        bgBar.setFillColor(Color(100, 0, 0));
+        window.draw(bgBar);
+
+        // Health bar (green)
+        RectangleShape healthBar(Vector2f(barWidth * healthPercent, barHeight));
+        healthBar.setPosition(player_x + width / 2.0f - barWidth / 2.0f - camX,
+                           player_y + barOffsetY - camY);
+        healthBar.setFillColor(Color(0, 255, 0));
+        window.draw(healthBar);
+
+        // Border
+        RectangleShape border(Vector2f(barWidth, barHeight));
+        border.setPosition(player_x + width / 2.0f - barWidth / 2.0f - camX,
+                        player_y + barOffsetY - camY);
+        border.setFillColor(Color::Transparent);
+        border.setOutlineThickness(2);
+        border.setOutlineColor(Color::White);
+        window.draw(border);
+    }
+
     virtual void render(RenderWindow& window, float camX = 0, float camY = 0) {
         currentAnim = (velocityX > 0.1f || velocityX < -0.1f) ? WALK : STAND;
         Animation& a = anims[currentAnim];
-        
+
         if (a.hasLegs()) {
             IntRect lr = a.currentLegsRect();
             if (lr.width > 0 && lr.height > 0) {
@@ -390,6 +433,9 @@ public:
             sprite.setScale(scX, 2.0f);
             window.draw(sprite);
         }
+
+        // Render health bar above player (drawn last so it appears on top)
+        renderHealthBar(window, camX, camY);
     }
 
     virtual float getFireRate() { return 0.2f; }

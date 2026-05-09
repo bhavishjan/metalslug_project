@@ -132,7 +132,7 @@ private:
 public:
 
     PlainsBiome(float startX, float endX,bool per=false)
-        : Biome("Plains", BIOME_PLAINS, startX, endX) {
+        : Biome("Plains", BIOME_PLAINS, startX, endX), hillSpeed(0.03f), hillSize(4) {
         useperlin = per;
     }
 
@@ -195,7 +195,9 @@ public:
                     b = new Block(x, y, BLOCK_SOLID, BIOME_PLAINS);
                     b->setTexture(dirtTex);
                 }
-                blocks[blockCount++] = b;
+                if (blockCount < widthInBlocks * heightInBlocks) {
+                    blocks[blockCount++] = b;
+                }
             }
         }
     }
@@ -266,7 +268,9 @@ public:
                     b = new Block(x, y, BLOCK_SOLID, BIOME_AERIAL);
                     b->setTexture(dirtTex);
                 }
-                blocks[blockCount++] = b;
+                if (blockCount < widthInBlocks * heightInBlocks) {
+                    blocks[blockCount++] = b;
+                }
             }
         }
     }
@@ -342,7 +346,9 @@ public:
                     b = new Block(x, y, BLOCK_SOLID, BIOME_AQUATIC);
                     b->setTexture(dirtTex);
                 }
-                blocks[blockCount++] = b;
+                if (blockCount < widthInBlocks * heightInBlocks) {
+                    blocks[blockCount++] = b;
+                }
             }
         }
     }
