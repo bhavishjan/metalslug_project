@@ -412,9 +412,9 @@ public:
     int   getHeight()    const { return (int)height; }
     float getFriction()  const { return 0.85f; }
     float getAirFriction() const { return 0.95f; }
-    float getJumpPower() const { return -60.0f; }
+    float getJumpPower() const { return -20.0f; }
     float getGravity()   const { return 1.0f; }
-    float getMaxFallSpeed() const { return 800.0f; }
+    float getMaxFallSpeed() const { return 80.0f; }
     bool  getIsGrounded() const { return isGrounded; }
 
     void setPlayerX(float x) { player_x = x; }

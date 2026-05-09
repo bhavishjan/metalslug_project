@@ -45,7 +45,7 @@ protected:
     bool  isTargetingPlayer;
     PlayerSoldier* largestPlayer;
 
-    float gravityConstant = 200.0f;
+    float gravityConstant = 50.0f;
     float jumpPower = -200.0f; // Higher jump power than player to cross walls
     float patrolRange;
 public:
@@ -658,7 +658,7 @@ public:
         float ty = largestPlayer->getPlayerY();
 
         float flightTime = 1.2f;
-        float gravity = 980.0f;
+        float gravity = 9.0f;
 
         float dx = tx - x;
         float dy = ty - y;
