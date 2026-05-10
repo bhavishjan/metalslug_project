@@ -1,44 +1,95 @@
-﻿  levelmanager.cpp
+﻿  main.cpp
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Weapon.h(583,24): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
-C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\PlayerSoldier.h(103,22): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\PlayerSoldier.h(205,22): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
   
-C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\PlayerSoldier.h(104,23): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\PlayerSoldier.h(207,23): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(95,19): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(223,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(230,30): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(698,14): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(777,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(831,14): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(914,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(965,14): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(1496,33): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(2153,14): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
   
 C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Enemy.h(2245,14): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-  (compiling source file 'levelmanager.cpp')
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Menu.h(114,79): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Menu.h(124,62): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Menu.h(124,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Menu.h(404,89): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Menu.h(445,62): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Menu.h(445,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Menu.h(481,62): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Menu.h(481,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\GameState.h(290,40): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\GameState.h(290,24): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Game.h(640,26): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Game.h(713,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Game.h(714,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Game.h(751,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Game.h(752,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Game.h(874,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Game.h(874,43): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
   
   Final Project.vcxproj -> C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\x64\Debug\Final Project.exe
