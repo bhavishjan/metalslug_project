@@ -4,7 +4,6 @@
 #include "Biome.h"
 #include "Enemy.h"
 
-
 using namespace sf;
 using namespace std;
 
@@ -498,149 +497,149 @@ public:
     //    */
     //}
 
-    void spawnEnemies(EnemyManager& enemyManager, PlayerSoldier* player) override {
+void spawnEnemies(EnemyManager& enemyManager, PlayerSoldier* player) override {
 
-        float spawnY = 200.0f;
+    float spawnY = 200.0f;
 
-        float plainsStart = levelStart;
-        float plainsEnd_ = plainsEnd;
-        float aerialStart = plainsEnd;
-        float aerialEnd_ = aerialEnd;
-        float aquaticStart = aerialEnd;
-        float aquaticEnd_ = aquaticEnd;
+    float plainsStart = levelStart;
+    float plainsEnd_ = plainsEnd;
+    float aerialStart = plainsEnd;
+    float aerialEnd_ = aerialEnd;
+    float aquaticStart = aerialEnd;
+    float aquaticEnd_ = aquaticEnd;
 
-        float plainsW = plainsEnd_ - plainsStart;
-        float aerialW = aerialEnd_ - aerialStart;
-        float aquaticW = aquaticEnd_ - aquaticStart;
+    float plainsW = plainsEnd_ - plainsStart;
+    float aerialW = aerialEnd_ - aerialStart;
+    float aquaticW = aquaticEnd_ - aquaticStart;
 
-        // ===== PLAINS — Infantry 2 batches =====
-        for (int b = 0; b < 2; b++) {
-            float base = plainsStart + (plainsW * 0.25f) + b * (plainsW * 0.45f);
+    // ===== PLAINS — Infantry 2 batches =====
+    for (int b = 0; b < 2; b++) {
+        float base = plainsStart + (plainsW * 0.25f) + b * (plainsW * 0.45f);
 
-            for (int j = 0; j < 3; j++) {
-                RebelSoldier* r = new RebelSoldier();
-                r->setPosition(base + j * 150, spawnY);
-                r->setPlayer(player); r->setPatrolRange(100.f);
-                enemyManager.addEnemy(r);
-            }
-            ShieldedSoldier* sh = new ShieldedSoldier();
-            sh->setPosition(base + 500, spawnY);
-            sh->setPlayer(player); sh->setPatrolRange(80.f);
-            enemyManager.addEnemy(sh);
-
-            BazookaSoldier* bz = new BazookaSoldier();
-            bz->setPosition(base + 700, spawnY);
-            bz->setPlayer(player); bz->setPatrolRange(80.f);
-            enemyManager.addEnemy(bz);
-
-            GrenadeSoldier* gr = new GrenadeSoldier();
-            gr->setPosition(base + 900, spawnY);
-            gr->setPlayer(player); gr->setPatrolRange(80.f);
-            enemyManager.addEnemy(gr);
+        for (int j = 0; j < 3; j++) {
+            RebelSoldier* r = new RebelSoldier();
+            r->setPosition(base + j * 150, spawnY);
+            r->setPlayer(player); r->setPatrolRange(100.f);
+            enemyManager.addEnemy(r);
         }
+        ShieldedSoldier* sh = new ShieldedSoldier();
+        sh->setPosition(base + 500, spawnY);
+        sh->setPlayer(player); sh->setPatrolRange(80.f);
+        enemyManager.addEnemy(sh);
 
-        // ===== PLAINS — Undead 2 batches (plains only) =====
-        for (int b = 0; b < 2; b++) {
-            float base = plainsStart + (plainsW * 0.30f) + b * (plainsW * 0.40f);
-            MummyWarrior* m = new MummyWarrior();
-            m->setPosition(base, spawnY);
-            m->setPlayer(player); m->setPatrolRange(60.f);
-            enemyManager.addEnemy(m);
+        BazookaSoldier* bz = new BazookaSoldier();
+        bz->setPosition(base + 700, spawnY);
+        bz->setPlayer(player); bz->setPatrolRange(80.f);
+        enemyManager.addEnemy(bz);
+
+        GrenadeSoldier* gr = new GrenadeSoldier();
+        gr->setPosition(base + 900, spawnY);
+        gr->setPlayer(player); gr->setPatrolRange(80.f);
+        enemyManager.addEnemy(gr);
+    }
+
+    // ===== PLAINS — Undead 2 batches (plains only) =====
+    for (int b = 0; b < 2; b++) {
+        float base = plainsStart + (plainsW * 0.30f) + b * (plainsW * 0.40f);
+        MummyWarrior* m = new MummyWarrior();
+        m->setPosition(base, spawnY);
+        m->setPlayer(player); m->setPatrolRange(60.f);
+        enemyManager.addEnemy(m);
+    }
+
+    // ===== AERIAL — Infantry 2 batches =====
+    for (int b = 0; b < 2; b++) {
+        float base = aerialStart + (aerialW * 0.25f) + b * (aerialW * 0.45f);
+
+        for (int j = 0; j < 3; j++) {
+            RebelSoldier* r = new RebelSoldier();
+            r->setPosition(base + j * 150, spawnY);
+            r->setPlayer(player); r->setPatrolRange(100.f);
+            enemyManager.addEnemy(r);
         }
+        ShieldedSoldier* sh = new ShieldedSoldier();
+        sh->setPosition(base + 500, spawnY);
+        sh->setPlayer(player); sh->setPatrolRange(80.f);
+        enemyManager.addEnemy(sh);
 
-        // ===== AERIAL — Infantry 2 batches =====
-        for (int b = 0; b < 2; b++) {
-            float base = aerialStart + (aerialW * 0.25f) + b * (aerialW * 0.45f);
+        BazookaSoldier* bz = new BazookaSoldier();
+        bz->setPosition(base + 700, spawnY);
+        bz->setPlayer(player); bz->setPatrolRange(80.f);
+        enemyManager.addEnemy(bz);
 
-            for (int j = 0; j < 3; j++) {
-                RebelSoldier* r = new RebelSoldier();
-                r->setPosition(base + j * 150, spawnY);
-                r->setPlayer(player); r->setPatrolRange(100.f);
-                enemyManager.addEnemy(r);
-            }
-            ShieldedSoldier* sh = new ShieldedSoldier();
-            sh->setPosition(base + 500, spawnY);
-            sh->setPlayer(player); sh->setPatrolRange(80.f);
-            enemyManager.addEnemy(sh);
+        GrenadeSoldier* gr = new GrenadeSoldier();
+        gr->setPosition(base + 900, spawnY);
+        gr->setPlayer(player); gr->setPatrolRange(80.f);
+        enemyManager.addEnemy(gr);
+    }
 
-            BazookaSoldier* bz = new BazookaSoldier();
-            bz->setPosition(base + 700, spawnY);
-            bz->setPlayer(player); bz->setPatrolRange(80.f);
-            enemyManager.addEnemy(bz);
+    // ===== AERIAL — Paratroopers 1 batch =====
+    for (int j = 0; j < 2; j++) {
+        Paratrooper* p = new Paratrooper();
+        p->setPosition(aerialStart + (aerialW * 0.35f) + j * 250, -150.f);
+        p->setPlayer(player);
+        enemyManager.addEnemy(p);
+    }
 
-            GrenadeSoldier* gr = new GrenadeSoldier();
-            gr->setPosition(base + 900, spawnY);
-            gr->setPlayer(player); gr->setPatrolRange(80.f);
-            enemyManager.addEnemy(gr);
+    // ===== AERIAL — Martian 1 batch =====
+    Martian* mar = new Martian();
+    mar->setPosition(aerialStart + (aerialW * 0.65f), -50.f);
+    mar->setPlayer(player);
+    enemyManager.addEnemy(mar);
+
+    // ===== AERIAL — Flying Tara batch 0 =====
+    for (int j = 0; j < 2; j++) {
+        FlyingTara* ft = new FlyingTara();
+        ft->setPosition(aerialStart + (aerialW * 0.40f) + j * 300, 150.f);
+        ft->setPlayer(player);
+        enemyManager.addEnemy(ft);
+    }
+
+    // ===== AQUATIC — Infantry 2 batches =====
+    for (int b = 0; b < 2; b++) {
+        float base = aquaticStart + (aquaticW * 0.25f) + b * (aquaticW * 0.45f);
+
+        for (int j = 0; j < 3; j++) {
+            RebelSoldier* r = new RebelSoldier();
+            r->setPosition(base + j * 150, spawnY);
+            r->setPlayer(player); r->setPatrolRange(100.f);
+            enemyManager.addEnemy(r);
         }
+        ShieldedSoldier* sh = new ShieldedSoldier();
+        sh->setPosition(base + 500, spawnY);
+        sh->setPlayer(player); sh->setPatrolRange(80.f);
+        enemyManager.addEnemy(sh);
 
-        // ===== AERIAL — Paratroopers 1 batch =====
-        for (int j = 0; j < 2; j++) {
-            Paratrooper* p = new Paratrooper();
-            p->setPosition(aerialStart + (aerialW * 0.35f) + j * 250, -150.f);
-            p->setPlayer(player);
-            enemyManager.addEnemy(p);
-        }
+        BazookaSoldier* bz = new BazookaSoldier();
+        bz->setPosition(base + 700, spawnY);
+        bz->setPlayer(player); bz->setPatrolRange(80.f);
+        enemyManager.addEnemy(bz);
 
-        // ===== AERIAL — Martian 1 batch =====
-        Martian* mar = new Martian();
-        mar->setPosition(aerialStart + (aerialW * 0.65f), -50.f);
-        mar->setPlayer(player);
-        enemyManager.addEnemy(mar);
+        GrenadeSoldier* gr = new GrenadeSoldier();
+        gr->setPosition(base + 900, spawnY);
+        gr->setPlayer(player); gr->setPatrolRange(80.f);
+        enemyManager.addEnemy(gr);
+    }
 
-        // ===== AERIAL — Flying Tara batch 0 =====
-        for (int j = 0; j < 2; j++) {
-            FlyingTara* ft = new FlyingTara();
-            ft->setPosition(aerialStart + (aerialW * 0.40f) + j * 300, 150.f);
-            ft->setPlayer(player);
-            enemyManager.addEnemy(ft);
-        }
-
-        // ===== AQUATIC — Infantry 2 batches =====
-        for (int b = 0; b < 2; b++) {
-            float base = aquaticStart + (aquaticW * 0.25f) + b * (aquaticW * 0.45f);
-
-            for (int j = 0; j < 3; j++) {
-                RebelSoldier* r = new RebelSoldier();
-                r->setPosition(base + j * 150, spawnY);
-                r->setPlayer(player); r->setPatrolRange(100.f);
-                enemyManager.addEnemy(r);
-            }
-            ShieldedSoldier* sh = new ShieldedSoldier();
-            sh->setPosition(base + 500, spawnY);
-            sh->setPlayer(player); sh->setPatrolRange(80.f);
-            enemyManager.addEnemy(sh);
-
-            BazookaSoldier* bz = new BazookaSoldier();
-            bz->setPosition(base + 700, spawnY);
-            bz->setPlayer(player); bz->setPatrolRange(80.f);
-            enemyManager.addEnemy(bz);
-
-            GrenadeSoldier* gr = new GrenadeSoldier();
-            gr->setPosition(base + 900, spawnY);
-            gr->setPlayer(player); gr->setPatrolRange(80.f);
-            enemyManager.addEnemy(gr);
-        }
-
-        // ===== AQUATIC — Zombies 2 batches =====
-        for (int b = 0; b < 2; b++) {
-            float base = aquaticStart + (aquaticW * 0.25f) + b * (aquaticW * 0.45f);
-            for (int j = 0; j < 3; j++) {
-                Zombie* z = new Zombie();
-                z->setPosition(base + j * 150, spawnY);
-                z->setPlayer(player); z->setPatrolRange(80.f);
-                enemyManager.addEnemy(z);
-            }
-        }
-
-        // ===== AQUATIC — Flying Tara batch 1 =====
-        for (int j = 0; j < 2; j++) {
-            FlyingTara* ft = new FlyingTara();
-            ft->setPosition(aquaticStart + (aquaticW * 0.40f) + j * 300, 150.f);
-            ft->setPlayer(player);
-            enemyManager.addEnemy(ft);
+    // ===== AQUATIC — Zombies 2 batches =====
+    for (int b = 0; b < 2; b++) {
+        float base = aquaticStart + (aquaticW * 0.25f) + b * (aquaticW * 0.45f);
+        for (int j = 0; j < 3; j++) {
+            Zombie* z = new Zombie();
+            z->setPosition(base + j * 150, spawnY);
+            z->setPlayer(player); z->setPatrolRange(80.f);
+            enemyManager.addEnemy(z);
         }
     }
+
+    // ===== AQUATIC — Flying Tara batch 1 =====
+    for (int j = 0; j < 2; j++) {
+        FlyingTara* ft = new FlyingTara();
+        ft->setPosition(aquaticStart + (aquaticW * 0.40f) + j * 300, 150.f);
+        ft->setPlayer(player);
+        enemyManager.addEnemy(ft);
+    }
+}
 
     void update(float dt) override {
         //base class called
@@ -1160,7 +1159,6 @@ public:
 };
 
 // Infinite terrain
-// Infinite terrain
 class CampaignLevel {
 private:
     bool isInfinite;
@@ -1195,23 +1193,10 @@ private:
     Biome** activeBiomes;
     int biomeCount;
     int maxBiomes;
-
-    // -----------------------------------------------------------
-    // Spawning track karne ke liye — ek jagah dobara spawn na ho
-    // -----------------------------------------------------------
-    struct SpawnRecord {
-        float x;
-        bool  used;
-    };
-
-    static const int MAX_SPAWN_RECORDS = 2048;
-    SpawnRecord spawnRecords[MAX_SPAWN_RECORDS];
-    int         spawnRecordCount;
-
-    // player kitna aage gaya tab se last spawn hua
-    float lastSpawnCheckX;
-
 public:
+
+
+
 
     CampaignLevel(int profileChoice) {
 
@@ -1255,31 +1240,8 @@ public:
         biomeCount = 0;
         activeBiomes = new Biome * [maxBiomes];
 
-        // spawning system initialize karo
-        spawnRecordCount = 0;
-        lastSpawnCheckX = 0.f;
-        for (int i = 0; i < MAX_SPAWN_RECORDS; i++) {
-            spawnRecords[i].x = 0.f;
-            spawnRecords[i].used = false;
-        }
     }
 
-    // -----------------------------------------------------------
-    // Destructor — heap memory free karo, memory leak na ho
-    // -----------------------------------------------------------
-    ~CampaignLevel() {
-        delete[] enemiesKilledPerType;
-        delete[] vehiclesDestroyedPerType;
-
-        for (int i = 0; i < biomeCount; i++) {
-            delete activeBiomes[i];
-            activeBiomes[i] = nullptr;
-        }
-        delete[] activeBiomes;
-
-        delete perlin;
-        delete profile;
-    }
 
 
     bool checkCollision(float px, float py, float pw, float ph) {
@@ -1296,12 +1258,17 @@ public:
     }
 
     // Chunk is 16 blocks wide - generates terrain from perlin noise
+
+
     void generateChunk(int startCol) {
         float scale = profile->getScale();
         int octaves = profile->getOctaves();
 
         // Decide biome from noise
         float noiseX = startCol * 0.03f;
+
+
+
 
         int biomeType = perlin->getBiome(noiseX, 0);
 
@@ -1328,7 +1295,6 @@ public:
             activeBiomes[biomeCount++] = b;
         }
     }
-
     // Draw blocks stored in chunk array
     void render(RenderWindow& window, float camX, float camY) {
         for (int i = 0; i < biomeCount; i++)
@@ -1350,6 +1316,8 @@ public:
     }
 
 
+
+
     bool checkWaterAt(float px, float py, float pw, float ph) {
         for (int i = 0; i < biomeCount; i++) {
             if (activeBiomes[i]->checkWaterCollision(px, py, pw, ph)) {
@@ -1357,230 +1325,6 @@ public:
             }
         }
         return false;
-    }
-
-    // ===========================================================
-    //  ENEMY SPAWNING SYSTEM
-    // ===========================================================
-
-    // -----------------------------------------------------------
-    // Check karo ke diye gaye X ke 300px range mein pehle se
-    // koi spawn record toh nahi — taake overlap na ho
-    // -----------------------------------------------------------
-    bool hasSpawnedNear(float x) {
-        for (int i = 0; i < spawnRecordCount; i++) {
-            if (!spawnRecords[i].used) continue;
-            float diff = spawnRecords[i].x - x;
-            if (diff < 0.f) diff = -diff;
-            if (diff < 300.f) return true;
-        }
-        return false;
-    }
-
-    // -----------------------------------------------------------
-    // Spawn hui location note karo — next time duplicate na bane
-    // -----------------------------------------------------------
-    void recordSpawn(float x) {
-        if (spawnRecordCount < MAX_SPAWN_RECORDS) {
-            spawnRecords[spawnRecordCount].x = x;
-            spawnRecords[spawnRecordCount].used = true;
-            spawnRecordCount++;
-        }
-        // agar array bhar gaya toh purane records recycle karo
-        // (yeh infinite world hai, player bahut aage ja sakta hai)
-        else {
-            // circular overwrite — pehle wala replace karo
-            static int overwriteIdx = 0;
-            spawnRecords[overwriteIdx].x = x;
-            spawnRecords[overwriteIdx].used = true;
-            overwriteIdx = (overwriteIdx + 1) % MAX_SPAWN_RECORDS;
-        }
-    }
-
-    // -----------------------------------------------------------
-    // Main spawning function — Game.h ke updateCampaign() se
-    // call karo jab bhi player 400px aage badhe
-    //
-    // Usage (Game.h mein):
-    //   if (pX - lastSpawnX > 400.f) {
-    //       campaignLevel->spawnWave(pX, enemies, player);
-    //       lastSpawnX = pX;
-    //   }
-    // -----------------------------------------------------------
-    void spawnWave(float playerX, EnemyManager& enemyManager, PlayerSoldier* player) {
-
-        // Player ke 700px aage spawn karo taake player ko surprise mile
-        float baseX = playerX + 700.f;
-
-        // Agar yahan pehle spawn ho chuka hai toh kuch nahi karo
-        if (hasSpawnedNear(baseX)) return;
-
-        // Is location ko record kar lo
-        recordSpawn(baseX);
-
-        // Perlin noise se pata karo yahan kaun sa biome hai
-        float noiseX = (baseX / 64.f) * 0.03f;
-        int   biome = perlin->getBiome(noiseX, 0);
-
-        // Upar se fall karke terrain par land karenge
-        float spawnY = -10.f;
-
-        // Thodi variety ke liye position se ek simple seed banao
-        int   seed = (int)(baseX / 100.f);
-
-        // ---------------------------------------------------
-        // Plains biome — infantry aur kabhi kabhi mummy bhi
-        // ---------------------------------------------------
-        if (biome == BIOME_PLAINS) {
-
-            // Rebel soldiers har wave mein toh honge hi
-            for (int j = 0; j < 2; j++) {
-                RebelSoldier* r = new RebelSoldier();
-                r->setPosition(baseX + j * 120.f, spawnY);
-                r->setPlayer(player);
-                r->setPatrolRange(120.f);
-                enemyManager.addEnemy(r);
-            }
-
-            // Grenade soldier thoda aage
-            GrenadeSoldier* g = new GrenadeSoldier();
-            g->setPosition(baseX + 420.f, spawnY);
-            g->setPlayer(player);
-            g->setPatrolRange(80.f);
-            enemyManager.addEnemy(g);
-
-            // Har doosri wave mein shielded soldier
-            if (seed % 3 == 0) {
-                ShieldedSoldier* s = new ShieldedSoldier();
-                s->setPosition(baseX + 600.f, spawnY);
-                s->setPlayer(player);
-                s->setPatrolRange(80.f);
-                enemyManager.addEnemy(s);
-            }
-
-            // Har teesri wave mein mummy — plains only
-            if (seed % 3 == 0) {
-                MummyWarrior* m = new MummyWarrior();
-                m->setPosition(baseX + 780.f, spawnY);
-                m->setPlayer(player);
-                m->setPatrolRange(60.f);
-                enemyManager.addEnemy(m);
-            }
-        }
-
-        // ---------------------------------------------------
-        // Aerial biome — paratroopers, martians, flying tara
-        // ---------------------------------------------------
-        else if (biome == BIOME_AERIAL) {
-
-            // Paratroopers upar se aate hain — negative Y
-            for (int j = 0; j < 2; j++) {
-                Paratrooper* p = new Paratrooper();
-                p->setPosition(baseX + j * 250.f, -150.f);
-                p->setPlayer(player);
-                enemyManager.addEnemy(p);
-            }
-
-            // Martian har doosri wave mein
-            if (seed % 3 == 0) {
-                Martian* mar = new Martian();
-                mar->setPosition(baseX + 150.f, -50.f);
-                mar->setPlayer(player);
-                enemyManager.addEnemy(mar);
-            }
-
-            // Ground pe bhi kuch rebels rakh do
-            for (int j = 0; j < 2; j++) {
-                RebelSoldier* r = new RebelSoldier();
-                r->setPosition(baseX + 100.f + j * 150.f, spawnY);
-                r->setPlayer(player);
-                r->setPatrolRange(100.f);
-                enemyManager.addEnemy(r);
-            }
-
-            // Flying Tara — aerial ka signature enemy
-            FlyingTara* ft = new FlyingTara();
-            ft->setPosition(baseX + 350.f, 150.f);
-            ft->setPlayer(player);
-            enemyManager.addEnemy(ft);
-        }
-
-        // ---------------------------------------------------
-        // Aquatic biome — zombies aur bazooka wale
-        // ---------------------------------------------------
-        else {
-
-            // Zombies batch mein aate hain
-            for (int j = 0; j < 2; j++) {
-                Zombie* z = new Zombie();
-                z->setPosition(baseX + j * 150.f, spawnY);
-                z->setPlayer(player);
-                z->setPatrolRange(80.f);
-                enemyManager.addEnemy(z);
-            }
-
-            // Bazooka soldier thoda door se fire karta hai
-            BazookaSoldier* bz = new BazookaSoldier();
-            bz->setPosition(baseX + 520.f, spawnY);
-            bz->setPlayer(player);
-            bz->setPatrolRange(80.f);
-            enemyManager.addEnemy(bz);
-
-            // Har doosri wave mein shielded bhi
-            if (seed % 3 == 0) {
-                ShieldedSoldier* sh = new ShieldedSoldier();
-                sh->setPosition(baseX + 700.f, spawnY);
-                sh->setPlayer(player);
-                sh->setPatrolRange(80.f);
-                enemyManager.addEnemy(sh);
-            }
-        }
-    }
-
-    // -----------------------------------------------------------
-    // Kill count update karo jab koi enemy mare
-    // checkBulletEnemyCollisions() se call hoga
-    // -----------------------------------------------------------
-    void recordEnemyKill(const string& name) {
-
-        // String se enemy type ka index nikaalo
-        int idx = -1;
-        if (name == "Rebel Soldier")  idx = 0;
-        else if (name == "Shielded")       idx = 1;
-        else if (name == "Bazooka")        idx = 2;
-        else if (name == "Grenade")        idx = 3;
-        else if (name == "Paratrooper")    idx = 4;
-        else if (name == "Mummy")          idx = 5;
-        else if (name == "Zombie")         idx = 6;
-        else if (name == "Martian")        idx = 7;
-
-        if (idx >= 0) {
-            enemiesKilledPerType[idx]++;
-
-            // Check karo kya sab types ka quota pura hua
-            checkKillQuota();
-        }
-    }
-
-    // -----------------------------------------------------------
-    // Har type ke liye 5 kills chahiye — tab campaign clear hoga
-    // -----------------------------------------------------------
-    void checkKillQuota() {
-        for (int i = 0; i < 8; i++) {
-            if (enemiesKilledPerType[i] < killQuotaPerType)
-                return; // abhi bhi koi type incomplete hai
-        }
-        // Sab types complete — campaign clear!
-        isKillQuotaReached = true;
-    }
-
-    bool getKillQuotaReached() { return isKillQuotaReached; }
-
-    // Kill progress dekhne ke liye — debug ya UI ke liye useful
-    int getKillCount(int typeIdx) {
-        if (typeIdx >= 0 && typeIdx < 8)
-            return enemiesKilledPerType[typeIdx];
-        return 0;
     }
 };
 
@@ -1674,7 +1418,6 @@ public:
         levels[0] = new Level1();
         levels[1] = new Level2();
         levels[2] = new Level3();
-        //levels[3] = new BossLevel();
         totalLevels = 3;
     }
 

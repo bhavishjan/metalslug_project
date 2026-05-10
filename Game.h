@@ -2,10 +2,9 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-// Game.h ke top mein yeh order rakho
 #include "Weapon.h"
 #include "Enemy.h"
-#include "GameMode.h"    // SurvivalGame aur CampaignGame yahan hain
+#include "GameMode.h"
 #include "Level.h"
 #include "Biome.h"
 #include "PlayerSoldier.h"
@@ -24,23 +23,20 @@ private:
     int screenX;
     int screenY;
 
-
     int gameMode;
-
-
     int selectedCharacter;
 
     SurvivalGame* survivalGame;
-
     CampaignGame* campaignGame;
 
     CharacterManager characters;
-    EnemyManager enemies;
-    LevelManager levelManager;
-    bool jumpHeld;
-    bool showLevelTitle;
+    EnemyManager     enemies;
+    LevelManager     levelManager;
+
+    bool  jumpHeld;
+    bool  showLevelTitle;
     Clock levelTitleTimer;
-    int currentLevelNumber;
+    int   currentLevelNumber;
 
     BulletManager bulletManager;
     Clock clock;
@@ -48,32 +44,34 @@ private:
     Clock pauseDelay;
     Clock playerFireTimer;
     Clock playerDiedTimer;
-    bool showPlayerDiedMessage;
+    bool  showPlayerDiedMessage;
     float playerFireCooldown = 0.2f;
 
-    // Score system
     ScoreSystem scoreSystem;
+    Camera      camera;
+    Menu        startMenu;
+    Menu        pauseMenu;
 
-    Camera camera;
-    Menu startMenu;
-    Menu pauseMenu;
+    //BossLevel* bossLevel = nullptr;   // boss level ka alag pointer
+    bool inBossLevel = false;          // track karne ke liye
+    float lastCampaignSpawnX = 0.f;   // campaign spawning track karne ke liye
 
 public:
     Game()
         : screenX(1600),
-          screenY(900),
-          gameMode(0),
-          selectedCharacter(0),
-          startMenu(false),
-          pauseMenu(true),
-          survivalGame(nullptr),
-          campaignGame(nullptr),
-          jumpHeld(false),
-          showLevelTitle(false),
-          currentLevelNumber(0),
-          showPlayerDiedMessage(false),
-          camera(screenX, screenY) {
-
+        screenY(900),
+        gameMode(0),
+        selectedCharacter(0),
+        startMenu(false),
+        pauseMenu(true),
+        survivalGame(nullptr),
+        campaignGame(nullptr),
+        jumpHeld(false),
+        showLevelTitle(false),
+        currentLevelNumber(0),
+        showPlayerDiedMessage(false),
+        camera(screenX, screenY)
+    {
         window.create(VideoMode(screenX, screenY), "Metal Slug", Style::Close);
 
         Delay.restart();
@@ -82,8 +80,8 @@ public:
 
         window.setVerticalSyncEnabled(true);
         window.setFramerateLimit(60);
-        enemies.setBulletManager(&bulletManager);  // ADD KARO
 
+        enemies.setBulletManager(&bulletManager);
         scoreSystem.loadFont("arial.TTF");
     }
 
@@ -91,24 +89,33 @@ public:
         cleanup();
     }
 
+    // =========================================================
+    //  MAIN LOOP
+    // =========================================================
     void run() {
         while (window.isOpen()) {
             float dt = clock.restart().asSeconds();
-
             handleInput();
             update(dt);
             render();
         }
     }
 
+    // =========================================================
+    //  INPUT
+    // =========================================================
     void handleInput() {
         Event ev;
         while (window.pollEvent(ev)) {
+
             if (ev.type == Event::Closed) {
                 window.close();
+                return;
             }
 
+            // ---- Menu navigation (only in gameMode 0) ----
             if (gameMode == 0 && ev.type == Event::KeyPressed) {
+
                 if (ev.key.code == Keyboard::Up) {
                     startMenu.moveSelectionUp();
                 }
@@ -117,141 +124,128 @@ public:
                 }
                 else if (ev.key.code == Keyboard::Enter) {
                     int menuState = startMenu.getMenuState();
+
+                    // Main screen -> character select
                     if (menuState == 0) {
                         startMenu.setMenuState(1);
                     }
+                    // Character select -> mode select
                     else if (menuState == 1) {
                         selectedCharacter = startMenu.getSelectionIndex();
                         characters.switchCharacterToIndex(selectedCharacter);
                         startMenu.setMenuState(2);
                     }
+                    // Mode select -> start game
                     else if (menuState == 2) {
                         int modeSelection = startMenu.getSelectionIndex();
-                        if (modeSelection == 0) {
-                            gameMode = 1;
-                            survivalGame = new SurvivalGame(screenX, screenY);
-                          
-                            survivalGame->setCharManager(&characters);
-                            survivalGame->start();
-                            levelManager.loadAllLevels();
-                            survivalGame->setCurrentLevel(levelManager.getCurrentLevel());
-                            characters.getActivePlayer()->setPlayerPosition(survivalGame->getCurrentLevel()->getPlayerSpawnX(), survivalGame->getCurrentLevel()->getPlayerSpawnY());
-                            characters.getActivePlayer()->setVelocity(0, 0);
-                            characters.getActivePlayer()->setGrounded(false);
-                            camera.reset();
-                            Delay.restart();
 
-                            // Get the level from survivalGame and spawn enemies directly
-                            Level* level = survivalGame->getCurrentLevel();
-                            if (level) {
-                                level->spawnEnemies(enemies, characters.getActivePlayer());
-                            }
-                            
-                            currentLevelNumber = 1;
-                            showLevelTitle = true;
-                            levelTitleTimer.restart();
+                        // ---- SURVIVAL ----
+                        if (modeSelection == 0) {
+                            startSurvivalMode();
                         }
+                        // ---- CAMPAIGN ----
                         else if (modeSelection == 1) {
-                            gameMode = 2;
-                            campaignGame = new CampaignGame(screenX, screenY);
-                            campaignGame->setCharManager(&characters);
-                            campaignGame->start();
-                            characters.getActivePlayer()->setPlayerPosition(200, 50);
-                            characters.getActivePlayer()->setVelocity(0, 0);
-                            characters.getActivePlayer()->setGrounded(false);
-                            camera.reset();
-                            Delay.restart();
+                            startCampaignMode();
                         }
                     }
                 }
+
+                // Escape inside menu
+                else if (ev.key.code == Keyboard::Escape) {
+                    handleMenuEscape();
+                }
             }
-        }
 
-
-        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
-            if (gameMode != 0) {
+            // ---- Escape during gameplay ----
+            if (gameMode != 0 && ev.type == Event::KeyPressed
+                && ev.key.code == Keyboard::Escape
+                && pauseDelay.getElapsedTime().asSeconds() > 0.3f)
+            {
                 if (pauseMenu.getPauseMenuVisible()) {
                     pauseMenu.handlePauseInput();
+
                     if (!pauseMenu.getPauseMenuVisible()) {
-                        int selectedOption = pauseMenu.getPauseSelection();
-                        if (selectedOption == 1) {
+                        int sel = pauseMenu.getPauseSelection();
+                        if (sel == 1) {          // Quit
                             cleanup();
                             window.close();
+                            return;
                         }
+                        // sel == 0  ->  Resume (menu already hidden)
                     }
-                    pauseDelay.restart();
                 }
                 else {
                     pauseMenu.showPauseMenu();
-                    pauseDelay.restart();
-                }
-            }
-            else {
-                int menuState = startMenu.getMenuState();
-                if (menuState == 2) {
-                    startMenu.setMenuState(1);
-                    startMenu.resetSelection();
-                }
-                else if (menuState == 1) {
-                    startMenu.setMenuState(0);
-                    startMenu.resetSelection();
-                }
-                else {
-                    window.close();
                 }
                 pauseDelay.restart();
             }
-        }
+        } // end pollEvent loop
     }
 
+    // =========================================================
+    //  UPDATE
+    // =========================================================
     void update(float dt) {
+
         if (gameMode == 0) {
             startMenu.updateAnimation(dt);
             return;
         }
 
         if (pauseMenu.getPauseMenuVisible()) {
+            // Allow pause-menu navigation while paused
             pauseMenu.handlePauseInput();
+            if (!pauseMenu.getPauseMenuVisible()) {
+                int sel = pauseMenu.getPauseSelection();
+                if (sel == 1) {
+                    cleanup();
+                    window.close();
+                }
+            }
             return;
         }
 
-        // Check if player died (HP <= 0)
-        if (!showPlayerDiedMessage && characters.getActivePlayer() && characters.getActivePlayer()->getHP() <= 0) {
+        // ---- Player died? ----
+        if (!showPlayerDiedMessage
+            && characters.getActivePlayer()
+            && characters.getActivePlayer()->getHP() <= 0)
+        {
             showPlayerDiedMessage = true;
             playerDiedTimer.restart();
         }
 
-        // Handle player died message display
         if (showPlayerDiedMessage) {
-            float elapsed = playerDiedTimer.getElapsedTime().asSeconds();
-            if (elapsed > 3.0f) {
-                // Return to menu after 3 seconds
+            if (playerDiedTimer.getElapsedTime().asSeconds() > 3.0f) {
                 showPlayerDiedMessage = false;
                 cleanup();
                 gameMode = 0;
-                startMenu.setMenuState(2); // Go to mode selection
-                // Reset player for next game
-                if (characters.getActivePlayer()) {
+                startMenu.setMenuState(2);
+                if (characters.getActivePlayer())
                     characters.getActivePlayer()->forceRespawn();
-                }
-                return;
             }
-            return; // Don't update game while showing death message
+            return;
         }
 
+        // ---- Common player update ----
         characters.getActivePlayer()->update(dt);
 
-        if (Keyboard::isKeyPressed(Keyboard::Z) && Delay.getElapsedTime().asSeconds() > 0.2f) {
+        // Character switch
+        if (Keyboard::isKeyPressed(Keyboard::Z)
+            && Delay.getElapsedTime().asSeconds() > 0.2f)
+        {
             characters.switchCharacter();
             Delay.restart();
         }
 
-        // F key for firing
-        if (Keyboard::isKeyPressed(Keyboard::F) && playerFireTimer.getElapsedTime().asSeconds() > playerFireCooldown) {
+        // Fire
+        if (Keyboard::isKeyPressed(Keyboard::F)
+            && playerFireTimer.getElapsedTime().asSeconds() > playerFireCooldown)
+        {
             playerFire();
             playerFireTimer.restart();
         }
 
+        // Horizontal movement
         if (Keyboard::isKeyPressed(Keyboard::Left)) {
             if (characters.getActivePlayer()->isFacingRight()) {
                 characters.getActivePlayer()->setVelocityX(0);
@@ -267,564 +261,722 @@ public:
             characters.getActivePlayer()->moveRight();
         }
         else {
+            // Friction
             if (characters.getActivePlayer()->getIsGrounded()) {
-                characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * characters.getActivePlayer()->getFriction());
+                characters.getActivePlayer()->setVelocityX(
+                    characters.getActivePlayer()->getVelocityX()
+                    * characters.getActivePlayer()->getFriction());
             }
             else {
-                characters.getActivePlayer()->setVelocityX(characters.getActivePlayer()->getVelocityX() * characters.getActivePlayer()->getAirFriction());
+                characters.getActivePlayer()->setVelocityX(
+                    characters.getActivePlayer()->getVelocityX()
+                    * characters.getActivePlayer()->getAirFriction());
             }
         }
 
-        float velCap;
-        if (gameMode == 2) {
-            velCap = 14.f;
-        }
-        else {
-            velCap = 6.f;
-        }
-        if (characters.getActivePlayer()->getVelocityX() > velCap) {
-            characters.getActivePlayer()->setVelocityX(velCap);
-        }
-        if (characters.getActivePlayer()->getVelocityX() < -velCap) {
-            characters.getActivePlayer()->setVelocityX(-velCap);
-        }
+        // Velocity cap
+        float velCap = (gameMode == 2) ? 14.f : 6.f;
+        float vx = characters.getActivePlayer()->getVelocityX();
+        if (vx > velCap) characters.getActivePlayer()->setVelocityX(velCap);
+        if (vx < -velCap) characters.getActivePlayer()->setVelocityX(-velCap);
 
-
+        // Jump
         if (Keyboard::isKeyPressed(Keyboard::Up)) {
             if (characters.getActivePlayer()->getIsGrounded()) {
-                characters.getActivePlayer()->setVelocityY(characters.getActivePlayer()->getJumpPower());
+                characters.getActivePlayer()->setVelocityY(
+                    characters.getActivePlayer()->getJumpPower());
                 characters.getActivePlayer()->setGrounded(false);
                 jumpHeld = true;
             }
         }
         else if (Keyboard::isKeyPressed(Keyboard::J)) {
             if (characters.getActivePlayer()->getIsGrounded()) {
-
-                // direct velocity set — no jumpPower multiplier nonsense
                 characters.getActivePlayer()->setVelocityY(-40.0f);
                 characters.getActivePlayer()->setGrounded(false);
-                jumpHeld = true;  // true rakho taake halving na ho
+                jumpHeld = true;
             }
         }
         else {
             jumpHeld = false;
         }
 
+        // Variable jump height
         if (!jumpHeld && characters.getActivePlayer()->getVelocityY() < 0) {
-            characters.getActivePlayer()->setVelocityY(characters.getActivePlayer()->getVelocityY() * 0.5f);
+            characters.getActivePlayer()->setVelocityY(
+                characters.getActivePlayer()->getVelocityY() * 0.5f);
         }
 
+        // Gravity
+        characters.getActivePlayer()->setVelocityY(
+            characters.getActivePlayer()->getVelocityY()
+            + characters.getActivePlayer()->getGravity());
 
-        characters.getActivePlayer()->setVelocityY(characters.getActivePlayer()->getVelocityY() + characters.getActivePlayer()->getGravity());
-        if (characters.getActivePlayer()->getVelocityY() > characters.getActivePlayer()->getMaxFallSpeed()) {
-            characters.getActivePlayer()->setVelocityY(characters.getActivePlayer()->getMaxFallSpeed());
+        if (characters.getActivePlayer()->getVelocityY()
+        > characters.getActivePlayer()->getMaxFallSpeed())
+        {
+            characters.getActivePlayer()->setVelocityY(
+                characters.getActivePlayer()->getMaxFallSpeed());
         }
 
+        // ---- Mode-specific update ----
         if (gameMode == 1 && survivalGame) {
-            Level* currentLevel = survivalGame->getCurrentLevel();
-            if (currentLevel) {
-                float pX = characters.getActivePlayer()->getPlayerX();
-                float pY = characters.getActivePlayer()->getPlayerY();
-                float pVelocityX = characters.getActivePlayer()->getVelocityX();
-                float pVelocityY = characters.getActivePlayer()->getVelocityY();
-
-                checkEnemyCollisions(pX, pY, pVelocityX);
-                updatePlayerPhysics(currentLevel, pX, pY, pVelocityX, pVelocityY);
-
-                if (pX < 0) {
-                    pX = 0;
-                    pVelocityX = 0;
-                }
-
-                if (pX < 10) {
-                    pX = 10;
-                    pVelocityX = 0;
-                }
-                // Check if player reached level end - switch to next level
-                if (pX + characters.getActivePlayer()->getWidth() >= currentLevel->getLevelEnd() - 10.f) {
-                    if (levelManager.getCurrentLevelIndex() < levelManager.getTotalLevels() - 1) {
-                        levelManager.nextLevel();
-                        Level* newLevel = levelManager.getCurrentLevel();
-                        if (newLevel) {
-                            enemies.clearAll();
-                            enemies.setBulletManager(&bulletManager);
-                            newLevel->spawnEnemies(enemies, characters.getActivePlayer());
-                            characters.getActivePlayer()->setPlayerPosition(newLevel->getPlayerSpawnX(), newLevel->getPlayerSpawnY());
-                            characters.getActivePlayer()->setVelocity(0, 0);
-                            characters.getActivePlayer()->setGrounded(false);
-                            survivalGame->setCurrentLevel(newLevel);
-                            camera.reset();
-                            currentLevelNumber = levelManager.getCurrentLevelIndex() + 1;
-                            showLevelTitle = true;
-                            levelTitleTimer.restart();
-                        }
-                    }
-                }
-                else if (pX + characters.getActivePlayer()->getWidth() > currentLevel->getLevelEnd()) {
-                    pX = currentLevel->getLevelEnd() - characters.getActivePlayer()->getWidth();
-                    pVelocityX = 0;
-                }
-                
-
-
-                characters.getActivePlayer()->setPlayerPosition(pX, pY);
-                characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
-
-                camera.follow(pX, pY);
-                camera.setBounds(0.0f, currentLevel->getLevelEnd() - screenX, 0.0f, 0.0f);
-                camera.update();
-
-                survivalGame->setCamera(camera.getX(), camera.getY());
-
-                enemies.updateAll(dt, characters.getActivePlayer());
-
-                // Update bullets
-                bulletManager.update(dt);
-
-                // Check bullet collisions
-                checkBulletEnemyCollisions();    // Player bullets hit enemies
-                checkBulletPlayerCollisions();   // Enemy bullets hit player
-
-                // Handle enemy collision with level blocks (must be in Game.h to avoid circular dependency)
-                for (int i = 0; i < enemies.getEnemyCount(); i++) {
-                    Enemy* enemy = enemies.getEnemyAt(i);
-                    if (!enemy || !enemy->getIsAlive()) {
-                        continue;
-                    }
-
-                    float enemy_x = enemy->getX();
-                    float enemy_y = enemy->getY();
-                    float enemy_vx = enemy->getVelocityX();
-                    float enemy_vy = enemy->getVelocityY();
-                    const float enemy_w = enemy->getWidth();
-                    const float enemy_h = enemy->getHeight();
-
-                    enemy->applyGravity(dt);
-                    enemy_vy = enemy->getVelocityY();
-
-                    enemy_y += enemy_vy * dt;
-                    enemy_x += enemy_vx * dt;
-
-                    if (enemy_x < 0) {
-                        enemy_x = 0;
-                        enemy_vx = -enemy_vx;
-                        enemy->setVelocityX(enemy_vx);
-                    }
-
-                    // resolve collisions
-                    bool onGround = false;
-                    currentLevel->resolveCollisions(enemy_x, enemy_y, enemy_w, enemy_h, enemy_vx, enemy_vy, onGround);
-
-                    // push enemy out of terrain if stuck inside
-                    int pushAttempts = 0;
-                    while (currentLevel->checkCollision(enemy_x, enemy_y, enemy_w, enemy_h) && pushAttempts < 100) {
-                        enemy_y -= 1.0f;
-                        pushAttempts++;
-                    }
-
-                    // jump if block ahead
-                    if (onGround && enemy_vx != 0.0f) {
-                        float checkX = (enemy_vx > 0)
-                            ? (enemy_x + enemy_w + 5.f)
-                            : (enemy_x - 5.f);
-
-                        bool blockAhead = currentLevel->checkCollision(checkX, enemy_y, 5.f, enemy_h);
-                        bool canJumpOver = !currentLevel->checkCollision(checkX, enemy_y - 40.f, 5.f, enemy_h);
-
-                        if (blockAhead && canJumpOver) {
-                            enemy_vy = -250.0f;
-                            enemy->setVelocityY(enemy_vy);
-                            onGround = false;
-                        }
-                    }
-
-                    enemy->setGrounded(onGround);
-                    enemy->setVelocityY(enemy_vy);
-                    enemy->setVelocityX(enemy_vx);
-                    enemy->setPosition(enemy_x, enemy_y);
-                }
-
-                // Wire enemy death to level kill counter
-                for (int i = 0; i < enemies.getEnemyCount(); i++) {
-                    Enemy* e = enemies.getEnemyAt(i);
-                    if (e && !e->getIsAlive()) {
-                        SurvivalLevel* sl = dynamic_cast<SurvivalLevel*>(currentLevel);
-                        if (sl) sl->enemyKilled();
-                    }
-                }
-                // Baad mein - level switch hone par enemies respawn
-                
-                
-            }
-            else {
-                gameMode = 0;
-            }
+            updateSurvival(dt);
         }
-
         else if (gameMode == 2 && campaignGame) {
-            CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
-            if (campaignLevel) {
-                float pX = characters.getActivePlayer()->getPlayerX();
-                float pY = characters.getActivePlayer()->getPlayerY();
-                float pVelocityX = characters.getActivePlayer()->getVelocityX();
-                float pVelocityY = characters.getActivePlayer()->getVelocityY();
-
-                updatePlayerPhysicsCampaign(campaignLevel, pX, pY, pVelocityX, pVelocityY);
-
-                if (pY + characters.getActivePlayer()->getHeight() > screenY) {
-                    pY = screenY - characters.getActivePlayer()->getHeight();
-                    pVelocityY = 0;
-                    characters.getActivePlayer()->setGrounded(true);
-                }
-
-                if (pX < 0) {
-                    pX = 0;
-                }
-
-                characters.getActivePlayer()->setPlayerPosition(pX, pY);
-                characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
-
-                camera.follow(pX, pY);
-                camera.setBounds(0.0f, screenX, 0.0f, 0.0f);
-                camera.update();
-
-                campaignGame->setCamera(camera.getX(), camera.getY());
-
-                // Update bullets for campaign mode
-                bulletManager.update(dt);
-
-                // Check bullet collisions
-                checkBulletEnemyCollisions();
-                checkBulletPlayerCollisions();
-
-                campaignGame->update(dt, &characters);
-            }
-            else {
-                gameMode = 0;
-            }
+            updateCampaign(dt);
         }
     }
 
+    // =========================================================
+    //  RENDER
+    // =========================================================
     void render() {
         window.clear(Color(135, 206, 235));
 
+        // ---- Menu ----
         if (gameMode == 0) {
             int menuState = startMenu.getMenuState();
-            if (menuState == 0) {
-                startMenu.renderStartScreen(window);
-            }
-            else if (menuState == 1) {
-                startMenu.renderCharacterSelection(window);
-            }
-            else if (menuState == 2) {
-                startMenu.renderModeSelection(window);
-            }
+            if (menuState == 0) startMenu.renderStartScreen(window);
+            else if (menuState == 1) startMenu.renderCharacterSelection(window);
+            else if (menuState == 2) startMenu.renderModeSelection(window);
             window.display();
             return;
         }
 
+        // ---- Survival ----
         if (gameMode == 1 && survivalGame) {
             survivalGame->render(window);
             enemies.renderAll(window, camera.getX(), camera.getY());
             bulletManager.render(window, camera.getX(), camera.getY());
             characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
 
-            // Render score
             scoreSystem.render(window, screenX, screenY);
+            renderPlayerDiedOverlay();
+            renderLevelTitle();
 
-            // Render player died message overlay on game screen
-            if (showPlayerDiedMessage) {
-                Font font;
-                if (!font.loadFromFile("arial.TTF")) {
-                    // Fallback if font fails to load
-                    return;
-                }
-
-                // Semi-transparent overlay (smaller, at top)
-                RectangleShape overlay(Vector2f(screenX, 150));
-                overlay.setFillColor(Color(0, 0, 0, 150));
-                overlay.setPosition(0, 0);
-                window.draw(overlay);
-
-                // Player Died text
-                Text diedText;
-                diedText.setFont(font);
-                diedText.setString("PLAYER DIED");
-                diedText.setCharacterSize(60);
-                diedText.setFillColor(Color::Red);
-                diedText.setStyle(Text::Bold);
-                FloatRect textBounds = diedText.getLocalBounds();
-                diedText.setPosition(screenX / 2.0f - textBounds.width / 2.0f, 30.0f);
-                window.draw(diedText);
-
-                // Returning to menu text
-                Text returnText;
-                returnText.setFont(font);
-                returnText.setString("Returning to menu...");
-                returnText.setCharacterSize(25);
-                returnText.setFillColor(Color::White);
-                FloatRect returnBounds = returnText.getLocalBounds();
-                returnText.setPosition(screenX / 2.0f - returnBounds.width / 2.0f, 100.0f);
-                window.draw(returnText);
-            }
-
-            if (showLevelTitle) {
-                if (levelTitleTimer.getElapsedTime().asSeconds() < 3.0f) {
-                    Font font;
-                    font.loadFromFile("arial.TTF");
-                    Text levelTitle;
-                    levelTitle.setFont(font);
-                    levelTitle.setString("LEVEL " + to_string(currentLevelNumber));
-                    levelTitle.setCharacterSize(100);
-                    levelTitle.setFillColor(Color::White);
-                    levelTitle.setPosition(screenX / 2.0f - 200.0f, screenY / 2.0f - 50.0f);
-                    window.draw(levelTitle);
-                }
-                else {
-                    showLevelTitle = false;
-                }
-            }
-            
             if (pauseMenu.getPauseMenuVisible()) {
-                RectangleShape overlay;
-                overlay.setSize(Vector2f((float)screenX, (float)screenY));
-                overlay.setFillColor(Color(0, 0, 0, 100));
-                overlay.setPosition(0, 0);
-                window.draw(overlay);
-                pauseMenu.renderPauseMenu(window);
+                renderPauseOverlay();
                 window.display();
                 return;
             }
-            
             window.display();
+            return;
         }
 
-        else if (gameMode == 2 && campaignGame) {
+        // ---- Campaign ----
+        if (gameMode == 2 && campaignGame) {
             campaignGame->render(window);
             enemies.renderAll(window, camera.getX(), camera.getY());
             bulletManager.render(window, camera.getX(), camera.getY());
             characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
 
-            // Render score
             scoreSystem.render(window, screenX, screenY);
-
-            // Render player died message overlay on game screen
-            if (showPlayerDiedMessage) {
-                Font font;
-                if (!font.loadFromFile("arial.TTF")) {
-                    // Fallback if font fails to load
-                    return;
-                }
-
-                // Semi-transparent overlay (smaller, at top)
-                RectangleShape overlay(Vector2f(screenX, 150));
-                overlay.setFillColor(Color(0, 0, 0, 150));
-                overlay.setPosition(0, 0);
-                window.draw(overlay);
-
-                // Player Died text
-                Text diedText;
-                diedText.setFont(font);
-                diedText.setString("PLAYER DIED");
-                diedText.setCharacterSize(60);
-                diedText.setFillColor(Color::Red);
-                diedText.setStyle(Text::Bold);
-                FloatRect textBounds = diedText.getLocalBounds();
-                diedText.setPosition(screenX / 2.0f - textBounds.width / 2.0f, 30.0f);
-                window.draw(diedText);
-
-                // Returning to menu text
-                Text returnText;
-                returnText.setFont(font);
-                returnText.setString("Returning to menu...");
-                returnText.setCharacterSize(25);
-                returnText.setFillColor(Color::White);
-                FloatRect returnBounds = returnText.getLocalBounds();
-                returnText.setPosition(screenX / 2.0f - returnBounds.width / 2.0f, 100.0f);
-                window.draw(returnText);
-            }
+            renderPlayerDiedOverlay();
 
             if (pauseMenu.getPauseMenuVisible()) {
-                RectangleShape overlay;
-                overlay.setSize(Vector2f(screenX, screenY));
-                overlay.setFillColor(Color(0, 0, 0, 180));
-                window.draw(overlay);
-                pauseMenu.renderPauseMenu(window);
+                renderPauseOverlay();
             }
+            window.display();
+            return;
         }
+
+        window.display();
     }
 
-    // Score system handled by ScoreSystem class
-
+    // =========================================================
+    //  PLAYER FIRE
+    // =========================================================
     void playerFire() {
         PlayerSoldier* player = characters.getActivePlayer();
         if (!player) return;
-        
-        // Get player position and facing direction
+
         float px = player->getPlayerX();
         float py = player->getPlayerY();
-        bool facingRight = player->isFacingRight();
-        
-        // Calculate bullet spawn position (slightly in front of player)
-        float bulletX = facingRight ? px + 30 : px - 30;
-        float bulletY = py + 10; // Center height
-        
-        // Calculate angle (0 for right, PI for left)
+        bool  facingRight = player->isFacingRight();
+
+        float bulletX = facingRight ? px + 30.f : px - 30.f;
+        float bulletY = py + 10.f;
         float angle = facingRight ? 0.f : 3.14159f;
-        
-        // Spawn bullet with PLAYER owner type
-        bulletManager.spawnBullet(bulletX, bulletY, angle, 10, PLAYER, 800.f, 600.f, sf::Color::Yellow);
-        
-        // Call player's shoot animation
+
+        bulletManager.spawnBullet(
+            bulletX, bulletY, angle,
+            10, PLAYER, 800.f, 600.f, sf::Color::Yellow);
+
         player->shoot();
     }
 
+    // =========================================================
+    //  CLEANUP
+    // =========================================================
     void cleanup() {
         delete survivalGame;
+        survivalGame = nullptr;
         delete campaignGame;
+        campaignGame = nullptr;
+        enemies.clearAll();
+        bulletManager.clearAll();
     }
 
 private:
-    void updatePlayerPhysics(Level* level, float& pX, float& pY, float& pVelocityX, float& pVelocityY) {
-        if (!level) {
-            return;
+
+    // =========================================================
+    //  START HELPERS
+    // =========================================================
+    void startSurvivalMode() {
+        gameMode = 1;
+
+        if (survivalGame) { delete survivalGame; survivalGame = nullptr; }
+        enemies.clearAll();
+        bulletManager.clearAll();
+        enemies.setBulletManager(&bulletManager);
+
+        survivalGame = new SurvivalGame(screenX, screenY);
+        survivalGame->setCharManager(&characters);
+        survivalGame->start();   // internally calls loadAllLevels + switchToLevel(0)
+
+        Level* level = survivalGame->getCurrentLevel();
+        if (level) {
+            characters.getActivePlayer()->setPlayerPosition(
+                level->getPlayerSpawnX(),
+                level->getPlayerSpawnY());
+            level->spawnEnemies(enemies, characters.getActivePlayer());
         }
 
-        pX += pVelocityX;
+        characters.getActivePlayer()->setVelocity(0, 0);
+        characters.getActivePlayer()->setGrounded(false);
+        camera.reset();
+        Delay.restart();
 
-        float stepHeight = 64.0f;
-        if (pVelocityX != 0 &&
-            level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-            float tempY = pY - stepHeight;
-            if (!level->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                pY = tempY;
-            }
-            else {
-                pX = characters.getActivePlayer()->getPlayerX();
-                pVelocityX = 0;
+        currentLevelNumber = 1;
+        showLevelTitle = true;
+        levelTitleTimer.restart();
+
+        // Sync levelManager with survivalGame's internal levels
+        levelManager.loadAllLevels();
+        levelManager.switchToLevel(0);
+    }
+
+    void startCampaignMode() {
+        gameMode = 2;
+
+        if (campaignGame) { delete campaignGame; campaignGame = nullptr; }
+        enemies.clearAll();
+        bulletManager.clearAll();
+        enemies.setBulletManager(&bulletManager);   // FIX: was missing
+
+        campaignGame = new CampaignGame(screenX, screenY);
+        campaignGame->setCharManager(&characters);
+        campaignGame->start();
+
+        // Generate initial chunks so the player has terrain immediately
+        CampaignLevel* cl = campaignGame->getCampaignLevel();
+        if (cl) {
+            // Pre-generate the first 8 chunks so there is terrain on screen
+            for (int i = 0; i < 8; i++) {
+                cl->update(i * 16 * 64.0f);
             }
         }
 
-        pY += pVelocityY;
+        characters.getActivePlayer()->setPlayerPosition(200, 50);
+        characters.getActivePlayer()->setVelocity(0, 0);
+        characters.getActivePlayer()->setGrounded(false);
+        camera.reset();
+        Delay.restart();
+    }
 
-        if (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-            if (pVelocityY > 0) {
-                characters.getActivePlayer()->setGrounded(true);
-                pVelocityY = 0;
-                while (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    pY -= 1;
-                }
-            }
-            else {
-                pVelocityY = 0;
-                while (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    pY += 1;
-                }
-            }
+    void handleMenuEscape() {
+        int menuState = startMenu.getMenuState();
+        if (menuState == 2) {
+            startMenu.setMenuState(1);
+            startMenu.resetSelection();
+        }
+        else if (menuState == 1) {
+            startMenu.setMenuState(0);
+            startMenu.resetSelection();
         }
         else {
-            if (pVelocityY >= 0) {
-                characters.getActivePlayer()->setGrounded(false);
-            }
+            window.close();
         }
     }
 
-    void updatePlayerPhysicsCampaign(CampaignLevel* level, float& pX, float& pY, float& pVelocityX, float& pVelocityY) {
-        if (!level) {
+    // =========================================================
+    //  SURVIVAL UPDATE
+    // =========================================================
+    void updateSurvival(float dt) {
+        Level* currentLevel = survivalGame->getCurrentLevel();
+        if (!currentLevel) {
+            gameMode = 0;
             return;
         }
 
-        pX += pVelocityX;
+        float pX = characters.getActivePlayer()->getPlayerX();
+        float pY = characters.getActivePlayer()->getPlayerY();
+        float pVelocityX = characters.getActivePlayer()->getVelocityX();
+        float pVelocityY = characters.getActivePlayer()->getVelocityY();
 
-        float stepHeight = 20.0f;
-        if (pVelocityX != 0 &&
-            level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-            float tempY = pY - stepHeight;
-            if (!level->checkCollision(pX, tempY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                pY = tempY;
-            }
-            else {
-                pX = characters.getActivePlayer()->getPlayerX();
-                pVelocityX = 0;
-            }
+        // Resolve player physics against level terrain
+        updatePlayerPhysics(currentLevel, pX, pY, pVelocityX, pVelocityY);
+
+        // Left world boundary
+        if (pX < 10.f) {
+            pX = 10.f;
+            pVelocityX = 0.f;
         }
 
-        pY += pVelocityY;
+        // ---- Level end / advance ----
+        float levelEndX = currentLevel->getLevelEnd();
+        if (pX + characters.getActivePlayer()->getWidth() >= levelEndX - 10.f) {
+            if (levelManager.getCurrentLevelIndex() < levelManager.getTotalLevels() - 1) {
+                // Advance to next level
+                levelManager.nextLevel();
+                Level* newLevel = levelManager.getCurrentLevel();
+                if (newLevel) {
+                    bulletManager.clearAll();
+                    enemies.clearAll();
+                    enemies.setBulletManager(&bulletManager);
 
-        if (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-            if (pVelocityY > 0) {
-                characters.getActivePlayer()->setGrounded(true);
-                pVelocityY = 0;
-                while (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    pY -= 1;
+                    survivalGame->setCurrentLevel(newLevel);
+                    currentLevel = newLevel;
+
+                    newLevel->spawnEnemies(enemies, characters.getActivePlayer());
+
+                    characters.getActivePlayer()->setPlayerPosition(
+                        newLevel->getPlayerSpawnX(),
+                        newLevel->getPlayerSpawnY());
+                    characters.getActivePlayer()->setVelocity(0, 0);
+                    characters.getActivePlayer()->setGrounded(false);
+
+                    camera.reset();
+
+                    currentLevelNumber = levelManager.getCurrentLevelIndex() + 1;
+                    showLevelTitle = true;
+                    levelTitleTimer.restart();
+
+                    // Early return so new level values are used next frame
+                    return;
                 }
             }
             else {
-                pVelocityY = 0;
-                while (level->checkCollision(pX, pY, characters.getActivePlayer()->getWidth(), characters.getActivePlayer()->getHeight())) {
-                    pY += 1;
+                // Last level – check survival clear
+                bool allDefeated = true;
+                for (int i = 0; i < enemies.getEnemyCount(); i++) {
+                    Enemy* e = enemies.getEnemyAt(i);
+                    if (e && e->getIsAlive()) { allDefeated = false; break; }
                 }
+                if (allDefeated) {
+                    scoreSystem.addFeatScore("Survival Clear");
+                }
+
+                // Clamp player at end
+                pX = levelEndX - characters.getActivePlayer()->getWidth();
+                pVelocityX = 0.f;
             }
         }
-        else {
-            if (pVelocityY >= 0) {
-                characters.getActivePlayer()->setGrounded(false);
-            }
-        }
-    }
 
-    void checkEnemyCollisions(float& pX, float& pY, float& pVelocityX) {
-        // Commented out - let player pass through enemies
-        /*
-        if (pVelocityX == 0) {
-            return;
-        }
+        // Apply final player position / velocity
+        characters.getActivePlayer()->setPlayerPosition(pX, pY);
+        characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
 
-        if (!characters.getIsGrounded()) {
-            return;
-        }
+        // Camera
+        camera.follow(pX, pY);
+        camera.setBounds(0.f, currentLevel->getLevelEnd() - screenX, 0.f, 0.f);
+        camera.update();
+        survivalGame->setCamera(camera.getX(), camera.getY());
 
-        float pW = (float)characters.getWidth();
-        float pH = (float)characters.getHeight();
+        // Enemies
+        enemies.updateAll(dt, characters.getActivePlayer());
 
+        // Enemy physics against terrain
+        updateEnemyPhysics(currentLevel, dt);
+
+        // Bullets
+        bulletManager.update(dt);
+        checkBulletEnemyCollisions();
+        checkBulletPlayerCollisions();
+        bulletManager.checkMultiKill(
+            characters.getActivePlayer()->getPlayerX(),
+            characters.getActivePlayer()->getPlayerY(),
+            &scoreSystem);
+
+        // Wire enemy death -> level kill counter
         for (int i = 0; i < enemies.getEnemyCount(); i++) {
-            Enemy* enemy = enemies.getEnemy(i);
-            if (!enemy) {
-                continue;
-            }
-            if (!enemy->getIsAlive()) {
-                continue;
-            }
-            float ex2 = enemy->getX();
-            float ey2 = enemy->getY();
-            float ew2 = enemy->getWidth();
-            float eh2 = enemy->getHeight();
-            if (pX < ex2 + ew2 && pX + pW > ex2 &&
-                pY < ey2 + eh2 && pY + pH > ey2) {
-                pX = characters.getX();
-                pVelocityX = 0;
-                break;
+            Enemy* e = enemies.getEnemyAt(i);
+            if (e && !e->getIsAlive()) {
+                SurvivalLevel* sl = dynamic_cast<SurvivalLevel*>(currentLevel);
+                if (sl) sl->enemyKilled();
             }
         }
-        */
     }
 
-    // Check player bullets hitting enemies
-    void checkBulletEnemyCollisions() {
-        PlayerSoldier* player = characters.getActivePlayer();
-        if (!player) return;
+    // =========================================================
+    //  CAMPAIGN UPDATE
+    // =========================================================
+    // 
+    void updateCampaign(float dt) {
+        CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
+        if (!campaignLevel) {
+            gameMode = 0;
+            return;
+        }
 
-        // Get all bullets from bullet manager
+        float pX = characters.getActivePlayer()->getPlayerX();
+        float pY = characters.getActivePlayer()->getPlayerY();
+        float pVelocityX = characters.getActivePlayer()->getVelocityX();
+        float pVelocityY = characters.getActivePlayer()->getVelocityY();
+
+        // FIX: generate Perlin noise chunks as player moves right
+        campaignLevel->update(pX);
+
+        // Player physics
+        updatePlayerPhysicsCampaign(campaignLevel, pX, pY, pVelocityX, pVelocityY);
+
+        // Floor clamp
+        if (pY + characters.getActivePlayer()->getHeight() > screenY) {
+            pY = screenY - characters.getActivePlayer()->getHeight();
+            pVelocityY = 0.f;
+            characters.getActivePlayer()->setGrounded(true);
+        }
+
+        // Left boundary
+        if (pX < 0.f) {
+            pX = 0.f;
+            pVelocityX = 0.f;
+        }
+
+        characters.getActivePlayer()->setPlayerPosition(pX, pY);
+        characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
+
+        // Camera
+        camera.follow(pX, pY);
+        camera.setBounds(0.f, pX + (float)screenX * 2.f, 0.f, 0.f);
+        camera.update();
+        campaignGame->setCamera(camera.getX(), camera.getY());
+
+        // ---------------------------------------------------------
+        // Enemies ko player track karne do aur fire karne do
+        // yeh line ZAROORI hai — iske baghair enemies sirf khadi rehti hain
+        // ---------------------------------------------------------
+        enemies.updateAll(dt, characters.getActivePlayer());
+
+        // Enemy physics — gravity aur terrain collision
+        for (int i = 0; i < enemies.getEnemyCount(); i++) {
+            Enemy* e = enemies.getEnemyAt(i);
+            if (!e || !e->getIsAlive()) continue;
+
+            float ex = e->getX();
+            float ey = e->getY();
+            float evx = e->getVelocityX();
+            float evy = e->getVelocityY();
+
+            e->applyGravity(dt);
+            evy = e->getVelocityY();
+            ey += evy * dt;
+            ex += evx * dt;
+
+            bool onGround = false;
+            campaignLevel->resolveCollisions(ex, ey,
+                e->getWidth(), e->getHeight(), evx, evy, onGround);
+
+            // Terrain mein ghus gaya toh bahar nikalo
+            int tries = 0;
+            while (campaignLevel->checkCollision(ex, ey,
+                e->getWidth(), e->getHeight()) && tries < 100) {
+                ey -= 1.f;
+                tries++;
+            }
+
+            e->setGrounded(onGround);
+            e->setVelocityY(evy);
+            e->setVelocityX(evx);
+            e->setPosition(ex, ey);
+        }
+
+        // Dead enemies remove karo taake slot free ho
+        enemies.removeDeadEnemies();
+
+        // Har 1000px baad naya wave spawn karo
+        if (pX - lastCampaignSpawnX > 500.f) {
+            campaignLevel->spawnWave(pX, enemies, characters.getActivePlayer());
+            lastCampaignSpawnX = pX;
+        }
+
+        // Bullets
+        bulletManager.update(dt);
+        checkBulletEnemyCollisions();
+        checkBulletPlayerCollisions();
+        bulletManager.checkMultiKill(
+            characters.getActivePlayer()->getPlayerX(),
+            characters.getActivePlayer()->getPlayerY(),
+            &scoreSystem);
+
+        campaignGame->update(dt, &characters);
+
+        if (campaignGame->getKillQuotaReached()) {
+            scoreSystem.addFeatScore("Campaign Clear");
+        }
+    }
+//    void updateCampaign(float dt) {
+//        CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
+//        if (!campaignLevel) {
+//            gameMode = 0;
+//            return;
+//        }
+//
+//        float pX = characters.getActivePlayer()->getPlayerX();
+//        float pY = characters.getActivePlayer()->getPlayerY();
+//        float pVelocityX = characters.getActivePlayer()->getVelocityX();
+//        float pVelocityY = characters.getActivePlayer()->getVelocityY();
+//
+//        // FIX: generate Perlin noise chunks as player moves right
+//        campaignLevel->update(pX);
+//
+//        for (int i = 0; i < enemies.getEnemyCount(); i++) {
+//    Enemy* e = enemies.getEnemyAt(i);
+//    if (!e || !e->getIsAlive()) continue;
+//
+//    float ex  = e->getX();
+//    float ey  = e->getY();
+//    float evx = e->getVelocityX();
+//    float evy = e->getVelocityY();
+//
+//    e->applyGravity(dt);
+//    evy = e->getVelocityY();
+//    ey += evy * dt;
+//    ex += evx * dt;
+//
+//    bool onGround = false;
+//    campaignLevel->resolveCollisions(ex, ey,
+//        e->getWidth(), e->getHeight(), evx, evy, onGround);
+//
+//    int tries = 0;
+//    while (campaignLevel->checkCollision(ex, ey,
+//           e->getWidth(), e->getHeight()) && tries < 100) {
+//        ey -= 1.f;
+//        tries++;
+//    }
+//
+//    e->setGrounded(onGround);
+//    e->setVelocityY(evy);
+//    e->setVelocityX(evx);
+//    e->setPosition(ex, ey);
+//}
+//
+//// Dead enemies hata do slot free karne ke liye
+//enemies.removeDeadEnemies();
+//
+//
+//        // Har 400px baad naya wave spawn karo
+//        if (pX - lastCampaignSpawnX > 1000.f) {
+//            campaignLevel->spawnWave(pX, enemies, characters.getActivePlayer());
+//            lastCampaignSpawnX = pX;
+//        }
+//
+//
+//
+//        // Player physics
+//        updatePlayerPhysicsCampaign(campaignLevel, pX, pY, pVelocityX, pVelocityY);
+//
+//        // Floor clamp
+//        if (pY + characters.getActivePlayer()->getHeight() > screenY) {
+//            pY = screenY - characters.getActivePlayer()->getHeight();
+//            pVelocityY = 0.f;
+//            characters.getActivePlayer()->setGrounded(true);
+//        }
+//
+//        // Left boundary
+//        if (pX < 0.f) {
+//            pX = 0.f;
+//            pVelocityX = 0.f;
+//        }
+//
+//        characters.getActivePlayer()->setPlayerPosition(pX, pY);
+//        characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
+//
+//        // FIX: camera follows infinitely, not clamped to screenX
+//        camera.follow(pX, pY);
+//        camera.setBounds(0.f, pX + (float)screenX * 2.f, 0.f, 0.f);
+//        camera.update();
+//        campaignGame->setCamera(camera.getX(), camera.getY());
+//
+//        // Bullets
+//        bulletManager.update(dt);
+//        checkBulletEnemyCollisions();
+//        checkBulletPlayerCollisions();
+//        bulletManager.checkMultiKill(
+//            characters.getActivePlayer()->getPlayerX(),
+//            characters.getActivePlayer()->getPlayerY(),
+//            &scoreSystem);
+//
+//        campaignGame->update(dt, &characters);
+//
+//        if (campaignGame->getKillQuotaReached()) {
+//            scoreSystem.addFeatScore("Campaign Clear");
+//        }
+//    }
+
+    // =========================================================
+    //  PHYSICS HELPERS
+    // =========================================================
+    void updatePlayerPhysics(Level* level,
+        float& pX, float& pY,
+        float& pVelocityX, float& pVelocityY)
+    {
+        if (!level) return;
+
+        // Horizontal
+        pX += pVelocityX;
+
+        const float stepHeight = 64.0f;
+        float pw = characters.getActivePlayer()->getWidth();
+        float ph = characters.getActivePlayer()->getHeight();
+
+        if (pVelocityX != 0 && level->checkCollision(pX, pY, pw, ph)) {
+            float tempY = pY - stepHeight;
+            if (!level->checkCollision(pX, tempY, pw, ph)) {
+                pY = tempY;
+            }
+            else {
+                pX = characters.getActivePlayer()->getPlayerX();
+                pVelocityX = 0;
+            }
+        }
+
+        // Vertical
+        pY += pVelocityY;
+
+        if (level->checkCollision(pX, pY, pw, ph)) {
+            if (pVelocityY > 0) {
+                characters.getActivePlayer()->setGrounded(true);
+                pVelocityY = 0;
+                while (level->checkCollision(pX, pY, pw, ph)) pY -= 1.f;
+            }
+            else {
+                pVelocityY = 0;
+                while (level->checkCollision(pX, pY, pw, ph)) pY += 1.f;
+            }
+        }
+        else {
+            if (pVelocityY >= 0)
+                characters.getActivePlayer()->setGrounded(false);
+        }
+    }
+
+    void updatePlayerPhysicsCampaign(CampaignLevel* level,
+        float& pX, float& pY,
+        float& pVelocityX, float& pVelocityY)
+    {
+        if (!level) return;
+
+        float pw = characters.getActivePlayer()->getWidth();
+        float ph = characters.getActivePlayer()->getHeight();
+
+        // Horizontal
+        pX += pVelocityX;
+
+        const float stepHeight = 20.0f;
+        if (pVelocityX != 0 && level->checkCollision(pX, pY, pw, ph)) {
+            float tempY = pY - stepHeight;
+            if (!level->checkCollision(pX, tempY, pw, ph)) {
+                pY = tempY;
+            }
+            else {
+                pX = characters.getActivePlayer()->getPlayerX();
+                pVelocityX = 0;
+            }
+        }
+
+        // Vertical
+        pY += pVelocityY;
+
+        if (level->checkCollision(pX, pY, pw, ph)) {
+            if (pVelocityY > 0) {
+                characters.getActivePlayer()->setGrounded(true);
+                pVelocityY = 0;
+                while (level->checkCollision(pX, pY, pw, ph)) pY -= 1.f;
+            }
+            else {
+                pVelocityY = 0;
+                while (level->checkCollision(pX, pY, pw, ph)) pY += 1.f;
+            }
+        }
+        else {
+            if (pVelocityY >= 0)
+                characters.getActivePlayer()->setGrounded(false);
+        }
+    }
+
+    // =========================================================
+    //  ENEMY PHYSICS (survival only)
+    // =========================================================
+    void updateEnemyPhysics(Level* currentLevel, float dt) {
+        for (int i = 0; i < enemies.getEnemyCount(); i++) {
+            Enemy* enemy = enemies.getEnemyAt(i);
+            if (!enemy || !enemy->getIsAlive()) continue;
+
+            float ex = enemy->getX();
+            float ey = enemy->getY();
+            float evx = enemy->getVelocityX();
+            float evy = enemy->getVelocityY();
+            const float ew = enemy->getWidth();
+            const float eh = enemy->getHeight();
+
+            enemy->applyGravity(dt);
+            evy = enemy->getVelocityY();
+
+            ey += evy * dt;
+            ex += evx * dt;
+
+            // Left boundary bounce
+            if (ex < 0) {
+                ex = 0;
+                evx = -evx;
+                enemy->setVelocityX(evx);
+            }
+
+            // Terrain collision
+            bool onGround = false;
+            currentLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, onGround);
+
+            // Push out of terrain if stuck
+            int pushAttempts = 0;
+            while (currentLevel->checkCollision(ex, ey, ew, eh) && pushAttempts < 100) {
+                ey -= 1.0f;
+                pushAttempts++;
+            }
+
+            // Jump over obstacles
+            if (onGround && evx != 0.f) {
+                float checkX = (evx > 0) ? (ex + ew + 5.f) : (ex - 5.f);
+                bool blockAhead = currentLevel->checkCollision(checkX, ey, 5.f, eh);
+                bool canJump = !currentLevel->checkCollision(checkX, ey - 40.f, 5.f, eh);
+
+                if (blockAhead && canJump) {
+                    evy = -250.0f;
+                    enemy->setVelocityY(evy);
+                    onGround = false;
+                }
+            }
+
+            enemy->setGrounded(onGround);
+            enemy->setVelocityY(evy);
+            enemy->setVelocityX(evx);
+            enemy->setPosition(ex, ey);
+        }
+    }
+
+    // =========================================================
+    //  BULLET COLLISION CHECKS
+    // =========================================================
+    void checkBulletEnemyCollisions() {
         for (int i = 0; i < bulletManager.getBulletCount(); i++) {
             Bullet* bullet = bulletManager.getBullet(i);
             if (!bullet || !bullet->isActive()) continue;
-            if (bullet->getOwner() != PLAYER) continue; // Only player bullets
+            if (bullet->getOwner() != PLAYER)   continue;
 
             float bx = bullet->getX();
             float by = bullet->getY();
             float br = bullet->getRadius();
 
-            // Check collision with each enemy
             for (int j = 0; j < enemies.getEnemyCount(); j++) {
                 Enemy* enemy = enemies.getEnemyAt(j);
                 if (!enemy || !enemy->getIsAlive()) continue;
@@ -834,25 +986,26 @@ private:
                 float ew = enemy->getWidth();
                 float eh = enemy->getHeight();
 
-                // Simple AABB collision
                 if (bx + br > ex && bx - br < ex + ew &&
-                    by + br > ey && by - br < ey + eh) {
-                    // Hit enemy
+                    by + br > ey && by - br < ey + eh)
+                {
                     enemy->takeDamage(bullet->getDamage(), bx, by, false);
-                    
-                    // Check if enemy died and add score
-                    if (!enemy->getIsAlive()) {
+
+                    if (!enemy->getIsAlive())
                         scoreSystem.addEnemyKillScore(enemy->getName());
+                    // Campaign mode mein kill quota track karo
+                    if (gameMode == 2 && campaignGame) {
+                        CampaignLevel* cl = campaignGame->getCampaignLevel();
+                        if (cl) cl->recordEnemyKill(enemy->getName());
                     }
-                    
+
                     bullet->deactivate();
-                    break; // Bullet hit one enemy, move to next bullet
+                    break;
                 }
             }
         }
     }
 
-    // Check enemy bullets hitting player
     void checkBulletPlayerCollisions() {
         PlayerSoldier* player = characters.getActivePlayer();
         if (!player || !player->getIsAlive()) return;
@@ -862,25 +1015,91 @@ private:
         float pw = player->getWidth();
         float ph = player->getHeight();
 
-        // Get all bullets from bullet manager
         for (int i = 0; i < bulletManager.getBulletCount(); i++) {
             Bullet* bullet = bulletManager.getBullet(i);
             if (!bullet || !bullet->isActive()) continue;
-            if (bullet->getOwner() != ENEMY) continue; // Only enemy bullets
+            if (bullet->getOwner() != ENEMY)   continue;
 
             float bx = bullet->getX();
             float by = bullet->getY();
             float br = bullet->getRadius();
 
-            // Check collision with player
             if (bx + br > px && bx - br < px + pw &&
-                by + br > py && by - br < py + ph) {
-                // Hit player
+                by + br > py && by - br < py + ph)
+            {
                 player->takeDamage(bullet->getDamage());
                 bullet->deactivate();
             }
         }
     }
 
+    // =========================================================
+    //  RENDER HELPERS
+    // =========================================================
+    void renderPlayerDiedOverlay() {
+        if (!showPlayerDiedMessage) return;
+
+        Font font;
+        if (!font.loadFromFile("arial.TTF")) return;
+
+        RectangleShape overlay(Vector2f((float)screenX, 150.f));
+        overlay.setFillColor(Color(0, 0, 0, 150));
+        overlay.setPosition(0, 0);
+        window.draw(overlay);
+
+        Text diedText;
+        diedText.setFont(font);
+        diedText.setString("PLAYER DIED");
+        diedText.setCharacterSize(60);
+        diedText.setFillColor(Color::Red);
+        diedText.setStyle(Text::Bold);
+        FloatRect tb = diedText.getLocalBounds();
+        diedText.setPosition(screenX / 2.f - tb.width / 2.f, 30.f);
+        window.draw(diedText);
+
+        Text returnText;
+        returnText.setFont(font);
+        returnText.setString("Returning to menu...");
+        returnText.setCharacterSize(25);
+        returnText.setFillColor(Color::White);
+        FloatRect rb = returnText.getLocalBounds();
+        returnText.setPosition(screenX / 2.f - rb.width / 2.f, 100.f);
+        window.draw(returnText);
+    }
+
+    void renderLevelTitle() {
+        if (!showLevelTitle) return;
+
+        if (levelTitleTimer.getElapsedTime().asSeconds() < 3.0f) {
+            Font font;
+            if (!font.loadFromFile("arial.TTF")) return;
+
+            Text levelTitle;
+            levelTitle.setFont(font);
+            levelTitle.setString("LEVEL " + to_string(currentLevelNumber));
+            levelTitle.setCharacterSize(100);
+            levelTitle.setFillColor(Color::White);
+            levelTitle.setStyle(Text::Bold);
+            FloatRect tb = levelTitle.getLocalBounds();
+            levelTitle.setPosition(
+                screenX / 2.f - tb.width / 2.f,
+                screenY / 2.f - 50.f);
+            window.draw(levelTitle);
+        }
+        else {
+            showLevelTitle = false;
+        }
+    }
+
+    void renderPauseOverlay() {
+        RectangleShape overlay;
+        overlay.setSize(Vector2f((float)screenX, (float)screenY));
+        overlay.setFillColor(Color(0, 0, 0, 150));
+        overlay.setPosition(0, 0);
+        window.draw(overlay);
+        pauseMenu.renderPauseMenu(window);
+    }
+
 public:
+    // (no extra public members needed)
 };

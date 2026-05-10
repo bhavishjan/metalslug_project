@@ -124,8 +124,8 @@ public:
         fusionUsedThisLevel = false;
         cameraX = 0;
         cameraY = 0;
-        //loadAllLevels();
-        //switchToLevel(0);
+        loadAllLevels();
+        switchToLevel(0);
     }
 
     void update(float dt) override {
@@ -227,10 +227,10 @@ public:
     }
 
     void loadAllLevels() override {
-        //levels[0] = new Level1();
-        //levels[1] = new Level2();
-        //levels[2] = new Level3();
-        //levels[3] = nullptr; // Boss level to be implemented
+        levels[0] = new Level1();
+        levels[1] = new Level2();
+        levels[2] = new Level3();
+        levels[3] = nullptr; // Boss level to be implemented
     }
 
     void render(RenderWindow& window) override {
@@ -378,6 +378,8 @@ public:
         }
         return true;
     }
+    
+    bool getKillQuotaReached() const { return isKillQuotaReached; }
 
     void onEnemyKilled(int typeIndex) {
         if (typeIndex >= 0 && typeIndex < 8) {

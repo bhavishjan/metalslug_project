@@ -89,10 +89,6 @@ public:
     float    getX()      const { return x; }
     float    getY()      const { return y; }
     float    getRadius() const { return 3.f; }
-
-
-
-
 };
 
 

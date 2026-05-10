@@ -301,7 +301,7 @@ public:
 // Enemy Manager class - moved here to fix declaration order issues
 class EnemyManager {
 private:
-    Enemy* enemies[500];
+    Enemy* enemies[50];
     int enemyCount;
     int maxEnemies;
     BulletManager* bulletMgr;
@@ -309,7 +309,7 @@ private:
 public:
     EnemyManager() {
         enemyCount = 0;
-        maxEnemies = 500;
+        maxEnemies = 50;
         bulletMgr = nullptr;
         for (int i = 0; i < maxEnemies; i++) {
             enemies[i] = nullptr;
@@ -320,21 +320,6 @@ public:
         bulletMgr = bm;
     }
 
-
-    void removeDeadEnemies() {
-        for (int i = 0; i < enemyCount; i++) {
-            if (enemies[i] && !enemies[i]->getIsAlive()) {
-                delete enemies[i];
-                enemies[i] = nullptr;
-
-                // Last enemy se replace karo gap fill karne ke liye
-                enemies[i] = enemies[enemyCount - 1];
-                enemies[enemyCount - 1] = nullptr;
-                enemyCount--;
-                i--;  // is index ko dobara check karo
-            }
-        }
-    }
     ~EnemyManager() {
         clearAll();
     }
@@ -2035,20 +2020,6 @@ public:
         anims[DIE].load("Sprites/Iron Nokana.png", dieXs, dieYs, dieWs, dieHs, 6, 0.15f);
     }
 
-    // IronNokana, HairbusterRiberts, SeaSatan — teeno mein add karo
-    bool hasRetreated = false;
-
-    void retreat() { hasRetreated = true; }
-    bool getHasRetreated() const { return hasRetreated; }
-
-    void takeDamage(int dmg) {
-        hp -= dmg;
-        if (hp <= 0) hp = 0;
-        // 50% HP par retreat
-        if (hp <= maxHp * 0.5f && !hasRetreated) {
-            retreat();
-        }
-    }
     // only moves on flat terrain
     void move(float dt) override {
         if (!isOnFlatGround) return;
@@ -2187,21 +2158,7 @@ public:
         }
         energyBombActive = true;
     }
-    // IronNokana, HairbusterRiberts, SeaSatan — teeno mein add karo
-    bool hasRetreated = false;
 
-    void retreat() { hasRetreated = true; }
-    bool getHasRetreated() const { return hasRetreated; }
-
-    void takeDamage(int dmg) {
-        hp -= dmg;
-        if (hp <= 0) hp = 0;
-        // 50% HP par retreat
-        if (hp <= maxHp * 0.5f && !hasRetreated) {
-            retreat();
-        }
-    }
-    
     void update(float dt) override {
         if (!isAlive || !largestPlayer) return;
 
@@ -2299,21 +2256,6 @@ public:
         checkPlayerCollision(largestPlayer);
     }
 
-
-    // IronNokana, HairbusterRiberts, SeaSatan — teeno mein add karo
-    bool hasRetreated = false;
-
-    void retreat() { hasRetreated = true; }
-    bool getHasRetreated() const { return hasRetreated; }
-
-    void takeDamage(int dmg) {
-        hp -= dmg;
-        if (hp <= 0) hp = 0;
-        // 50% HP par retreat
-        if (hp <= maxHp * 0.5f && !hasRetreated) {
-            retreat();
-        }
-    }
     void render(RenderWindow& window, float camX = 0.f, float camY = 0.f) override {
         if (!isAlive) return;
 
