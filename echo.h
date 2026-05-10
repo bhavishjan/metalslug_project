@@ -150,6 +150,8 @@ public:
 	{
 		audio = nullptr;
 		countofaudio = 0;
+		// Initialize header to prevent uninitialized variable warning
+		memset(&header, 0, sizeof(WavHeader));
 	}
 	~whisper() {
 		delete[]audio;
@@ -328,7 +330,9 @@ public:
 		}
 
 		for (int i = 0; i < other.countofaudio; i++) {
-			newarray[countofaudio + i] = other.audio[i];
+			if (countofaudio + i < newcount) {
+				newarray[countofaudio + i] = other.audio[i];
+			}
 		}
 
 		delete[] audio;

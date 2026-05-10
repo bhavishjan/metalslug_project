@@ -34,7 +34,7 @@ private:
     float timer;
     const float duration;
 public:
-    UndeadState(float dur = 10.0f) : timer(dur), duration(dur) {}
+    UndeadState(float dur = 8.0f) : timer(dur), duration(dur) {}
     void        update(float dt)               override { timer -= dt; }
     void        applyEffects(PlayerSoldier* s) override;
     void        removeEffects(PlayerSoldier*)  override {}
@@ -1049,11 +1049,3 @@ public:
     }
 };
 
-void UndeadState::applyEffects(PlayerSoldier* s) {
-    s->setVelocity(s->getVelocityX() * 0.7f, s->getVelocityY());
-}
-
-void MummyState::applyEffects(PlayerSoldier* s) {
-    s->setVelocity(s->getVelocityX() * 0.5f, s->getVelocityY());
-    s->pickupWeapon(nullptr);
-}

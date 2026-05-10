@@ -319,7 +319,7 @@ private:
 
 public:
     Fruit() : Food() {
-        strncpy(name, "Fruit", 31);
+        strncpy_s(name, "Fruit", sizeof(name));
         foodType = foodFruit;
         saturationValue = 2;       // 2 saturation per spec
         healAmount = 2;
@@ -366,7 +366,7 @@ private:
 
 public:
     Turkey() : Food() {
-        strncpy(name, "Turkey", 31);
+        strncpy_s(name, "Turkey", sizeof(name));
         foodType = foodTurkey;
         saturationValue = 3;       // 3 saturation per spec, more then fruit
         healAmount = 3;
@@ -426,7 +426,7 @@ private:
 
 public:
     SupplyCrate() : Collectible() {
-        strncpy(name, "Supply Crate", 31);
+        strncpy_s(name, "Supply Crate", sizeof(name));
         collectibleType = collectibleCrate;
         weaponInside = nullptr;
         weaponType = NONE;
@@ -621,7 +621,7 @@ private:
 
 public:
     POWPrisoner() : Collectible() {
-        strncpy(name, "POW Prisoner", 31);
+        strncpy_s(name, "POW Prisoner", sizeof(name));
         collectibleType = collectiblePrisoner;
         isFreed = false;
         freeRange = 80.0f;

@@ -19,7 +19,7 @@ class Paratrooper;
 class Martian;
 class Zombie;
 class FlyingTara;
-
+class BossLevel;
 class Level {
 protected:
 
@@ -1670,13 +1670,8 @@ public:
         }
     }
 
-    void loadAllLevels() {
-        levels[0] = new Level1();
-        levels[1] = new Level2();
-        levels[2] = new Level3();
-        //levels[3] = new BossLevel();
-        totalLevels = 3;
-    }
+    void loadAllLevels();
+      
 
     void switchToLevel(int index) {
         if (index >= 0 && index < totalLevels) {

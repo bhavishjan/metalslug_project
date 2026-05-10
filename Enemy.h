@@ -2325,4 +2325,3 @@ public:
     }
 };
 
-void Enemy::spawnLoot() {}

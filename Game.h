@@ -5,13 +5,16 @@
 #include "Weapon.h"
 #include "Enemy.h"
 #include "GameMode.h"
+
 #include "Level.h"
+#include "BossLevel.h"
 #include "Biome.h"
 #include "PlayerSoldier.h"
 #include "Menu.h"
 #include "GameState.h"
 #include "Camera.h"
 #include "ScoreSystem.h"
+
 
 using namespace sf;
 using namespace std;
@@ -52,9 +55,11 @@ private:
     Menu        startMenu;
     Menu        pauseMenu;
 
-    //BossLevel* bossLevel = nullptr;   // boss level ka alag pointer
-    bool inBossLevel = false;          // track karne ke liye
-    float lastCampaignSpawnX = 0.f;   // campaign spawning track karne ke liye
+    // Boss level track karne ke liye
+    bool inBossLevel = false;
+
+    // Campaign spawning track karne ke liye
+    float lastCampaignSpawnX = 0.f;
 
 public:
     Game()
@@ -277,7 +282,7 @@ public:
         // Velocity cap
         float velCap = (gameMode == 2) ? 14.f : 6.f;
         float vx = characters.getActivePlayer()->getVelocityX();
-        if (vx > velCap) characters.getActivePlayer()->setVelocityX(velCap);
+        if (vx > velCap)  characters.getActivePlayer()->setVelocityX(velCap);
         if (vx < -velCap) characters.getActivePlayer()->setVelocityX(-velCap);
 
         // Jump
@@ -350,6 +355,18 @@ public:
             bulletManager.render(window, camera.getX(), camera.getY());
             characters.getActivePlayer()->render(window, camera.getX(), camera.getY());
 
+            // Boss level mein minions alag se render karo
+            if (inBossLevel) {
+                BossLevel* bl = dynamic_cast<BossLevel*>(survivalGame->getCurrentLevel());
+                if (bl) {
+                    for (int i = 0; i < bl->getMaxMinions(); i++) {
+                        Enemy* m = bl->getMinionAt(i);
+                        if (m && m->getIsAlive())
+                            m->render(window, camera.getX(), camera.getY());
+                    }
+                }
+            }
+
             scoreSystem.render(window, screenX, screenY);
             renderPlayerDiedOverlay();
             renderLevelTitle();
@@ -415,6 +432,8 @@ public:
         campaignGame = nullptr;
         enemies.clearAll();
         bulletManager.clearAll();
+        inBossLevel = false;
+        lastCampaignSpawnX = 0.f;
     }
 
 private:
@@ -424,6 +443,7 @@ private:
     // =========================================================
     void startSurvivalMode() {
         gameMode = 1;
+        inBossLevel = false;
 
         if (survivalGame) { delete survivalGame; survivalGame = nullptr; }
         enemies.clearAll();
@@ -451,7 +471,7 @@ private:
         showLevelTitle = true;
         levelTitleTimer.restart();
 
-        // Sync levelManager with survivalGame's internal levels
+        // levelManager ko survivalGame ke levels ke saath sync karo
         levelManager.loadAllLevels();
         levelManager.switchToLevel(0);
     }
@@ -462,16 +482,15 @@ private:
         if (campaignGame) { delete campaignGame; campaignGame = nullptr; }
         enemies.clearAll();
         bulletManager.clearAll();
-        enemies.setBulletManager(&bulletManager);   // FIX: was missing
+        enemies.setBulletManager(&bulletManager);
 
         campaignGame = new CampaignGame(screenX, screenY);
         campaignGame->setCharManager(&characters);
         campaignGame->start();
 
-        // Generate initial chunks so the player has terrain immediately
+        // Pehle 8 chunks generate karo taake shuru mein terrain ho
         CampaignLevel* cl = campaignGame->getCampaignLevel();
         if (cl) {
-            // Pre-generate the first 8 chunks so there is terrain on screen
             for (int i = 0; i < 8; i++) {
                 cl->update(i * 16 * 64.0f);
             }
@@ -482,6 +501,7 @@ private:
         characters.getActivePlayer()->setGrounded(false);
         camera.reset();
         Delay.restart();
+        lastCampaignSpawnX = 0.f;
     }
 
     void handleMenuEscape() {
@@ -500,6 +520,51 @@ private:
     }
 
     // =========================================================
+    //  LEVEL ADVANCE HELPER
+    //  Yeh function level transition ka poora kaam karta hai —
+    //  boss level ka special setup bhi yahan hota hai
+    // =========================================================
+    void advanceToNextLevel() {
+        levelManager.nextLevel();
+        Level* newLevel = levelManager.getCurrentLevel();
+        if (!newLevel) return;
+
+        bulletManager.clearAll();
+        enemies.clearAll();
+        enemies.setBulletManager(&bulletManager);
+
+        survivalGame->setCurrentLevel(newLevel);
+
+        // Check karo yeh boss level hai ya normal
+        BossLevel* bl = dynamic_cast<BossLevel*>(newLevel);
+        if (bl) {
+            // Boss level ka special setup
+            inBossLevel = true;
+            bl->setBulletManager(&bulletManager);
+            bl->setPlayerRef(characters.getActivePlayer());
+            // spawnEnemies internally phase 1 shuru karta hai
+            bl->spawnEnemies(enemies, characters.getActivePlayer());
+        }
+        else {
+            // Normal level
+            inBossLevel = false;
+            newLevel->spawnEnemies(enemies, characters.getActivePlayer());
+        }
+
+        characters.getActivePlayer()->setPlayerPosition(
+            newLevel->getPlayerSpawnX(),
+            newLevel->getPlayerSpawnY());
+        characters.getActivePlayer()->setVelocity(0, 0);
+        characters.getActivePlayer()->setGrounded(false);
+
+        camera.reset();
+
+        currentLevelNumber = levelManager.getCurrentLevelIndex() + 1;
+        showLevelTitle = true;
+        levelTitleTimer.restart();
+    }
+
+    // =========================================================
     //  SURVIVAL UPDATE
     // =========================================================
     void updateSurvival(float dt) {
@@ -514,7 +579,7 @@ private:
         float pVelocityX = characters.getActivePlayer()->getVelocityX();
         float pVelocityY = characters.getActivePlayer()->getVelocityY();
 
-        // Resolve player physics against level terrain
+        // Player physics terrain se resolve karo
         updatePlayerPhysics(currentLevel, pX, pY, pVelocityX, pVelocityY);
 
         // Left world boundary
@@ -526,54 +591,45 @@ private:
         // ---- Level end / advance ----
         float levelEndX = currentLevel->getLevelEnd();
         if (pX + characters.getActivePlayer()->getWidth() >= levelEndX - 10.f) {
+
             if (levelManager.getCurrentLevelIndex() < levelManager.getTotalLevels() - 1) {
-                // Advance to next level
-                levelManager.nextLevel();
-                Level* newLevel = levelManager.getCurrentLevel();
-                if (newLevel) {
-                    bulletManager.clearAll();
-                    enemies.clearAll();
-                    enemies.setBulletManager(&bulletManager);
-
-                    survivalGame->setCurrentLevel(newLevel);
-                    currentLevel = newLevel;
-
-                    newLevel->spawnEnemies(enemies, characters.getActivePlayer());
-
-                    characters.getActivePlayer()->setPlayerPosition(
-                        newLevel->getPlayerSpawnX(),
-                        newLevel->getPlayerSpawnY());
-                    characters.getActivePlayer()->setVelocity(0, 0);
-                    characters.getActivePlayer()->setGrounded(false);
-
-                    camera.reset();
-
-                    currentLevelNumber = levelManager.getCurrentLevelIndex() + 1;
-                    showLevelTitle = true;
-                    levelTitleTimer.restart();
-
-                    // Early return so new level values are used next frame
-                    return;
-                }
+                // Agle level par jao
+                advanceToNextLevel();
+                return; // naya level values next frame se use honge
             }
             else {
-                // Last level – check survival clear
-                bool allDefeated = true;
-                for (int i = 0; i < enemies.getEnemyCount(); i++) {
-                    Enemy* e = enemies.getEnemyAt(i);
-                    if (e && e->getIsAlive()) { allDefeated = false; break; }
+                // ---- Yeh last level hai ----
+
+                // Boss level complete check
+                if (inBossLevel) {
+                    BossLevel* bl = dynamic_cast<BossLevel*>(currentLevel);
+                    if (bl && bl->getPhase4Complete()) {
+                        scoreSystem.addFeatScore("Boss Clear");
+                        cleanup();
+                        gameMode = 0;
+                        startMenu.setMenuState(0);
+                        return;
+                    }
                 }
-                if (allDefeated) {
-                    scoreSystem.addFeatScore("Survival Clear");
+                else {
+                    // Normal last level — survival clear check
+                    bool allDefeated = true;
+                    for (int i = 0; i < enemies.getEnemyCount(); i++) {
+                        Enemy* e = enemies.getEnemyAt(i);
+                        if (e && e->getIsAlive()) { allDefeated = false; break; }
+                    }
+                    if (allDefeated) {
+                        scoreSystem.addFeatScore("Survival Clear");
+                    }
                 }
 
-                // Clamp player at end
+                // Player ko end par rok do
                 pX = levelEndX - characters.getActivePlayer()->getWidth();
                 pVelocityX = 0.f;
             }
         }
 
-        // Apply final player position / velocity
+        // Final player position apply karo
         characters.getActivePlayer()->setPlayerPosition(pX, pY);
         characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
 
@@ -583,10 +639,10 @@ private:
         camera.update();
         survivalGame->setCamera(camera.getX(), camera.getY());
 
-        // Enemies
+        // Enemies update — player track aur fire karo
         enemies.updateAll(dt, characters.getActivePlayer());
 
-        // Enemy physics against terrain
+        // Enemy physics terrain ke against
         updateEnemyPhysics(currentLevel, dt);
 
         // Bullets
@@ -598,20 +654,80 @@ private:
             characters.getActivePlayer()->getPlayerY(),
             &scoreSystem);
 
-        // Wire enemy death -> level kill counter
-        for (int i = 0; i < enemies.getEnemyCount(); i++) {
-            Enemy* e = enemies.getEnemyAt(i);
-            if (e && !e->getIsAlive()) {
-                SurvivalLevel* sl = dynamic_cast<SurvivalLevel*>(currentLevel);
-                if (sl) sl->enemyKilled();
+        // Normal levels mein enemy death -> level kill counter
+        if (!inBossLevel) {
+            for (int i = 0; i < enemies.getEnemyCount(); i++) {
+                Enemy* e = enemies.getEnemyAt(i);
+                if (e && !e->getIsAlive()) {
+                    SurvivalLevel* sl = dynamic_cast<SurvivalLevel*>(currentLevel);
+                    if (sl) sl->enemyKilled();
+                }
             }
+        }
+
+        // ---- Boss level special update ----
+        if (inBossLevel) {
+            updateBossLevel(dt, currentLevel);
+        }
+    }
+
+    // =========================================================
+    //  BOSS LEVEL UPDATE
+    //  updateSurvival() se call hota hai jab inBossLevel == true
+    // =========================================================
+    void updateBossLevel(float dt, Level* currentLevel) {
+        BossLevel* bl = dynamic_cast<BossLevel*>(currentLevel);
+        if (!bl) return;
+
+        // BossLevel ka apna update — phases switch karna, minions update etc.
+        bl->update(dt);
+
+        // Boss par player bullets check karo
+        bl->checkBulletHitsOnBosses(bulletManager);
+
+        // Minions par bhi bullets check karo
+        for (int i = 0; i < bl->getMaxMinions(); i++) {
+            Enemy* minion = bl->getMinionAt(i);
+            if (!minion || !minion->getIsAlive()) continue;
+
+            for (int b = 0; b < bulletManager.getBulletCount(); b++) {
+                Bullet* bullet = bulletManager.getBullet(b);
+                if (!bullet || !bullet->isActive())   continue;
+                if (bullet->getOwner() != PLAYER)     continue;
+
+                float bx = bullet->getX();
+                float by = bullet->getY();
+                float br = bullet->getRadius();
+
+                if (bx + br > minion->getX() &&
+                    bx - br < minion->getX() + minion->getWidth() &&
+                    by + br > minion->getY() &&
+                    by - br < minion->getY() + minion->getHeight())
+                {
+                    minion->takeDamage(bullet->getDamage(), bx, by, false);
+
+                    if (!minion->getIsAlive())
+                        scoreSystem.addEnemyKillScore(minion->getName());
+
+                    bullet->deactivate();
+                    break;
+                }
+            }
+        }
+
+        // Phase 4 complete — game khatam
+        if (bl->getPhase4Complete()) {
+            scoreSystem.addFeatScore("Boss Clear");
+            scoreSystem.addFeatScore("Survival Clear");
+            cleanup();
+            gameMode = 0;
+            startMenu.setMenuState(0);
         }
     }
 
     // =========================================================
     //  CAMPAIGN UPDATE
     // =========================================================
-    // 
     void updateCampaign(float dt) {
         CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
         if (!campaignLevel) {
@@ -624,13 +740,13 @@ private:
         float pVelocityX = characters.getActivePlayer()->getVelocityX();
         float pVelocityY = characters.getActivePlayer()->getVelocityY();
 
-        // FIX: generate Perlin noise chunks as player moves right
+        // Perlin noise chunks generate karo jaise player aage badhe
         campaignLevel->update(pX);
 
         // Player physics
         updatePlayerPhysicsCampaign(campaignLevel, pX, pY, pVelocityX, pVelocityY);
 
-        // Floor clamp
+        // Floor clamp — screen ke neeche na gire
         if (pY + characters.getActivePlayer()->getHeight() > screenY) {
             pY = screenY - characters.getActivePlayer()->getHeight();
             pVelocityY = 0.f;
@@ -646,16 +762,14 @@ private:
         characters.getActivePlayer()->setPlayerPosition(pX, pY);
         characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
 
-        // Camera
+        // Camera infinitely follow karo
         camera.follow(pX, pY);
         camera.setBounds(0.f, pX + (float)screenX * 2.f, 0.f, 0.f);
         camera.update();
         campaignGame->setCamera(camera.getX(), camera.getY());
 
-        // ---------------------------------------------------------
         // Enemies ko player track karne do aur fire karne do
-        // yeh line ZAROORI hai — iske baghair enemies sirf khadi rehti hain
-        // ---------------------------------------------------------
+        // Yeh line zaroori hai — iske baghair enemies khadi rehti hain
         enemies.updateAll(dt, characters.getActivePlayer());
 
         // Enemy physics — gravity aur terrain collision
@@ -694,7 +808,7 @@ private:
         // Dead enemies remove karo taake slot free ho
         enemies.removeDeadEnemies();
 
-        // Har 1000px baad naya wave spawn karo
+        // Har 500px baad naya enemy wave spawn karo
         if (pX - lastCampaignSpawnX > 500.f) {
             campaignLevel->spawnWave(pX, enemies, characters.getActivePlayer());
             lastCampaignSpawnX = pX;
@@ -711,108 +825,11 @@ private:
 
         campaignGame->update(dt, &characters);
 
+        // Kill quota complete — campaign clear
         if (campaignGame->getKillQuotaReached()) {
             scoreSystem.addFeatScore("Campaign Clear");
         }
     }
-//    void updateCampaign(float dt) {
-//        CampaignLevel* campaignLevel = campaignGame->getCampaignLevel();
-//        if (!campaignLevel) {
-//            gameMode = 0;
-//            return;
-//        }
-//
-//        float pX = characters.getActivePlayer()->getPlayerX();
-//        float pY = characters.getActivePlayer()->getPlayerY();
-//        float pVelocityX = characters.getActivePlayer()->getVelocityX();
-//        float pVelocityY = characters.getActivePlayer()->getVelocityY();
-//
-//        // FIX: generate Perlin noise chunks as player moves right
-//        campaignLevel->update(pX);
-//
-//        for (int i = 0; i < enemies.getEnemyCount(); i++) {
-//    Enemy* e = enemies.getEnemyAt(i);
-//    if (!e || !e->getIsAlive()) continue;
-//
-//    float ex  = e->getX();
-//    float ey  = e->getY();
-//    float evx = e->getVelocityX();
-//    float evy = e->getVelocityY();
-//
-//    e->applyGravity(dt);
-//    evy = e->getVelocityY();
-//    ey += evy * dt;
-//    ex += evx * dt;
-//
-//    bool onGround = false;
-//    campaignLevel->resolveCollisions(ex, ey,
-//        e->getWidth(), e->getHeight(), evx, evy, onGround);
-//
-//    int tries = 0;
-//    while (campaignLevel->checkCollision(ex, ey,
-//           e->getWidth(), e->getHeight()) && tries < 100) {
-//        ey -= 1.f;
-//        tries++;
-//    }
-//
-//    e->setGrounded(onGround);
-//    e->setVelocityY(evy);
-//    e->setVelocityX(evx);
-//    e->setPosition(ex, ey);
-//}
-//
-//// Dead enemies hata do slot free karne ke liye
-//enemies.removeDeadEnemies();
-//
-//
-//        // Har 400px baad naya wave spawn karo
-//        if (pX - lastCampaignSpawnX > 1000.f) {
-//            campaignLevel->spawnWave(pX, enemies, characters.getActivePlayer());
-//            lastCampaignSpawnX = pX;
-//        }
-//
-//
-//
-//        // Player physics
-//        updatePlayerPhysicsCampaign(campaignLevel, pX, pY, pVelocityX, pVelocityY);
-//
-//        // Floor clamp
-//        if (pY + characters.getActivePlayer()->getHeight() > screenY) {
-//            pY = screenY - characters.getActivePlayer()->getHeight();
-//            pVelocityY = 0.f;
-//            characters.getActivePlayer()->setGrounded(true);
-//        }
-//
-//        // Left boundary
-//        if (pX < 0.f) {
-//            pX = 0.f;
-//            pVelocityX = 0.f;
-//        }
-//
-//        characters.getActivePlayer()->setPlayerPosition(pX, pY);
-//        characters.getActivePlayer()->setVelocity(pVelocityX, pVelocityY);
-//
-//        // FIX: camera follows infinitely, not clamped to screenX
-//        camera.follow(pX, pY);
-//        camera.setBounds(0.f, pX + (float)screenX * 2.f, 0.f, 0.f);
-//        camera.update();
-//        campaignGame->setCamera(camera.getX(), camera.getY());
-//
-//        // Bullets
-//        bulletManager.update(dt);
-//        checkBulletEnemyCollisions();
-//        checkBulletPlayerCollisions();
-//        bulletManager.checkMultiKill(
-//            characters.getActivePlayer()->getPlayerX(),
-//            characters.getActivePlayer()->getPlayerY(),
-//            &scoreSystem);
-//
-//        campaignGame->update(dt, &characters);
-//
-//        if (campaignGame->getKillQuotaReached()) {
-//            scoreSystem.addFeatScore("Campaign Clear");
-//        }
-//    }
 
     // =========================================================
     //  PHYSICS HELPERS
@@ -906,7 +923,7 @@ private:
     }
 
     // =========================================================
-    //  ENEMY PHYSICS (survival only)
+    //  ENEMY PHYSICS — survival aur boss level dono ke liye
     // =========================================================
     void updateEnemyPhysics(Level* currentLevel, float dt) {
         for (int i = 0; i < enemies.getEnemyCount(); i++) {
@@ -937,14 +954,14 @@ private:
             bool onGround = false;
             currentLevel->resolveCollisions(ex, ey, ew, eh, evx, evy, onGround);
 
-            // Push out of terrain if stuck
+            // Terrain mein ghus gaya toh bahar nikalo
             int pushAttempts = 0;
             while (currentLevel->checkCollision(ex, ey, ew, eh) && pushAttempts < 100) {
                 ey -= 1.0f;
                 pushAttempts++;
             }
 
-            // Jump over obstacles
+            // Aage block hai toh jump karo
             if (onGround && evx != 0.f) {
                 float checkX = (evx > 0) ? (ex + ew + 5.f) : (ex - 5.f);
                 bool blockAhead = currentLevel->checkCollision(checkX, ey, 5.f, eh);
@@ -991,12 +1008,14 @@ private:
                 {
                     enemy->takeDamage(bullet->getDamage(), bx, by, false);
 
-                    if (!enemy->getIsAlive())
+                    if (!enemy->getIsAlive()) {
                         scoreSystem.addEnemyKillScore(enemy->getName());
-                    // Campaign mode mein kill quota track karo
-                    if (gameMode == 2 && campaignGame) {
-                        CampaignLevel* cl = campaignGame->getCampaignLevel();
-                        if (cl) cl->recordEnemyKill(enemy->getName());
+
+                        // Campaign mode mein kill quota track karo
+                        if (gameMode == 2 && campaignGame) {
+                            CampaignLevel* cl = campaignGame->getCampaignLevel();
+                            if (cl) cl->recordEnemyKill(enemy->getName());
+                        }
                     }
 
                     bullet->deactivate();
@@ -1018,7 +1037,7 @@ private:
         for (int i = 0; i < bulletManager.getBulletCount(); i++) {
             Bullet* bullet = bulletManager.getBullet(i);
             if (!bullet || !bullet->isActive()) continue;
-            if (bullet->getOwner() != ENEMY)   continue;
+            if (bullet->getOwner() != ENEMY)    continue;
 
             float bx = bullet->getX();
             float by = bullet->getY();
@@ -1076,9 +1095,15 @@ private:
 
             Text levelTitle;
             levelTitle.setFont(font);
-            levelTitle.setString("LEVEL " + to_string(currentLevelNumber));
+
+            // Boss level ka alag title show karo
+            if (inBossLevel)
+                levelTitle.setString("BOSS LEVEL");
+            else
+                levelTitle.setString("LEVEL " + to_string(currentLevelNumber));
+
             levelTitle.setCharacterSize(100);
-            levelTitle.setFillColor(Color::White);
+            levelTitle.setFillColor(inBossLevel ? Color::Red : Color::White);
             levelTitle.setStyle(Text::Bold);
             FloatRect tb = levelTitle.getLocalBounds();
             levelTitle.setPosition(

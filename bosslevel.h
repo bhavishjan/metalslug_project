@@ -1,10 +1,9 @@
 #pragma once
-#include "Level.h"
+#include "Level.h"        // ← YEH ADD KARO — SurvivalLevel yahan hai
 #include "Enemy.h"
 #include "Weapon.h"
 #include "PlayerSoldier.h"
 #include <SFML/Graphics.hpp>
-
 
 // ================================================================
 //  Forward declarations (implement these classes separately)
@@ -560,7 +559,7 @@ public:
         }
     }
 
-    void updateMinions(float dt) {
+    void updateMinions(float dt) const {
         for (int i = 0; i < MAX_MINIONS; i++) {
             if (!bossMinions[i]) continue;
             if (!bossMinions[i]->getIsAlive()) continue;
@@ -568,7 +567,7 @@ public:
         }
     }
 
-    void render(sf::RenderWindow& window, float camX, float camY) override {
+    void render(sf::RenderWindow& window, float camX, float camY) {
         Level::render(window, camX, camY);
 
         // Render active boss
@@ -616,7 +615,7 @@ public:
     bool getPhase4Complete()  const { return isPhase4Complete; }
 
     // Expose minions for Game.h collision resolution
-    Enemy* getMinionAt(int i) {
+    Enemy* getMinionAt(int i) const {
         if (i >= 0 && i < MAX_MINIONS) return bossMinions[i];
         return nullptr;
     }

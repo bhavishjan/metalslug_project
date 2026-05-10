@@ -301,7 +301,7 @@ private:
 
 public:
     Pistol() : Firearm() {
-        strncpy(name, "Pistol", 31);
+        strncpy_s(name, "Pistol", sizeof(name));
         weaponType = PISTOL;
         isDefault = true;
         damage = 3;
@@ -364,7 +364,7 @@ private:
 
 public:
     Knife() : Firearm() {
-        strncpy(name, "Knife", 31);
+        strncpy_s(name, "Knife", sizeof(name));
         weaponType = KNIFE;
         meleeRange = BLOCK_SIZE;
         meleeDamage = 2;
@@ -418,7 +418,7 @@ private:
 
 public:
     HeavyMachineGun() : Firearm() {
-        strncpy(name, "HMG", 31);
+        strncpy_s(name, "HMG", sizeof(name));
         weaponType = HMG;
         isHeldDown = false;
         spinUpTimer = 0;
@@ -479,7 +479,7 @@ private:
 
 public:
     RocketLauncher() : Firearm() {
-        strncpy(name, "Rocket Launcher", 31);
+        strncpy_s(name, "Rocket Launcher", sizeof(name));
         weaponType = ROCKETLAUNCHER;
         reloadTimer = 0;
         reloadDuration = 2.0f;
@@ -544,7 +544,7 @@ private:
 
 public:
     FlameShot() : Firearm() {
-        strncpy(name, "Flame Shot", 31);
+        strncpy_s(name, "Flame Shot", sizeof(name));
         weaponType = FLAMESHOT;
         streamLength = 5.0f * BLOCK_SIZE;
         damagePerSecond = 2;
@@ -616,7 +616,7 @@ private:
 
 public:
     LaserGun() : Firearm() {
-        strncpy(name, "Laser Gun", 31);
+        strncpy_s(name, "Laser Gun", sizeof(name));
         weaponType = LASERGUN;
         beamActive = false;
         beamLength = 1200.0f;
@@ -828,7 +828,7 @@ private:
 
 public:
     HandGrenade() : Grenade() {
-        strncpy(name, "Hand Grenade", 31);
+        strncpy_s(name, "Hand Grenade", sizeof(name));
         weaponType = HANDGRENADE;
         bounceCount = 0;
         maxBounce = 3;
@@ -909,7 +909,7 @@ private:
 
 public:
     FireBombGrenade() : Grenade() {
-        strncpy(name, "Fire Bomb Grenade", 31);
+        strncpy_s(name, "Fire Bomb Grenade", sizeof(name));
         weaponType = FIREBOMBGRENADE;
         firePool = nullptr;
         firePoolDuration = 10.0f;
