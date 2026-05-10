@@ -1,14 +1,26 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "PerlinNoise.h"
+using namespace sf;
+using namespace std;
+
+const int screen_x = 1600;
+const int screen_y = 900;
+
+// Biome types
+static const int BIOME_AERIAL = 0;
+static  const int BIOME_PLAINS = 1;
+static const int BIOME_AQUATIC = 2;
+
+
 // Block types
 static const int BLOCK_EMPTY = 0;
 static const int BLOCK_SOLID = 1;
 static const int BLOCK_WATER = 2;
 static const int BLOCK_INDESTRUCTIBLE = 3;
 
-static const int SCREEN_H = 900;
 
+
+static const int SCREEN_H = 900;
 class Block {
 protected:
     float x, y;
@@ -48,25 +60,6 @@ public:
         isVisible = true;
         hp = 3;
     }
-    // Check if player is touching/overlapping this block 
-    bool checkCollisionRaw(float px, float py, float pw, float ph) {
-        if (px + pw <= x) {
-            return false;
-        }
-        if (px >= x + width) {
-            return false;
-        }
-        if (py + ph <= y) {
-            return false;
-        }
-        if (py >= y + height) {
-            return false;
-        }
-        return true;
-    }
-
-
-
 
     virtual ~Block() {}
 
@@ -81,69 +74,53 @@ public:
     bool  getIsIndestructible() { return isIndestructible; }
 
     // Setters
-    void setTexture(Texture& tex, float camX = 0, float camY = 0) { sprite.setTexture(tex); }
+    void setTexture(Texture& tex) { sprite.setTexture(tex); }
     void setIsSolid(bool val) { isSolid = val; }
 
     // Collision check
     bool checkCollision(float px, float py, float pw, float ph) {
-        if (!isSolid) {
-            return false;
-        }
-        if (px + pw <= x) {
-            return false;
-        }
-        if (px >= x + width) {
-            return false;
-        }
-        if (py + ph <= y) {
-            return false;
-        }
-        if (py >= y + height) {
-            return false;
-        }
+        if (!isSolid) return false;
+        if (px + pw <= x) return false;
+        if (px >= x + width) return false;
+        if (py + ph <= y) return false;
+        if (py >= y + height) return false;
         return true;
     }
 
     void resolveCollision(float& px, float& py, float pw, float ph,
         float& velX, float& velY, bool& onGround) {
 
-        if (!isSolid) {
-            return;
-        }
+        if (!isSolid) return;
 
-        if (px + pw <= x) {
-            return;
-        }
-        if (px >= x + width) {
-            return;
-        }
-        if (py + ph <= y) {
-            return;
-        }
-        if (py >= y + height) {
-            return;
-        }
+        if (px + pw <= x) return;
+        if (px >= x + width) return;
+        if (py + ph <= y) return;
+        if (py >= y + height) return;
 
         float overlapLeft = (x + width) - px;
         float overlapRight = (px + pw) - x;
         float overlapTop = (y + height) - py;
         float overlapBottom = (py + ph) - y;
 
-        float minX = (overlapLeft < overlapRight) ? overlapLeft : overlapRight;
-        float minY = (overlapTop < overlapBottom) ? overlapTop : overlapBottom;
+        float minX = min(overlapLeft, overlapRight);
+        float minY = min(overlapTop, overlapBottom);
 
         if (minY < minX) {
+            // Y collision
             if (velY > 0) {
+                // landing on ground
                 py = y - ph;
                 velY = 0;
                 onGround = true;
             }
             else if (velY < 0) {
+                // hitting ceiling
                 py = y + height;
                 velY = 0;
             }
         }
         else {
+            // X collision
             if (velX > 0) {
                 px = x - pw;
             }
@@ -155,24 +132,17 @@ public:
     }
 
 
-
     virtual void update(float dt) {}
 
     virtual void render(RenderWindow& window, float camX, float camY) {
-        if (!isVisible) {
-            return;
-        }
-        if (blockType == BLOCK_EMPTY) {
-            return;
-        }
+        if (!isVisible) return;
+        if (blockType == BLOCK_EMPTY) return;
         sprite.setPosition(x - camX, y - camY);
         window.draw(sprite);
     }
 
     virtual void takeDamage(int amount) {
-        if (isIndestructible) {
-            return;
-        }
+        if (isIndestructible) return;
         hp -= amount;
         if (hp <= 0) {
             blockType = BLOCK_EMPTY;
@@ -184,7 +154,7 @@ public:
     bool isDestroyed() { return blockType == BLOCK_EMPTY; }
 };
 
-// Child block
+//childblock
 class IndestructibleBlock : public Block {
 public:
     IndestructibleBlock(float x, float y, int biomeType, int layerIndex)

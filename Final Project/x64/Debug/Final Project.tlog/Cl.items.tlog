@@ -1,4 +1,20 @@
-C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\enemy.cpp;C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Final Project\x64\Debug\enemy.obj
-C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\gamestate.cpp;C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Final Project\x64\Debug\gamestate.obj
-C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\levelmanager.cpp;C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Final Project\x64\Debug\levelmanager.obj
-C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\main.cpp;C:\Users\A\OneDrive\Documents\GitHub\metalslug_project\Final Project\x64\Debug\main.obj
+E:\Semester 2\OOP\OOP Final Project\Animation.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Animation.obj
+E:\Semester 2\OOP\OOP Final Project\Biome.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Biome.obj
+E:\Semester 2\OOP\OOP Final Project\Block.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Block.obj
+E:\Semester 2\OOP\OOP Final Project\bosslevel.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\bosslevel.obj
+E:\Semester 2\OOP\OOP Final Project\Camera.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Camera.obj
+E:\Semester 2\OOP\OOP Final Project\collectibilies.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\collectibilies.obj
+E:\Semester 2\OOP\OOP Final Project\echo.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\echo.obj
+E:\Semester 2\OOP\OOP Final Project\enemy.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\enemy.obj
+E:\Semester 2\OOP\OOP Final Project\Entity.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Entity.obj
+E:\Semester 2\OOP\OOP Final Project\Game.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Game.obj
+E:\Semester 2\OOP\OOP Final Project\GameMode.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\GameMode.obj
+E:\Semester 2\OOP\OOP Final Project\gamestate.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\gamestate.obj
+E:\Semester 2\OOP\OOP Final Project\Level.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Level.obj
+E:\Semester 2\OOP\OOP Final Project\main.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\main.obj
+E:\Semester 2\OOP\OOP Final Project\Menu.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Menu.obj
+E:\Semester 2\OOP\OOP Final Project\PerlinNoise.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\PerlinNoise.obj
+E:\Semester 2\OOP\OOP Final Project\PlayerSoldier.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\PlayerSoldier.obj
+E:\Semester 2\OOP\OOP Final Project\ScoreSystem.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\ScoreSystem.obj
+E:\Semester 2\OOP\OOP Final Project\Vehicle.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Vehicle.obj
+E:\Semester 2\OOP\OOP Final Project\Weapon.cpp;E:\Semester 2\OOP\OOP Final Project\Final Project\x64\Debug\Weapon.obj

@@ -19,10 +19,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Biome.cpp" />
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="bosslevel.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="collectibilies.cpp" />
+    <ClCompile Include="echo.cpp" />
     <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameMode.cpp" />
     <ClCompile Include="gamestate.cpp" />
-    <ClCompile Include="levelmanager.cpp" />
+    <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="PerlinNoise.cpp" />
+    <ClCompile Include="PlayerSoldier.cpp" />
+    <ClCompile Include="ScoreSystem.cpp" />
+    <ClCompile Include="Vehicle.cpp" />
+    <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
@@ -42,7 +58,12 @@
     <ClInclude Include="PauseMenu.h" />
     <ClInclude Include="PerlinNoise.h" />
     <ClInclude Include="PlayerSoldier.h" />
+    <ClInclude Include="ScoreSystem.h" />
+    <ClInclude Include="Vehicle.h" />
     <ClInclude Include="Weapon.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Final Project\x64\Debug\Final Project.Build.CppClean.log" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

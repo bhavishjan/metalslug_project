@@ -1,6 +1,4 @@
-#ifndef CAMERA_H
-#define CAMERA_H
-
+#pragma once
 class Camera {
 private:
     float x;
@@ -119,5 +117,3 @@ public:
         return targetY;
     }
 };
-
-#endif

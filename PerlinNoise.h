@@ -1,12 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Block.h"
 using namespace sf;
-using namespace std;
-
-// Biome types
-static const int BIOME_AERIAL = 0;
-static  const int BIOME_PLAINS = 1;
-static const int BIOME_AQUATIC = 2;
 
 class PerlinNoise {
 private:

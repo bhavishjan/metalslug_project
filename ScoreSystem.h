@@ -1,8 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <string>
+#include <cstdio>
+#include <cstring>
 using namespace sf;
-using namespace std;
 
 class ScoreSystem {
 private:
@@ -15,7 +15,7 @@ private:
 
     bool   showScorePopup;
     Clock  scorePopupTimer;
-    string lastScoreText;
+    const char*  lastScoreText;
     int    lastScoreValue;
 
     // Multi-kill tracking
@@ -47,167 +47,22 @@ private:
     static const int BOSS_CLEAR_SCORE = 500;
 
 public:
-    ScoreSystem() : totalScore(0), survivalHighScore(0), campaignHighScore(0),
-        showScorePopup(false), lastScoreValue(0), fontLoaded(false),
-        recentKillCount(0), flawlessActive(true) {
-    }
-
-    void loadFont(const string& fontPath) {
-        fontLoaded = scoreFont.loadFromFile(fontPath);
-    }
-
-    // Player damaged — flawless broken
-    void onPlayerDamaged() {
-        flawlessActive = false;
-    }
-
-    void addScore(int points, const string& reason = "") {
-        if (points <= 0) return;
-        totalScore += points;
-        lastScoreValue = points;
-        lastScoreText = reason.empty()
-            ? "+" + to_string(points)
-            : reason + "  +" + to_string(points);
-        showScorePopup = true;
-        scorePopupTimer.restart();
-    }
-
-    void addEnemyKillScore(const string& enemyType,
-        bool isBoss = false,
-        int  bossPhase = 0)
-    {
-        int    points = 0;
-        string reason = enemyType + " Kill";
-
-        if (isBoss) {
-            if (bossPhase == 4) {
-                points = ULTIMATE_BOSS_SCORE;
-                reason = "Ultimate Boss Defeated!";
-            }
-            else {
-                points = NORMAL_BOSS_SCORE;
-                reason = "Boss Defeated!";
-            }
-        }
-        else {
-            if (enemyType == "Rebel Soldier")    points = REBEL_SOLDIER_SCORE;
-            else if (enemyType == "Shielded Soldier") points = SHIELDED_SOLDIER_SCORE;
-            else if (enemyType == "Bazooka Soldier")  points = BAZOOKA_SOLDIER_SCORE;
-            else if (enemyType == "Grenade Soldier")  points = GRENADE_SOLDIER_SCORE;
-            else if (enemyType == "Paratrooper")      points = PARATROOPER_SCORE;
-            else if (enemyType == "Mummy Warrior")    points = MUMMY_SCORE;
-            else if (enemyType == "Zombie")           points = ZOMBIE_SCORE;
-            else if (enemyType == "Martian")          points = MARTIAN_SCORE;
-            else points = 50;
-        }
-
-        addScore(points, reason);
-    }
-
-    void addFeatScore(const string& feat) {
-        int    points = 0;
-        string reason = feat;
-
-        if (feat == "Melee Kill")       points = MELEE_KILL_SCORE;
-        else if (feat == "Aerial Kill")      points = AERIAL_KILL_SCORE;
-        else if (feat == "Multi-Kill")       points = MULTI_KILL_SCORE;
-        else if (feat == "Survival Clear")   points = SURVIVAL_CLEAR_SCORE;
-        else if (feat == "Campaign Clear")   points = CAMPAIGN_CLEAR_SCORE;
-        else if (feat == "Boss Clear")       points = BOSS_CLEAR_SCORE;
-        else if (feat == "Flawless Victory") points = FLAWLESS_VICTORY_SCORE;
-
-        if (points > 0)
-            addScore(points, reason);
-    }
-
-    // Massacre scoring — 3+ kills with one grenade/rocket
-    // killCount = kitne enemies ek saath mare
-    void addMassacreScore(int killCount) {
-        if (killCount < 2) return;
-
-        if (killCount == 2) {
-            // Multi-Kill
-            addScore(MULTI_KILL_SCORE, "Multi-Kill!");
-        }
-        else {
-            // Massacre: 300 base + (n-3)*50 extra
-            int bonus = (killCount - 3) * MASSACRE_PER_KILL;
-            int points = MASSACRE_BASE_SCORE + (bonus > 0 ? bonus : 0);
-            addScore(points, "MASSACRE x" + to_string(killCount) + "!");
-        }
-    }
-
-    // Game.h ke updateSurvival() mein call karo har frame
-    // player ke paas kitne recent kills hain track karta hai
-    void checkMultiKill(float playerX, float playerY, ScoreSystem* self) {
-        // Multi-kill window 0.5 second — agar 2+ kills ek saath hote hain
-        // Yeh Game.h mein explosion/grenade kill count se call hoga
-        // Directly addMassacreScore(killCount) use karo jab grenade explode ho
-    }
-
-    // Flawless check — level end par call karo
-    void checkFlawlessVictory() {
-        if (flawlessActive) {
-            addScore(FLAWLESS_VICTORY_SCORE, "FLAWLESS VICTORY!");
-        }
-    }
-
-    void resetFlawless() {
-        flawlessActive = true;
-    }
-
-    void render(RenderWindow& window, int screenX, int screenY) {
-        if (!fontLoaded) return;
-
-        // Score — top left
-        Text scoreText;
-        scoreText.setFont(scoreFont);
-        scoreText.setString("SCORE: " + to_string(totalScore));
-        scoreText.setCharacterSize(24);
-        scoreText.setFillColor(Color::White);
-        scoreText.setOutlineColor(Color::Black);
-        scoreText.setOutlineThickness(2);
-        scoreText.setPosition(10, 10);
-        window.draw(scoreText);
-
-        // Popup — 2 second tak dikhao
-        if (showScorePopup &&
-            scorePopupTimer.getElapsedTime().asSeconds() < 2.0f)
-        {
-            Text popupText;
-            popupText.setFont(scoreFont);
-            popupText.setString(lastScoreText);
-            popupText.setCharacterSize(30);
-            popupText.setFillColor(Color::Yellow);
-            popupText.setOutlineColor(Color::Black);
-            popupText.setOutlineThickness(2);
-            FloatRect bounds = popupText.getLocalBounds();
-            popupText.setPosition(
-                screenX / 2.f - bounds.width / 2.f,
-                screenY / 2.f - 120.f);
-            window.draw(popupText);
-        }
-        else {
-            showScorePopup = false;
-        }
-    }
-
-    int  getTotalScore()         const { return totalScore; }
-    int  getSurvivalHighScore()  const { return survivalHighScore; }
-    int  getCampaignHighScore()  const { return campaignHighScore; }
-    bool getFlawlessActive()     const { return flawlessActive; }
-
-    void updateHighScore(int gameMode) {
-        if (gameMode == 1 && totalScore > survivalHighScore)
-            survivalHighScore = totalScore;
-        else if (gameMode == 2 && totalScore > campaignHighScore)
-            campaignHighScore = totalScore;
-    }
-
-    void resetScore() {
-        totalScore = 0;
-        showScorePopup = false;
-        flawlessActive = true;
-        recentKillCount = 0;
-    }
+    ScoreSystem();
+    ~ScoreSystem();
+    void loadFont(const char* fontPath);
+    void onPlayerDamaged();
+    void addScore(int points, const char* reason = "");
+    void addEnemyKillScore(const char* enemyType, bool isBoss = false, int bossPhase = 0);
+    void addFeatScore(const char* feat);
+    void addMassacreScore(int killCount);
+    void checkMultiKill(float playerX, float playerY, ScoreSystem* self);
+    void checkFlawlessVictory();
+    void resetFlawless();
+    void render(RenderWindow& window, int screenX, int screenY);
+    int  getTotalScore() const;
+    int  getSurvivalHighScore() const;
+    int  getCampaignHighScore() const;
+    bool getFlawlessActive() const;
+    void updateHighScore(int gameMode);
+    void resetScore();
 };
