@@ -2,7 +2,7 @@
 #include "Block.h"
 #include <cmath>
 
-// Biome implementations
+// Biome stuff
 Biome::Biome() {
     name = "";
     biomeType = BIOME_PLAINS;

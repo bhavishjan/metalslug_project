@@ -25,6 +25,7 @@
     <ClCompile Include="bosslevel.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="collectibilies.cpp" />
+    <ClCompile Include="DeveloperMode.cpp" />
     <ClCompile Include="echo.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="bosslevel.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collectibilies.h" />
+    <ClInclude Include="DeveloperMode.h" />
     <ClInclude Include="Echo.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Entity.h" />
