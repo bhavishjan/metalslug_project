@@ -7,6 +7,6 @@ We used OOP concepts like inheritence, polymorphism and how to deal with 40 file
 
 I have done a lot better than my previous semester project and I am proud of that.
 
-For more technical details, see the code yourself (If you are this much interested).
+For more technical details, see the code yourself (If you are interested).
 
-Cheers!
+I would like to thank Ma'am Munnaza Nida for teaching me this course.
